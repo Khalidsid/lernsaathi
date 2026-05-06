@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String             @id @default(cuid())
+  username     String             @unique
+  loginCount   Int                @default(0)
+  firstLoginAt DateTime?
+  lastLoginAt  DateTime?
+  createdAt    DateTime           @default(now())
+  profile      LearnerProfile?
+  events       LearningEvent[]
+  mistakes     Mistake[]
+  examMap      ExamReadinessMap?
+}
+
+model LearnerProfile {
+  id                           String   @id @default(cuid())
+  userId                       String   @unique
+  user                         User     @relation(fields: [userId], references: [id])
+  displayName                  String?
+  displayNamePromptCount       Int      @default(0)
+  preferredExplanationLanguage String   @default("roman_hinglish")
+  preferredFormality           String   @default("aap_formal")
+  englishLevel                 String   @default("weak")
+  formalHindiLevel             String   @default("weak")
+  germanLevel                  String   @default("A2_B1")
+  examGoalInternal             String   @default("B1_or_DTZ")
+  showExamLabelsToLearner      Boolean  @default(false)
+  mainFears                    String[] @default([])
+  preferredStyle               String   @default("simple_examples_first")
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+}
+
+model LearningEvent {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id])
+  inputType           String
+  rawInput            String   @db.Text
+  taskType            String?
+  hiddenExamRelevance String[] @default([])
+  diagnosis           String[] @default([])
+  responseDepth       String
+  response            String   @db.Text
+  learnerVisibleLabel String
+  verificationUsed    Boolean  @default(false)
+  verificationPrompt  String?  @db.Text
+  learnerResult       String?
+  mistakeCreated      Boolean  @default(false)
+  mistakeId           String?
+  uncertaintyFlagged  Boolean  @default(false)
+  llmModel            String
+  llmTokensIn         Int?
+  llmTokensOut        Int?
+  llmLatencyMs        Int?
+  createdAt           DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Mistake {
+  id                     String         @id @default(cuid())
+  userId                 String
+  user                   User           @relation(fields: [userId], references: [id])
+  sourceEventId          String
+  mistakeType            String
+  subtype                String?
+  exampleInput           String         @db.Text
+  correctForm            String         @db.Text
+  explanationGiven       String         @db.Text
+  priority               String         @default("medium")
+  hiddenExamImpact       String[]       @default([])
+  likelyTransferContexts String[]       @default([])
+  status                 String         @default("active")
+  reviewCount            Int            @default(0)
+  lastReviewedAt         DateTime?
+  createdAt              DateTime       @default(now())
+  revisionItems          RevisionItem[]
+
+  @@index([userId, status])
+}
+
+model RevisionItem {
+  id                  String    @id @default(cuid())
+  sourceMistakeId     String
+  mistake             Mistake   @relation(fields: [sourceMistakeId], references: [id])
+  revisionType        String
+  front               String    @db.Text
+  back                String    @db.Text
+  explanation         String?   @db.Text
+  hiddenExamRelevance String[]  @default([])
+  learnerVisibleLabel String    @default("Wiederholen, was schwer war")
+  nextReview          DateTime
+  intervalDays        Int       @default(1)
+  ease                Float     @default(2.5)
+  reviewCount         Int       @default(0)
+  createdAt           DateTime  @default(now())
+
+  @@index([nextReview])
+}
+
+model ExamReadinessMap {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
+  examGoalInternal String   @default("B1_or_DTZ")
+  skills           Json     @default("{}")
+  updatedAt        DateTime @updatedAt
+}
