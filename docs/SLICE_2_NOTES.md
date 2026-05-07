@@ -1,7 +1,7 @@
 # Slice 2 Notes
 
 ## Status
-complete locally; production verification pending
+complete locally; Railway route smoke verified; authenticated production verification pending
 
 ## What was built
 - Classifier extended for `grammar_question` and `sentence_correction`.
@@ -39,7 +39,10 @@ complete locally; production verification pending
 - ExamReadinessMap after mistake creation showed `grammar_accuracy.cases = weak` and `text_understanding.vocabulary_in_context = weak`; unrelated skills stayed `unknown`.
 
 ## Verified on Railway
-- Pending for Slice 2.
+- `origin/main` pushed and GitHub confirmed at Slice 2 commit `08e75e9`.
+- Public `POST /api/chat` without a session returns `401 Unauthorized`.
+- Public `POST /api/chat/attempt` without a session returns `401 Unauthorized`, confirming the new Slice 2 route is live on Railway.
+- Authenticated production behavior checks and production DB row evidence are still pending.
 
 ## Section 13 Exit Criteria Walked
 - `1` grammar question diagnostic: verified locally.
@@ -61,11 +64,11 @@ complete locally; production verification pending
 - `17` docs: this file updated.
 - `18` architecture docs: updated.
 - `19` slice map: updated.
-- `20` Railway deploy: pending.
-- `21` public behavior checks: pending.
+- `20` Railway deploy: route smoke verified by `/api/chat/attempt` returning `401` instead of the old `404`.
+- `21` authenticated public behavior checks: pending.
 - `22` production Mistake row: pending.
 
 ## Issues / Deferrals
 - `docs/build_prompts/visual_integration_pass.md` is referenced by the Slice 2 prompt but is missing from the repo. The visual rules were read from `docs/VISUAL_INTEGRATION_NOTES.md` and `docs/design_concept/Lernsaathi.html`.
-- Production verification is not complete yet. Slice 2 commits still need to be pushed, deployed by Railway, and walked against the public URL.
+- Authenticated production verification is not complete yet. Slice 2 is live at route level, but the public URL still needs the logged-in behavior walk and Railway Postgres `Mistake` row evidence.
 - Slice 3 remains deferred: no revision queue UI, mistake-list data wiring, or spaced-repetition scheduling.
