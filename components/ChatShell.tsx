@@ -7,15 +7,18 @@ import { Composer } from "@/components/Composer";
 import { MessageList } from "@/components/MessageList";
 import { NamePromptModal } from "@/components/NamePromptModal";
 
+import type { AssistantAttemptKind } from "@/components/AssistantBlock";
 import type { ChatTab } from "@/components/TabBar";
 import type { StructuredAssistantContent } from "@/lib/assistant-response";
 
 type ChatMessage = {
   id: string;
+  eventId?: string;
   role: "user" | "assistant";
   text: string;
   learnerVisibleLabel?: string;
   structured?: StructuredAssistantContent | null;
+  verificationPrompt?: string | null;
 };
 
 type ChatShellProps = {
@@ -59,24 +62,67 @@ export function ChatShell({ activeTab, shouldPromptForName }: ChatShellProps) {
       });
 
       const payload = (await response.json()) as {
+        eventId?: string;
         error?: string;
         response?: string;
         learnerVisibleLabel?: string;
         structured?: StructuredAssistantContent | null;
+        verificationPrompt?: string | null;
       };
 
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
+        eventId: payload.eventId,
         role: "assistant",
         text: payload.response || payload.error || "Abhi jawab nahi aa paaya.",
         learnerVisibleLabel: payload.learnerVisibleLabel,
         structured: payload.structured ?? null,
+        verificationPrompt: payload.verificationPrompt ?? null,
       };
 
       setMessages((current) => [...current, assistantMessage]);
     } finally {
       setIsSending(false);
     }
+  }
+
+  async function handleAttempt(parentEventId: string, value: string, kind: AssistantAttemptKind) {
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      text: value,
+    };
+
+    setMessages((current) => [...current, userMessage]);
+
+    const response = await fetch("/api/chat/attempt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        attemptText: value,
+        kind,
+        parentEventId,
+      }),
+    });
+    const payload = (await response.json()) as {
+      eventId?: string;
+      error?: string;
+      response?: string;
+      learnerVisibleLabel?: string;
+    };
+    const assistantMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      eventId: payload.eventId,
+      role: "assistant",
+      text: payload.response || payload.error || "Abhi jawab nahi aa paaya.",
+      learnerVisibleLabel: payload.learnerVisibleLabel,
+      structured: null,
+      verificationPrompt: null,
+    };
+
+    setMessages((current) => [...current, assistantMessage]);
   }
 
   if (activeTab === "revision") {
@@ -108,7 +154,7 @@ export function ChatShell({ activeTab, shouldPromptForName }: ChatShellProps) {
     >
       <div className="relative h-full min-h-[calc(100vh-9.5rem)] overflow-hidden">
         <div className="h-full overflow-y-auto px-4 py-5">
-          <MessageList messages={messages} />
+          <MessageList messages={messages} onAttempt={handleAttempt} />
         </div>
         {showNamePrompt ? <NamePromptModal onClose={() => setShowNamePrompt(false)} /> : null}
       </div>

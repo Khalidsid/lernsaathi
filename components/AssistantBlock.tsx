@@ -1,15 +1,22 @@
 import { forwardRef } from "react";
 
 import { BilingualPair } from "@/components/BilingualPair";
+import { ChhotaCheck } from "@/components/ChhotaCheck";
 import { LemmaAnchor } from "@/components/LemmaAnchor";
+import { ReflectionCard } from "@/components/ReflectionCard";
 import { cn } from "@/lib/cn";
 
 import type { StructuredAssistantContent } from "@/lib/assistant-response";
 
+export type AssistantAttemptKind = "reflection" | "chhota_check";
+
 type AssistantBlockProps = React.HTMLAttributes<HTMLDivElement> & {
+  eventId?: string;
   label?: string;
+  onAttempt?: (parentEventId: string, value: string, kind: AssistantAttemptKind) => Promise<void>;
   response: string;
   structured?: StructuredAssistantContent | null;
+  verificationPrompt?: string | null;
 };
 
 function labelText(label?: string) {
@@ -17,11 +24,12 @@ function labelText(label?: string) {
 }
 
 export const AssistantBlock = forwardRef<HTMLDivElement, AssistantBlockProps>(function AssistantBlock(
-  { className, label, response, structured, ...props },
+  { className, eventId, label, onAttempt, response, structured, verificationPrompt, ...props },
   ref,
 ) {
   const hasStructured = Boolean(structured?.lemma || structured?.examples?.length || structured?.use || structured?.pattern);
   const lemma = structured?.lemma;
+  const reflection = structured?.reflection;
 
   return (
     <div className={cn("max-w-[92%]", className)} ref={ref} {...props}>
@@ -31,8 +39,39 @@ export const AssistantBlock = forwardRef<HTMLDivElement, AssistantBlockProps>(fu
         </div>
       ) : null}
       <div className="assistant-bg fade-in rounded-2xl rounded-tl-md px-4 py-4 dark:bg-[#232825]">
-        {hasStructured ? (
+        {reflection ? (
           <div>
+            {structured?.intro ? (
+              <p className="mb-3 text-[14.5px] leading-[1.65] text-ink2 dark:text-[#CFCDC4]">{structured.intro}</p>
+            ) : null}
+            <ReflectionCard
+              corrected={reflection.corrected}
+              explanation={reflection.explanation}
+              friction={reflection.friction}
+              onAttempt={
+                eventId && onAttempt
+                  ? (value) => onAttempt(eventId, value, "reflection")
+                  : undefined
+              }
+              original={reflection.original}
+              question={reflection.question}
+            />
+            {verificationPrompt ? (
+              <ChhotaCheck
+                onReply={
+                  eventId && onAttempt
+                    ? (value) => onAttempt(eventId, value, "chhota_check")
+                    : undefined
+                }
+                prompt={verificationPrompt}
+              />
+            ) : null}
+          </div>
+        ) : hasStructured ? (
+          <div>
+            {structured?.intro ? (
+              <p className="mb-3 text-[14.5px] leading-[1.65] text-ink2 dark:text-[#CFCDC4]">{structured.intro}</p>
+            ) : null}
             {lemma ? (
               <div>
                 <LemmaAnchor className="text-[22px] text-ink dark:text-mist">
@@ -77,9 +116,38 @@ export const AssistantBlock = forwardRef<HTMLDivElement, AssistantBlockProps>(fu
             {structured?.note ? (
               <p className="mt-4 text-[14.5px] leading-[1.6] text-ink2 dark:text-[#CFCDC4]">{structured.note}</p>
             ) : null}
+
+            {structured?.priorMistakeReminder ? (
+              <p className="mt-4 text-[14.5px] leading-[1.6] text-ink2 dark:text-[#CFCDC4]">
+                {structured.priorMistakeReminder}
+              </p>
+            ) : null}
+
+            {verificationPrompt ? (
+              <ChhotaCheck
+                onReply={
+                  eventId && onAttempt
+                    ? (value) => onAttempt(eventId, value, "chhota_check")
+                    : undefined
+                }
+                prompt={verificationPrompt}
+              />
+            ) : null}
           </div>
         ) : (
-          <div className="whitespace-pre-wrap text-[15px] leading-[1.65] text-ink2 dark:text-[#CFCDC4]">{response}</div>
+          <div>
+            <div className="whitespace-pre-wrap text-[15px] leading-[1.65] text-ink2 dark:text-[#CFCDC4]">{response}</div>
+            {verificationPrompt ? (
+              <ChhotaCheck
+                onReply={
+                  eventId && onAttempt
+                    ? (value) => onAttempt(eventId, value, "chhota_check")
+                    : undefined
+                }
+                prompt={verificationPrompt}
+              />
+            ) : null}
+          </div>
         )}
       </div>
     </div>
