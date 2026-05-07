@@ -256,6 +256,32 @@ function addDisplayNameFallback(
   };
 }
 
+function addPriorMistakeFallback(
+  result: ResponderResult,
+  responseDepth: ResponseDepth,
+  priorMistakes: PriorMistakeNote[],
+) {
+  const prior = priorMistakes[0];
+
+  if (!prior || responseDepth !== "guided_explanation") {
+    return result;
+  }
+
+  if (result.response.toLowerCase().includes("pehle")) {
+    return result;
+  }
+
+  const reminder = `Yeh wala word aapne pehle bhi padha tha - ${prior.subtype ?? "ek chhota pattern"} yaad kar lete hain.`;
+  return {
+    ...result,
+    response: `${result.response}\n\nDhyaan dijiye:\n${reminder}`,
+    structured: {
+      ...(result.structured ?? {}),
+      priorMistakeReminder: reminder,
+    },
+  };
+}
+
 function enforceDisplayNameOnce(result: ResponderResult, displayName: string | null) {
   if (!displayName) {
     return result;
@@ -389,8 +415,12 @@ export async function buildResponse(
     schema: getResponderSchema(classification.inputType),
   });
   const data = enforceDisplayNameOnce(
-    normalizeDiagnosticContent(
-      addDisplayNameFallback(result.data, classification.inputType, options.responseDepth, options.displayName ?? null),
+    addPriorMistakeFallback(
+      normalizeDiagnosticContent(
+        addDisplayNameFallback(result.data, classification.inputType, options.responseDepth, options.displayName ?? null),
+      ),
+      options.responseDepth,
+      options.priorMistakes ?? [],
     ),
     options.displayName ?? null,
   );
