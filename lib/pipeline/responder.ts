@@ -1,10 +1,13 @@
 import { LEARNER_VISIBLE_LABELS } from "@/lib/pipeline/labels";
 import { loadPrompt } from "@/lib/prompts";
 import { runStructuredPrompt } from "@/lib/openai";
+import { getMistakeTypesForGrammarTopic, isCoreGrammarTopic } from "@/lib/pipeline/grammar_topics";
+import { MISTAKE_TYPES } from "@/lib/pipeline/taxonomy";
 
 import type { ClassifierResult } from "@/lib/pipeline/classifier";
 import type { ResponseDepth } from "@/lib/pipeline/depth";
-import type { StructuredAssistantContent } from "@/lib/assistant-response";
+import type { StructuredAssistantContent, StructuredDiagnosisItem } from "@/lib/assistant-response";
+import type { MistakeType } from "@/lib/pipeline/taxonomy";
 
 export type ResponderResult = {
   response: string;
@@ -253,6 +256,74 @@ function addDisplayNameFallback(
   };
 }
 
+function isMistakeType(value: string): value is MistakeType {
+  return MISTAKE_TYPES.includes(value as MistakeType);
+}
+
+function normalizeMistakeType(item: StructuredDiagnosisItem): MistakeType {
+  if (item.mistakeType && isMistakeType(item.mistakeType)) {
+    return item.mistakeType;
+  }
+
+  if (item.topic && isCoreGrammarTopic(item.topic)) {
+    return getMistakeTypesForGrammarTopic(item.topic)[0];
+  }
+
+  if (item.mistakeType === "vocabulary_choice") {
+    return "word_meaning";
+  }
+
+  return "transfer_failure";
+}
+
+function normalizeHiddenExamImpact(item: StructuredDiagnosisItem) {
+  const impact = item.hiddenExamImpact ?? [];
+  const knownImpact = impact.filter((value) =>
+    [
+      "grammar_accuracy.",
+      "vocabulary.",
+      "text_understanding.",
+      "audio_understanding.",
+      "writing.",
+      "speaking.",
+    ].some((prefix) => value.startsWith(prefix)),
+  );
+
+  if (knownImpact.length > 0) {
+    return knownImpact;
+  }
+
+  if (item.topic && isCoreGrammarTopic(item.topic)) {
+    return [];
+  }
+
+  if (item.mistakeType === "vocabulary_choice") {
+    return ["text_understanding.vocabulary_in_context"];
+  }
+
+  return ["grammar_accuracy"];
+}
+
+function normalizeDiagnosticContent(result: ResponderResult): ResponderResult {
+  const items = result.structured?.diagnosis;
+
+  if (!items?.length) {
+    return result;
+  }
+
+  return {
+    ...result,
+    structured: {
+      ...(result.structured ?? {}),
+      diagnosis: items.map((item) => ({
+        ...item,
+        mistakeType: normalizeMistakeType(item),
+        hiddenExamImpact: normalizeHiddenExamImpact(item),
+      })),
+    },
+  };
+}
+
 export async function buildResponse(
   input: string,
   classification: ClassifierResult,
@@ -294,7 +365,9 @@ export async function buildResponse(
     schemaName: getSchemaName(classification.inputType),
     schema: getResponderSchema(classification.inputType),
   });
-  const data = addDisplayNameFallback(result.data, classification.inputType, options.responseDepth, options.displayName ?? null);
+  const data = normalizeDiagnosticContent(
+    addDisplayNameFallback(result.data, classification.inputType, options.responseDepth, options.displayName ?? null),
+  );
 
   return {
     ...result,
