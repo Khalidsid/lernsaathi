@@ -15,3 +15,10 @@
 | 9 | Personal-story to German | Guided narrative conversion |
 | 10 | Hidden exam-readiness map | Internal skill-level updates and insights |
 | 11 | Polish & PWA | Installability, offline queue, export, theming |
+
+## Current Status
+- Slice 0 + Slice 1: live in production; login, migrations, real prompt-pipeline calls, OpenAI responses, and structured rendering are working.
+- Slice 1.5 Visual Integration: live in production; design tokens, dark mode, assistant blocks, lemma underline, bilingual pairs, and tab shell are rendering correctly.
+- Production smoke: Railway public `POST /api/chat` returns the expected unauthenticated `401`.
+- Remaining evidence follow-up: production `LearningEvent.structured` DB spot-check and production `/admin/stats` spot-check.
+- Latest pushed commit: `04a96d3` (`Run Prisma generate during build`).

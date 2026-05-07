@@ -1,10 +1,14 @@
 # Slice 1 Notes
 
 ## Status
-- Slice 1 is not marked done yet.
-- The structure is in place.
-- The first-login display name modal is now verified locally after a bug fix.
-- Remaining blockers are authenticated chat/refusal proof, spend-cap proof, event/admin stats proof, and Railway deployment.
+- Slice 1 local verification is complete for the audited Slice 0 + Slice 1 behaviors.
+- The first-login display name modal is verified locally after a bug fix.
+- Authenticated chat, out-of-scope refusal, spend-cap refusal, event logging, and admin stats are verified locally with a temporary audit password hash.
+- Visual Integration Pass 1.5 is implemented, committed, pushed to `main`, and locally verified.
+- Railway production is live and functional: login worked, migrations ran, and real authenticated prompt-pipeline queries executed through OpenAI.
+- Production verified queries: `fliesend` and `sich vorstellen` both returned structured assistant responses rendered with the visual system intact.
+- Railway public unauthenticated `POST /api/chat` also returns `401` from `https://lernsaathi-production.up.railway.app/api/chat`.
+- Remaining evidence follow-up: spot-check production `LearningEvent.structured` rows and production `/admin/stats`.
 
 ## Prompt and repo audit fixes
 - Added `exam` back to the forbidden list in `prompts/system_core.md`.
@@ -20,12 +24,17 @@
 - `npm run typecheck` passes.
 - `npm run lint` passes.
 - `npm run build` passes with the local `.env`.
+- `npm run build` now runs `prisma generate && next build`, so deployed builds generate Prisma Client before Next.js compiles.
 - `npm run dev` boots successfully.
 - `GET /login` returns `200`.
 - Local seeded login works when `ADMIN_PASSWORD_HASH` is set to a known test password hash for the audit run.
 - Unauthenticated `POST /api/chat` returns `401`.
 - The 11th unauthenticated request to `/api/chat` within 60 seconds returns `429`.
 - First-login display name modal behavior is verified with the protocol below.
+- Authenticated `die Leistung` round-trip is verified locally; it renders a structured response and writes a populated `LearningEvent`.
+- Authenticated out-of-scope request is verified locally; it returns the fixed Hinglish refusal and skips the responder call.
+- Daily spend cap behavior is verified locally with `DAILY_SPEND_CAP_USD=0.001`; it returns the daily-limit string without OpenAI calls.
+- `/admin/stats` is verified locally behind auth with the expected visual cards and JSON data shape.
 
 ## First-login name modal protocol
 
@@ -70,42 +79,36 @@ Bug found and fixed:
 - The database is now the source of truth for whether the popup should appear.
 
 ## Still unverified
-- Production seeded plaintext password is still not known; local audit used a temporary known test hash.
-- Authenticated `die Leistung` round-trip through `/api/chat`.
-- Authenticated out-of-scope refusal path with log proof that the responder call is skipped.
-- Daily spend cap behavior through the app route.
-- LearningEvent row contents in the real database after successful chats.
-- `/admin/stats` contents after real logins and events.
-- Railway deployment and public URL checks.
+- Exact `LearningEvent.structured.lemma.word` values in the Railway database for the production queries, especially typo-normalized `fliesend` -> `fließend`.
+- `/admin/stats` contents against Railway after the real public login and chat events.
+- Deployment SHA visibility from Railway is not separately recorded; app behavior confirms a deployed build with migrations and visual integration is live.
 
 ## Exit criteria audit
-- `1` Railway deploy from `main`: not verified.
-- `2` `/login` accepts seeded credentials: verified locally with a temporary known test password hash; production plaintext password still needed.
+- `1` Railway deploy from `main`: verified; production URL is reachable, login works, migrations ran, and authenticated prompt-pipeline queries execute.
+- `2` `/login` accepts seeded credentials: verified in production.
 - `3` first-login displayName modal flow: verified locally with the two-round protocol above.
-- `4` authenticated `die Leistung` response shape: not verified through the app route.
-- `5` authenticated out-of-scope refusal without responder call: not verified.
-- `6` `LearningEvent` rows populated after successful chat: not verified.
-- `7` unauthenticated `/api/chat` rejects with `401`: verified.
+- `4` authenticated word/phrase response shape: verified locally with `die Leistung` and in production with `fliesend` and `sich vorstellen`.
+- `5` authenticated out-of-scope refusal without responder call: verified locally through logs.
+- `6` `LearningEvent` rows populated after successful chat: verified locally; production row spot-check still pending for exact structured payload values.
+- `7` unauthenticated `/api/chat` rejects with `401`: verified locally and against the Railway public URL.
 - `8` 11th request in 60 seconds returns `429`: verified.
-- `9` daily spend cap refusal without OpenAI call: not verified.
+- `9` daily spend cap refusal without OpenAI call: verified locally with a lowered cap.
 - `10` eval runs all 8 golden examples and prints drift: verified locally.
 - `11` formality grep or policy check: verified through `npm run check:policy`.
 - `12` no mixed gloss lines in few-shot file: verified through `npm run check:policy`.
 - `13` login tracking timestamps and count: partially verified; protocol runs showed `loginCount` moved to `2` in Round 1 and `3` in Round 2, but timestamps still need a dedicated check.
-- `14` `/admin/stats` behind auth with expected JSON block: not verified.
+- `14` `/admin/stats` behind auth with expected JSON block: verified locally; production spot-check pending.
 - `15` architecture documentation exists: verified.
 - `16` README setup steps exist: verified.
 - `17` forbidden learner-facing exam vocabulary absent from app surfaces: verified by `npm run check:policy` for current local files.
 
 ## Next steps
-- Get the seeded plaintext password, or keep using a temporary known test hash for local-only authenticated audit runs.
-- Walk `/admin/stats` against the real database after authenticated chat events.
-- Capture logs for one out-of-scope request and one in-scope request after login.
-- Verify the daily spend cap by temporarily lowering `DAILY_SPEND_CAP_USD`.
-- Deploy to Railway and repeat the same checklist against the public URL.
+- Query the Railway database for the latest `LearningEvent.structured` values from `fliesend` and `sich vorstellen`.
+- Walk `/admin/stats` against the Railway database after the authenticated public chat events.
+- Keep the public `401`, login, and real-query production evidence as the baseline before starting Slice 2.
 
 ## Visual Integration Pass (post-Slice-1)
-- Status: in progress.
+- Status: live in production; DB/admin evidence spot-checks pending.
 - Date: 2026-05-07.
 - Components built: `AppShell`, `TabBar`, `Composer`, `UserBubble`, `AssistantBlock`, `LemmaAnchor`, `BilingualPair`, `StatusDot`, `RevisionCard`, `MistakeRow`, `ImageChip`, `AdminStatCard`.
 - Design tokens applied: `tailwind.config.ts`, `app/globals.css`.
@@ -114,4 +117,5 @@ Bug found and fixed:
 - Prompt changes: `response_word_query.md` and `response_phrase_query.md` updated to emit `structured` as a mirror of `response`.
 - Eval result post-pass: pass (`npm run eval`).
 - Policy check post-pass: pass (`npm run check:policy`).
-- Section 15 exit criteria after this pass: local checks re-walked with a temporary audit password hash and no local regressions found; Railway deploy and public URL checks remain.
+- Section 15 exit criteria after this pass: local checks re-walked with a temporary audit password hash and no local regressions found; Railway production login and real prompt-pipeline queries are working; public unauthenticated `POST /api/chat` returns `401`; production DB/admin spot-checks remain.
+- Git status: visual integration commit `c57758e` and Prisma build fix commit `04a96d3` pushed to `origin/main`.

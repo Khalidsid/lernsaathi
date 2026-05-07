@@ -56,7 +56,7 @@
 - `npm run lint`: pass.
 - `npm run check:policy`: pass.
 - `npm run eval`: pass; all 8 golden examples returned `structured` payloads.
-- `npm run build`: pass.
+- `npm run build`: pass; the build script now runs `prisma generate && next build` so Railway generates Prisma Client during deploy.
 - Fresh database authenticated checks: pass locally with temporary audit password hash.
 - Name modal: popup showed on first login, `Khalid` saved, popup did not show on second login, database showed `displayName = "Khalid"` and `loginCount = 2`.
 - `die Leistung`: authenticated chat rendered the structured response and created a `LearningEvent` row with `structured.lemma.word = "Leistung"`, token counts, `verificationUsed = false`, and `mistakeCreated = false`.
@@ -65,7 +65,14 @@
 - Rate limit: repeated unauthenticated `/api/chat` requests returned `429`.
 - Daily spend cap: with `DAILY_SPEND_CAP_USD=0.001`, returned `Aaj ka limit khatam ho gaya hai. Kal try karein.`, logged `pipeline_daily_limit_short_circuit`, and wrote zero token counts.
 - `/admin/stats`: rendered behind auth with the five stat cards, recent event rows, and the existing JSON data shape.
-- Railway deploy: not yet run.
+- GitHub handoff: visual integration commit `c57758e` and Prisma build fix commit `04a96d3` are pushed to `origin/main`.
+- Railway public smoke: unauthenticated `POST https://lernsaathi-production.up.railway.app/api/chat` returned `401 {"error":"Unauthorized"}` on 2026-05-07.
+- Railway production login: verified working after the production migration ran.
+- Railway production prompt pipeline: real authenticated queries `fliesend` and `sich vorstellen` executed through classifier, responder, OpenAI, structured response parsing, and `AssistantBlock` rendering.
+- Railway production visual system: dark mode, lemma underline gradient, bilingual left rule, assistant/user bubble contrast, italic `Wörter verstehen` label, and active `Baatcheet` tab rendered intact.
+- Railway production Hinglish voice: formal aap-form held in the observed responses, with no tum-form leakage or praise filler.
+- Railway production nuance: typo input `fliesend` returned normalized `fließend`; `sich vorstellen` returned both meanings and the case-pattern distinction.
+- Railway remaining spot-checks: query production `LearningEvent.structured` for exact persisted lemma values, and re-open production `/admin/stats` after the public chat events.
 
 ## What was NOT built (deferred)
 - Dohraana tab data wiring - Slice 3.

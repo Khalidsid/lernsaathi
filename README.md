@@ -22,5 +22,6 @@ Single-user German learning companion for a Hinglish-speaking learner. Slice 0 +
 
 ## Notes
 - Railway should receive all secrets from environment variables only.
+- `npm run build` runs `prisma generate && next build`, so Railway generates Prisma Client during deploy.
 - No public signup flow exists.
 - Prompt files are loaded from `prompts/` at runtime, so prompt edits stay reviewable.

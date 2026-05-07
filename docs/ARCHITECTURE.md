@@ -85,6 +85,7 @@
 - `bcryptjs` is used instead of native `bcrypt` to keep Railway deployment simpler while still validating bcrypt-format password hashes.
 - OpenAI daily spend checks use the current `LearningEvent` token history and a fixed GPT-5 price estimate in code. If model pricing changes, update `lib/openai.ts`.
 - `lucide-react` is used for the visual integration icon contract from `docs/design_concept/Lernsaathi.html`.
+- `npm run build` runs `prisma generate && next build` so Railway deployments do not fail with a missing Prisma Client.
 
 ## Visual System
 - Design source of truth: `docs/design_concept/Lernsaathi.html`.
