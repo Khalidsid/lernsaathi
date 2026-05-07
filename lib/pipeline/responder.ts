@@ -391,9 +391,10 @@ export async function buildResponse(
 
   const priorMistakeNote = buildPriorMistakeNote(input, options.priorMistakes ?? []);
   const displayNameRule = [
-    `Display name available: ${options.displayName || ""}`,
+    `Learner displayName value: ${options.displayName || ""}`,
     "Use the display name only when response depth is guided_explanation and the point is genuinely tricky.",
-    "Use it at most once, at the start of one sentence. Never use it in a meaning gloss line.",
+    "If you use it, copy the displayName value exactly as the first word of the sentence; do not replace it with a topic label.",
+    "Use it at most once. Never use it in a meaning gloss line.",
   ].join("\n");
 
   const systemPrompt = [systemCore, styleGuide, taskPrompt, fewShot, displayNameRule, priorMistakeNote]

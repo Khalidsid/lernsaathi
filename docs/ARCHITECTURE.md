@@ -99,3 +99,13 @@
 - Templated out-of-scope responses use `getLearnerVisibleLabelForEvent("out_of_scope")`, which always returns `Aufgabe verstehen`.
 - Templated daily-limit responses use `getLearnerVisibleLabelForEvent("daily_limit_reached")`, which returns `Wörter verstehen` because the learner's original task is still a word or phrase lookup even though the cap blocked the answer.
 - Both templated refusal paths are logged with `responseDepth = quick_answer`; guided explanation depth is reserved for real diagnostic responses.
+
+## Slice 2 Diagnostic Loop
+- Adaptive depth routing lives in `lib/pipeline/depth.ts`. Word and phrase lookups stay `quick_answer` unless a matching active mistake is found; grammar questions and sentence correction cap at `guided_explanation`.
+- The verifier is active only for guided grammar and sentence-correction responses. It reads `prompts/verifier_chhota_check.md` and returns one short chhota-check question; quick answers and templated refusals skip it.
+- Mistake creation happens after the `LearningEvent` is written in `app/api/chat/route.ts`, through `lib/pipeline/mistakes.ts`. It only runs for `grammar_question` and `sentence_correction`, skips duplicate active or settled items, writes locked `MISTAKE_TYPES`, and never creates rows for word or phrase lookups.
+- Mistake priority is deterministic in `lib/pipeline/mistake_priority.ts`: fundamentals and repeated types are high, most items are medium, register-only items are low.
+- Pattern A is rendered by `ReflectionCard`, `AttemptInput`, `GhostRevealLink`, and `ChhotaCheck`. The state is driven by `AssistantResponse.structured.reflection`; the reveal is client-only, while attempt replies post to `/api/chat/attempt`.
+- Attempt feedback uses `prompts/response_attempt_feedback.md` through `lib/pipeline/attempt_feedback.ts`, so follow-up replies still use the prompt pipeline and log token counts.
+- ExamReadinessMap updates run through `lib/pipeline/exam_map.ts`; only dot-path skill keys such as `grammar_accuracy.cases` are bumped from `unknown` to `weak`.
+- Prior-mistake awareness uses normalized local matching over active mistakes. When a lookup matches, the responder gets a prior-note injection, the response depth becomes `guided_explanation`, a visible `pehle` reminder is guaranteed, and the matched mistake's `reviewCount` / `lastReviewedAt` are updated.

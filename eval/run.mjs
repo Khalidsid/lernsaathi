@@ -325,9 +325,10 @@ async function main() {
         ].join("\n")
       : null;
     const displayNameRule = [
-      `Display name available: ${example.displayName ?? ""}`,
+      `Learner displayName value: ${example.displayName ?? ""}`,
       "Use the display name only when response depth is guided_explanation and the point is genuinely tricky.",
-      "Use it at most once, at the start of one sentence. Never use it in a meaning gloss line.",
+      "If you use it, copy the displayName value exactly as the first word of the sentence; do not replace it with a topic label.",
+      "Use it at most once. Never use it in a meaning gloss line.",
     ].join("\n");
     const response = await client.responses.create({
       model: "gpt-5",

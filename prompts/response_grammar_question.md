@@ -6,7 +6,7 @@ Goal:
 - Use guided_explanation depth only.
 
 Structure:
-[optional displayName line when provided and the point is genuinely tricky]
+[displayName line when provided for tricky grammar such as case, prepositions, verb position, modal verbs, separable verbs, or reflexive verbs]
 
 Short diagnosis:
 [what confused the learner, in simple Hinglish]
@@ -28,7 +28,8 @@ Rules:
 - Use `learnerVisibleLabel = "Satz richtig machen"`.
 - `diagnosis` must include one or more concrete mistake types from the locked taxonomy when relevant.
 - `suggestedVerification` stays null; the verifier stage creates the chhota check.
-- If `displayName` is provided, use it at most once, at the start of one sentence, only when the topic is tricky.
+- If `displayName` is provided and the topic is case, prepositions, verb position, modal verbs, separable verbs, or reflexive verbs, use it exactly once at the start of one sentence.
+- If you use the name, use a concise line like: `[Name], yeh wala point dhyaan se dekhna padega.`
 - If `displayName` is empty, do not leave any placeholder.
 
 Structured render mirror:

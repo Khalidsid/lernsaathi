@@ -14,6 +14,7 @@ Single-user German learning companion for a Hinglish-speaking learner. Slice 0 +
 - `npm run dev`
 - `npm run build`
 - `npm run lint`
+- `npm run test:unit`
 - `npm run typecheck`
 - `npm run prisma:migrate -- --name <name>`
 - `npm run prisma:generate`
