@@ -289,7 +289,7 @@ function normalizeMistakeType(item: StructuredDiagnosisItem): MistakeType {
     return getMistakeTypesForGrammarTopic(item.topic)[0];
   }
 
-  if (item.mistakeType === "vocabulary_choice") {
+  if (item.mistakeType === "vocabulary_choice" || item.mistakeType === "word_choice") {
     return "word_meaning";
   }
 
@@ -317,7 +317,7 @@ function normalizeHiddenExamImpact(item: StructuredDiagnosisItem) {
     return [];
   }
 
-  if (item.mistakeType === "vocabulary_choice") {
+  if (item.mistakeType === "vocabulary_choice" || item.mistakeType === "word_choice") {
     return ["text_understanding.vocabulary_in_context"];
   }
 
