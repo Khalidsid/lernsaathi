@@ -38,20 +38,27 @@ function inputLooksLikeLemma(input: string) {
   return input.trim().length > 1 && !input.includes("?") && input.trim().split(/\s+/).length <= 3;
 }
 
+function normalizeSearchText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/ß/g, "ss")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^\p{Letter}\p{Number}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function findOpenMistakesForInput(userId: string, input: string, inputType: string): Promise<PriorMistake[]> {
   if ((inputType !== "word_query" && inputType !== "phrase_query") || !inputLooksLikeLemma(input)) {
     return [];
   }
 
-  return db.mistake.findMany({
+  const needle = normalizeSearchText(input);
+  const mistakes = await db.mistake.findMany({
     where: {
       userId,
       status: "active",
-      OR: [
-        { exampleInput: { contains: input, mode: "insensitive" } },
-        { correctForm: { contains: input, mode: "insensitive" } },
-        { subtype: { contains: input, mode: "insensitive" } },
-      ],
     },
     select: {
       id: true,
@@ -60,8 +67,15 @@ async function findOpenMistakesForInput(userId: string, input: string, inputType
       exampleInput: true,
       correctForm: true,
     },
-    take: 3,
+    take: 25,
   });
+
+  return mistakes
+    .filter((mistake) => {
+      const haystack = normalizeSearchText([mistake.exampleInput, mistake.correctForm, mistake.subtype ?? ""].join(" "));
+      return haystack.includes(needle);
+    })
+    .slice(0, 3);
 }
 
 function getMistakeCandidates(inputType: string, structuredDiagnosis: StructuredDiagnosisItem[] | null | undefined) {

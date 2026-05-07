@@ -21,7 +21,7 @@ function getHiddenExamImpact(candidate: StructuredDiagnosisItem) {
     return getExamImpactForGrammarTopic(candidate.topic);
   }
 
-  return ["grammar_accuracy"];
+  return ["writing.simple_sentence_accuracy"];
 }
 
 async function updateExamMap(userId: string, hiddenExamImpact: string[]) {

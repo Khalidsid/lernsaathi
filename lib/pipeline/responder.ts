@@ -321,7 +321,7 @@ function normalizeHiddenExamImpact(item: StructuredDiagnosisItem) {
     return ["text_understanding.vocabulary_in_context"];
   }
 
-  return ["grammar_accuracy"];
+  return ["writing.simple_sentence_accuracy"];
 }
 
 function normalizeDiagnosticContent(result: ResponderResult): ResponderResult {
