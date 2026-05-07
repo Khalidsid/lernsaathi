@@ -19,3 +19,7 @@ type ChatLogFields = {
 export function logChatEvent(fields: ChatLogFields) {
   logger.info(fields, "chat_processed");
 }
+
+export function logPipelineEvent(event: string, fields: Record<string, unknown>) {
+  logger.info(fields, event);
+}

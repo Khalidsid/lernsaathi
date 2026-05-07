@@ -10,18 +10,23 @@ export default async function LoginPage() {
   const session = await auth();
 
   if (session?.user?.id) {
-    redirect("/");
+    redirect("/chat");
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md rounded-shell border border-border bg-surface p-8 shadow-soft backdrop-blur">
-        <p className="font-display text-3xl text-ink">Sprachhilfe</p>
-        <p className="mt-3 text-sm leading-6 text-muted">
-          Login karein. Is jagah par aap German word ya phrase ka matlab pooch sakte hain.
-        </p>
-        <div className="mt-8">
-          <LoginForm />
+      <div className="relative min-h-[760px] w-full max-w-[390px] overflow-hidden rounded-[30px] bg-paper text-ink shadow-[0_30px_80px_-35px_rgba(40,40,40,0.28)] sm:border sm:border-rule">
+        <div className="px-7 pt-28">
+          <div className="text-center">
+            <div className="serif text-[44px] leading-none tracking-[-0.02em] text-ink">Lernsaathi</div>
+            <div className="serif mt-3 text-[15px] italic text-ink3">Aapka private German saathi.</div>
+          </div>
+          <div className="mt-16">
+            <LoginForm />
+          </div>
+        </div>
+        <div className="absolute inset-x-0 bottom-8 text-center">
+          <div className="serif text-[12px] italic text-ink4">ek learner ke liye banaya gaya</div>
         </div>
       </div>
     </main>

@@ -50,6 +50,8 @@ model LearningEvent {
   diagnosis           String[] @default([])
   responseDepth       String
   response            String   @db.Text
+  structured          Json?
+  imagePath           String?
   learnerVisibleLabel String
   verificationUsed    Boolean  @default(false)
   verificationPrompt  String?  @db.Text

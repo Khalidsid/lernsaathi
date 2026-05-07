@@ -3,13 +3,40 @@ import { loadPrompt } from "@/lib/prompts";
 import { runStructuredPrompt } from "@/lib/openai";
 
 import type { ClassifierResult } from "@/lib/pipeline/classifier";
+import type { StructuredAssistantContent } from "@/lib/assistant-response";
 
 export type ResponderResult = {
   response: string;
   learnerVisibleLabel: string;
   diagnosis: string[];
   suggestedVerification: string | null;
+  structured?: StructuredAssistantContent | null;
 };
+
+const lemmaSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    article: {
+      type: ["string", "null"],
+      enum: ["der", "die", "das", null],
+    },
+    word: { type: "string" },
+    plural: { type: ["string", "null"] },
+    gloss: { type: "string" },
+  },
+  required: ["article", "word", "plural", "gloss"],
+} as const;
+
+const exampleSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    de: { type: "string" },
+    hi: { type: "string" },
+  },
+  required: ["de", "hi"],
+} as const;
 
 const responderSchema = {
   type: "object",
@@ -24,8 +51,26 @@ const responderSchema = {
     suggestedVerification: {
       type: ["string", "null"],
     },
+    structured: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      properties: {
+        lemma: {
+          anyOf: [lemmaSchema, { type: "null" }],
+        },
+        examples: {
+          type: ["array", "null"],
+          items: exampleSchema,
+        },
+        use: { type: ["string", "null"] },
+        pattern: { type: ["string", "null"] },
+        common: { type: ["string", "null"] },
+        note: { type: ["string", "null"] },
+      },
+      required: ["lemma", "examples", "use", "pattern", "common", "note"],
+    },
   },
-  required: ["response", "learnerVisibleLabel", "diagnosis", "suggestedVerification"],
+  required: ["response", "learnerVisibleLabel", "diagnosis", "suggestedVerification", "structured"],
 } as const;
 
 function getPromptFilename(inputType: ClassifierResult["inputType"]) {

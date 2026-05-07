@@ -21,7 +21,7 @@ const forbiddenInformal = [
   "chalo",
 ];
 
-const forbiddenExamWords = ["B1", "TELC", "Goethe", "DTZ", "Prüfung", "readiness", "score"];
+const forbiddenExamWords = ["B1", "TELC", "Goethe", "DTZ", "Prüfung", "exam", "readiness", "score"];
 
 const responderSchema = {
   type: "object",
@@ -31,8 +31,47 @@ const responderSchema = {
     learnerVisibleLabel: { type: "string" },
     diagnosis: { type: "array", items: { type: "string" } },
     suggestedVerification: { type: ["string", "null"] },
+    structured: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      properties: {
+        lemma: {
+          anyOf: [
+            {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                article: { type: ["string", "null"], enum: ["der", "die", "das", null] },
+                word: { type: "string" },
+                plural: { type: ["string", "null"] },
+                gloss: { type: "string" },
+              },
+              required: ["article", "word", "plural", "gloss"],
+            },
+            { type: "null" },
+          ],
+        },
+        examples: {
+          type: ["array", "null"],
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              de: { type: "string" },
+              hi: { type: "string" },
+            },
+            required: ["de", "hi"],
+          },
+        },
+        use: { type: ["string", "null"] },
+        pattern: { type: ["string", "null"] },
+        common: { type: ["string", "null"] },
+        note: { type: ["string", "null"] },
+      },
+      required: ["lemma", "examples", "use", "pattern", "common", "note"],
+    },
   },
-  required: ["response", "learnerVisibleLabel", "diagnosis", "suggestedVerification"],
+  required: ["response", "learnerVisibleLabel", "diagnosis", "suggestedVerification", "structured"],
 };
 
 function similarityScore(a, b) {
@@ -56,13 +95,30 @@ function hasForbiddenInformal(output) {
 }
 
 function hasForbiddenExamWord(output) {
-  return forbiddenExamWords.some((token) => output.includes(token));
+  return forbiddenExamWords.some((token) => containsForbiddenExamWord(output, token));
 }
 
 function hasMixedGloss(output) {
   return output
     .split("\n")
     .some((line) => line.includes(" = ") && line.includes(" / "));
+}
+
+function hasStructuredShape(payload) {
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+
+  if (!payload.structured || typeof payload.structured !== "object") {
+    return false;
+  }
+
+  const { structured } = payload;
+  if (!structured.lemma || typeof structured.lemma.word !== "string" || typeof structured.lemma.gloss !== "string") {
+    return false;
+  }
+
+  return Array.isArray(structured.examples) && structured.examples.every((example) => example.de && example.hi);
 }
 
 async function loadPrompt(filename) {
@@ -132,10 +188,11 @@ async function main() {
     const informal = hasForbiddenInformal(output);
     const mixedGloss = hasMixedGloss(output);
     const examWord = hasForbiddenExamWord(output);
+    const structuredShape = hasStructuredShape(parsed);
 
     console.log(`\n=== ${example.input} ===`);
     console.log(`Similarity: ${score.toFixed(2)}`);
-    if (score < 0.45 || informal || mixedGloss || examWord) {
+    if (score < 0.45 || informal || mixedGloss || examWord || !structuredShape) {
       failed = true;
       console.log("Status: FAIL");
     } else {
@@ -145,6 +202,8 @@ async function main() {
     if (informal) console.log("Negative check: informal form found");
     if (mixedGloss) console.log("Negative check: mixed gloss found");
     if (examWord) console.log("Negative check: forbidden exam word found");
+    if (!structuredShape) console.log("Structured check: missing or incomplete structured payload");
+    console.log(`Structured: ${JSON.stringify(parsed.structured)}`);
   }
 
   if (failed) {
@@ -156,3 +215,10 @@ main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
+function containsForbiddenExamWord(output, token) {
+  if (/^[A-Za-z]+$/.test(token)) {
+    return new RegExp(`\\b${token}\\b`, "i").test(output);
+  }
+
+  return output.includes(token);
+}

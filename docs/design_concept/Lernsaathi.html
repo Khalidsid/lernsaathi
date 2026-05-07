@@ -1,0 +1,1530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Lernsaathi — UI Skeleton</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          serif: ['Fraunces', 'ui-serif', 'Georgia', 'serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        },
+        colors: {
+          paper:   '#FAFAF7',
+          paper2:  '#F3F2EC',
+          ink:     '#1F1F1F',
+          ink2:    '#3A3A38',
+          ink3:    '#6B6B68',
+          ink4:    '#9B9B96',
+          rule:    '#E6E4DC',
+          rule2:   '#EFEDE6',
+          night:   '#191917',
+          night2:  '#222220',
+          night3:  '#2C2C29',
+          mist:    '#E9E7DF',
+          // dusty teal accent
+          teal:    '#5C8C8A',
+          tealDk:  '#43706E',
+          tealLt:  '#EAF0EF',
+          tealLt2: '#D7E2E1',
+          tealNight: '#3D5C5A',
+        },
+        borderRadius: {
+          'lg': '12px',
+          'xl': '16px',
+          '2xl': '20px',
+        },
+      }
+    }
+  };
+</script>
+
+<style>
+  html, body { background: #EDEBE3; }
+  body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; color: #1F1F1F; -webkit-font-smoothing: antialiased; }
+
+  /* ===== Tweak-driven CSS variables (defaults match the "calm / bilingual / underline" baseline) ===== */
+  :root {
+    --tw-accent-h: 178;
+    --tw-accent-s: 21%;
+    --tw-accent-l: 45%;
+    --tw-accent: hsl(var(--tw-accent-h) var(--tw-accent-s) var(--tw-accent-l));
+    --tw-accent-dk: hsl(var(--tw-accent-h) var(--tw-accent-s) calc(var(--tw-accent-l) - 8%));
+    --tw-accent-lt: hsl(var(--tw-accent-h) calc(var(--tw-accent-s) - 6%) 94%);
+
+    --tw-card-pad-y: 16px;
+    --tw-card-pad-x: 16px;
+    --tw-line: 1.55;
+    --tw-anchor-opacity: 0.40;
+    --tw-anchor-thickness: 4px;
+    --tw-fade-ms: 220ms;
+  }
+</style>
+<style>
+  html, body { background: #EDEBE3; }
+  body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; color: #1F1F1F; -webkit-font-smoothing: antialiased; }
+  .serif { font-family: 'Fraunces', ui-serif, Georgia, serif; font-optical-sizing: auto; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  /* Subtle paper grain on the canvas, NOT inside the frames */
+  .canvas-bg {
+    background-color: #EDEBE3;
+    background-image:
+      radial-gradient(rgba(0,0,0,0.025) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+
+  /* Phone frame */
+  .phone {
+    width: 360px;
+    max-width: 100%;
+    border-radius: 38px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.6) inset,
+      0 0 0 1px rgba(0,0,0,0.06),
+      0 30px 60px -20px rgba(40,40,40,0.18),
+      0 8px 20px -8px rgba(40,40,40,0.10);
+    overflow: hidden;
+  }
+  .phone-screen {
+    border-radius: 30px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Tiny status bar (calm, no clutter) */
+  .statusbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px 6px;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.01em;
+  }
+  .statusbar .dots { display: inline-flex; gap: 4px; align-items: center; }
+  .statusbar .dot { width: 4px; height: 4px; border-radius: 999px; background: currentColor; opacity: 0.6; }
+
+  /* Bilingual pair — 2px teal-low-opacity left rule */
+  .bipair {
+    border-left: 2px solid rgba(92, 140, 138, 0.55);
+    padding-left: 14px;
+  }
+  .bipair-dark {
+    border-left: 2px solid rgba(120, 170, 168, 0.65);
+    padding-left: 14px;
+  }
+  .de { font-weight: 500; letter-spacing: -0.005em; }
+  .hi { font-weight: 400; }
+
+  /* Assistant bubble warmth — accent at very low opacity */
+  .assistant-bg { background: hsl(var(--tw-accent-h) calc(var(--tw-accent-s) - 8%) 96%); padding: var(--tw-card-pad-y) var(--tw-card-pad-x); }
+  .assistant-bg-dark { background: #232825; padding: var(--tw-card-pad-y) var(--tw-card-pad-x); }
+  .assistant-bg p, .assistant-bg .text-ink2, .assistant-bg .de, .assistant-bg .hi, .assistant-bg .text-ink { line-height: var(--tw-line); }
+
+  /* Send button uses accent var */
+  .send-btn { background: var(--tw-accent); }
+  .bg-teal { background-color: var(--tw-accent) !important; }
+  .hover\:bg-tealDk:hover { background-color: var(--tw-accent-dk) !important; }
+  .text-tealDk { color: var(--tw-accent-dk) !important; }
+  .bg-tealLt { background-color: var(--tw-accent-lt) !important; }
+
+  /* Lemma underline accent — used to anchor target word in user msg + assistant card + revision/mistake rows */
+  .lemma-underline {
+    background-image: linear-gradient(to top, hsl(var(--tw-accent-h) var(--tw-accent-s) var(--tw-accent-l) / 0.35) 0, hsl(var(--tw-accent-h) var(--tw-accent-s) var(--tw-accent-l) / 0.35) 6px, transparent 6px);
+    background-repeat: no-repeat;
+    background-position: 0 88%;
+    padding-bottom: 1px;
+  }
+  /* Inline anchor inside user message bubbles — driven by tweaks */
+  .anchor {
+    background-image: linear-gradient(to top, hsl(var(--tw-accent-h) var(--tw-accent-s) var(--tw-accent-l) / var(--tw-anchor-opacity)) 0, hsl(var(--tw-accent-h) var(--tw-accent-s) var(--tw-accent-l) / var(--tw-anchor-opacity)) var(--tw-anchor-thickness), transparent var(--tw-anchor-thickness));
+    background-repeat: no-repeat;
+    background-position: 0 92%;
+    font-weight: 500;
+    padding-bottom: 1px;
+  }
+  /* Anchor: capsule mode — set by [data-anchor="capsule"] on <html> */
+  html[data-anchor="capsule"] .anchor,
+  html[data-anchor="capsule"] .lemma-underline {
+    background-image: none;
+    background-color: hsl(var(--tw-accent-h) var(--tw-accent-s) var(--tw-accent-l) / 0.14);
+    border-radius: 6px;
+    padding: 1px 6px;
+    font-weight: 500;
+  }
+  /* Anchor: quiet-bold mode — no color, weight + tracking only */
+  html[data-anchor="quietbold"] .anchor,
+  html[data-anchor="quietbold"] .lemma-underline {
+    background-image: none;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: #0E0E0D;
+  }
+  .anchor-dark {
+    background-image: linear-gradient(to top, rgba(120,170,168,0.50) 0, rgba(120,170,168,0.50) 4px, transparent 4px);
+    background-repeat: no-repeat;
+    background-position: 0 92%;
+    font-weight: 500;
+    padding-bottom: 1px;
+  }
+  /* Friction marker — muted amber, used to flag the disputed phrase in try-first cards. Never red. */
+  .friction {
+    background-image: linear-gradient(to top, rgba(190,140,60,0.30) 0, rgba(190,140,60,0.30) 5px, transparent 5px);
+    background-repeat: no-repeat;
+    background-position: 0 90%;
+    padding-bottom: 1px;
+    color: #6B4A18;
+  }
+
+  /* Tap-to-reveal layer for hint cascade */
+  details.hint { border-left: 2px solid rgba(92,140,138,0.30); padding-left: 14px; }
+  details.hint > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; color: #43706E; font-size: 13px; padding: 6px 0; }
+  details.hint > summary::-webkit-details-marker { display: none; }
+  details.hint > summary .chev { transition: transform 180ms ease-out; }
+  details.hint[open] > summary .chev { transform: rotate(90deg); }
+  details.hint[open] > summary { color: #6B6B68; }
+  details.hint > .reveal { color: #1F1F1F; font-size: 14.5px; line-height: 1.6; padding: 4px 0 8px; }
+
+  /* Touch-friendly affordances on phone surfaces */
+  .tap { -webkit-tap-highlight-color: transparent; transition: background-color 140ms ease-out, color 140ms ease-out, transform 140ms ease-out; }
+  .tap:active { transform: scale(0.985); }
+  .tabpill.tap:hover { background: #F3F2EC; }
+
+  /* Section header chip on canvas */
+  .seclabel {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: #6B6B68;
+    letter-spacing: 0.02em;
+  }
+
+  /* Reset list defaults inside frames */
+  .frame ul, .frame ol { list-style: none; padding: 0; margin: 0; }
+
+  /* Soft focus */
+  input:focus, textarea:focus, button:focus { outline: none; }
+
+  /* Hairline */
+  .hairline { background: #E6E4DC; height: 1px; width: 100%; }
+  .hairline-dark { background: #2E2E2B; height: 1px; width: 100%; }
+
+  /* Token swatch */
+  .swatch {
+    width: 100%; aspect-ratio: 3/2; border-radius: 10px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+  }
+
+  /* Tiny send arrow circle */
+  .send-btn {
+    width: 34px; height: 34px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #5C8C8A; color: #FAFAF7;
+  }
+  .send-btn-disabled { background: #D7D5CC; color: #FAFAF7; }
+
+  /* Vertical rhythm helper */
+  .vstack > * + * { margin-top: 12px; }
+
+  /* Scrollbar polish on canvas */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #D2CFC4; border-radius: 999px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  /* Animations: subtle fade only */
+  @media (prefers-reduced-motion: no-preference) {
+    .fade-in { animation: fadeIn var(--tw-fade-ms) ease-out both; }
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+
+  /* Tab pill (revision tab) */
+  .tabpill { padding: 6px 12px; border-radius: 999px; font-size: 13px; }
+</style>
+</head>
+
+<body class="canvas-bg min-h-screen">
+
+  <!-- ============================================================
+       Document header
+  ============================================================ -->
+  <header class="max-w-[1200px] mx-auto px-8 pt-16 pb-10">
+    <div class="flex items-end justify-between gap-8 flex-wrap">
+      <div>
+        <div class="seclabel mb-3">// design artifact · v1</div>
+        <h1 class="serif text-[44px] leading-[1.05] tracking-[-0.015em] text-ink">Lernsaathi</h1>
+        <p class="mt-3 text-ink3 max-w-[52ch] leading-relaxed">
+          A private German learning companion. Calm, bilingual, single-user. This artifact shows the full UI skeleton — tokens, components, and every screen from the brief — laid out for review.
+        </p>
+      </div>
+      <div class="text-right">
+        <div class="seclabel">aap-form Hinglish · German · one learner</div>
+        <div class="serif italic text-ink2 mt-2 text-[15px]">“<span data-voice="tagline">Aapka private German saathi.</span>”</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       Design tokens legend
+  ============================================================ -->
+  <section class="max-w-[1200px] mx-auto px-8 pb-14">
+    <div class="seclabel mb-3">// 0. design tokens — the legend for everything below</div>
+    <div class="bg-paper rounded-2xl p-8 shadow-sm border border-rule">
+
+      <div class="grid grid-cols-12 gap-8">
+
+        <!-- Color: light & dark -->
+        <div class="col-span-12 lg:col-span-6">
+          <div class="serif text-[20px] text-ink mb-1">Color</div>
+          <div class="text-ink3 text-[13px] mb-5">Warm neutrals. One accent. Two accent shades for status — never red/green for engagement.</div>
+
+          <div class="grid grid-cols-6 gap-3">
+            <div>
+              <div class="swatch" style="background:#FAFAF7"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">paper</div>
+              <div class="mono text-[10px] text-ink4">#FAFAF7</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#F3F2EC"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">paper2</div>
+              <div class="mono text-[10px] text-ink4">#F3F2EC</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#1F1F1F"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">ink</div>
+              <div class="mono text-[10px] text-ink4">#1F1F1F</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#6B6B68"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">ink3</div>
+              <div class="mono text-[10px] text-ink4">#6B6B68</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#5C8C8A"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">teal</div>
+              <div class="mono text-[10px] text-ink4">#5C8C8A</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#EAF0EF"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">teal-lt</div>
+              <div class="mono text-[10px] text-ink4">#EAF0EF</div>
+            </div>
+          </div>
+
+          <div class="mt-5 grid grid-cols-6 gap-3">
+            <div>
+              <div class="swatch" style="background:#191917"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">night</div>
+              <div class="mono text-[10px] text-ink4">#191917</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#222220"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">night2</div>
+              <div class="mono text-[10px] text-ink4">#222220</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#E9E7DF"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">paper-on-night</div>
+              <div class="mono text-[10px] text-ink4">#E9E7DF</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#3D5C5A"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">teal-night</div>
+              <div class="mono text-[10px] text-ink4">#3D5C5A</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#D7E2E1"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">accent-2 (status)</div>
+              <div class="mono text-[10px] text-ink4">#D7E2E1</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#5C8C8A; opacity:0.45"></div>
+              <div class="mono text-[10px] mt-1.5 text-ink3">teal @ 45%</div>
+              <div class="mono text-[10px] text-ink4">bipair rule</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Type -->
+        <div class="col-span-12 lg:col-span-3">
+          <div class="serif text-[20px] text-ink mb-1">Type</div>
+          <div class="text-ink3 text-[13px] mb-5">Serif for anchors. Sans for everything bilingual — one face, two languages, equal weight.</div>
+
+          <div class="vstack">
+            <div>
+              <div class="serif text-[28px] tracking-[-0.01em] text-ink leading-tight">Fraunces</div>
+              <div class="mono text-[10px] text-ink4">serif · headings, app name, italic labels</div>
+            </div>
+            <div>
+              <div class="text-[22px] text-ink leading-tight" style="font-weight:500">Inter</div>
+              <div class="mono text-[10px] text-ink4">sans · body, German, Hinglish, UI</div>
+            </div>
+            <div>
+              <div class="mono text-[15px] text-ink2">JetBrains Mono</div>
+              <div class="mono text-[10px] text-ink4">mono · operator/admin only</div>
+            </div>
+          </div>
+
+          <div class="hairline my-5"></div>
+          <div class="text-ink3 text-[13px] mb-2">Scale</div>
+          <div class="grid grid-cols-2 gap-y-1 mono text-[11px] text-ink3">
+            <div>11 · meta</div><div>13 · caption</div>
+            <div>15 · body</div><div>17 · message</div>
+            <div>20 · lemma</div><div>28 · screen title</div>
+          </div>
+        </div>
+
+        <!-- Spacing & radii -->
+        <div class="col-span-12 lg:col-span-3">
+          <div class="serif text-[20px] text-ink mb-1">Shape & rhythm</div>
+          <div class="text-ink3 text-[13px] mb-5">Generous gutters. Soft, not rounded-cute.</div>
+
+          <div class="flex items-end gap-3 mb-5">
+            <div class="flex flex-col items-center">
+              <div class="bg-paper2 border border-rule" style="width:36px;height:36px;border-radius:8px"></div>
+              <div class="mono text-[10px] mt-1 text-ink4">8</div>
+            </div>
+            <div class="flex flex-col items-center">
+              <div class="bg-paper2 border border-rule" style="width:42px;height:42px;border-radius:12px"></div>
+              <div class="mono text-[10px] mt-1 text-ink4">12</div>
+            </div>
+            <div class="flex flex-col items-center">
+              <div class="bg-paper2 border border-rule" style="width:48px;height:48px;border-radius:16px"></div>
+              <div class="mono text-[10px] mt-1 text-ink4">16</div>
+            </div>
+            <div class="flex flex-col items-center">
+              <div class="bg-paper2 border border-rule" style="width:54px;height:54px;border-radius:20px"></div>
+              <div class="mono text-[10px] mt-1 text-ink4">20</div>
+            </div>
+          </div>
+
+          <div class="text-ink3 text-[13px] mb-2">Spacing</div>
+          <div class="flex items-center gap-2 mb-1">
+            <div class="bg-teal" style="height:6px;width:8px;border-radius:2px"></div><span class="mono text-[10px] text-ink4">8 · inline</span>
+          </div>
+          <div class="flex items-center gap-2 mb-1">
+            <div class="bg-teal" style="height:6px;width:16px;border-radius:2px"></div><span class="mono text-[10px] text-ink4">16 · stack</span>
+          </div>
+          <div class="flex items-center gap-2 mb-1">
+            <div class="bg-teal" style="height:6px;width:24px;border-radius:2px"></div><span class="mono text-[10px] text-ink4">24 · section</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="bg-teal" style="height:6px;width:40px;border-radius:2px"></div><span class="mono text-[10px] text-ink4">40 · screen</span>
+          </div>
+
+          <div class="hairline my-5"></div>
+          <div class="text-ink3 text-[13px] mb-1">Motion</div>
+          <div class="mono text-[10px] text-ink4 leading-relaxed">fade · 150–220ms · ease-out<br/>respects prefers-reduced-motion<br/>no spring, no bounce</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Screens grid
+  ============================================================ -->
+  <main class="max-w-[1200px] mx-auto px-8 pb-32">
+
+    <!-- Row 1: 6.1 Login + 6.2 Name modal + 6.3 Empty chat -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-16 justify-items-center">
+
+      <!-- ===================== 6.1 LOGIN ===================== -->
+      <div>
+        <div class="seclabel mb-3">// 6.1 login</div>
+        <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+          <div class="phone-screen bg-paper" style="height:760px">
+            <div class="statusbar text-ink">
+              <span>9:41</span>
+              <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+
+            <div class="px-7 pt-24 frame">
+              <div class="text-center">
+                <div class="serif text-[44px] tracking-[-0.02em] text-ink leading-[1]">Lernsaathi</div>
+                <div class="serif italic text-ink3 mt-3 text-[15px]" data-voice="tagline">Aapka private German saathi.</div>
+              </div>
+
+              <div class="mt-16 vstack">
+                <label class="block">
+                  <div class="text-[12px] text-ink3 mb-1.5 ml-1">Username</div>
+                  <input class="w-full bg-paper2 border border-rule rounded-xl px-4 py-3 text-[15px] text-ink placeholder:text-ink4 focus:border-teal" placeholder="username" />
+                </label>
+                <label class="block">
+                  <div class="text-[12px] text-ink3 mb-1.5 ml-1">Password</div>
+                  <input type="password" class="w-full bg-paper2 border border-rule rounded-xl px-4 py-3 text-[15px] text-ink" value="••••••••" />
+                </label>
+                <button class="tap w-full bg-teal hover:bg-tealDk active:bg-tealDk text-paper text-[15px] font-medium rounded-xl py-3 mt-2" data-voice="signin">
+                  Sign in
+                </button>
+              </div>
+            </div>
+
+            <div class="absolute bottom-8 left-0 right-0 text-center">
+              <div class="serif italic text-ink4 text-[12px]" data-voice="manifesto1">ek learner ke liye banaya gaya</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 6.2 NAME MODAL ===================== -->
+      <div>
+        <div class="seclabel mb-3">// 6.2 first-login name modal</div>
+        <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+          <div class="phone-screen" style="height:760px;background:#FAFAF7">
+            <!-- Dimmed chat behind -->
+            <div class="absolute inset-0" style="filter: blur(2px); opacity: 0.55;">
+              <div class="statusbar text-ink">
+                <span>9:41</span>
+                <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+              </div>
+              <div class="px-5 pt-2 flex items-center justify-between">
+                <div class="serif text-[18px] text-ink">Lernsaathi</div>
+                <div class="w-7 h-7 rounded-full border border-rule"></div>
+              </div>
+              <div class="px-5 pt-10 flex justify-end">
+                <div class="bg-paper2 rounded-2xl rounded-br-md px-4 py-2.5 max-w-[78%] text-[15px] text-ink"><span class="anchor">die Leistung</span> kya hota hai?</div>
+              </div>
+            </div>
+
+            <!-- Backdrop -->
+            <div class="absolute inset-0" style="background: rgba(20,20,18,0.28); backdrop-filter: blur(8px);"></div>
+
+            <!-- Modal -->
+            <div class="absolute inset-x-0 bottom-0 px-4 pb-6">
+              <div class="bg-paper rounded-2xl p-6 fade-in" style="box-shadow: 0 20px 50px -10px rgba(0,0,0,0.25);">
+                <div class="serif text-[22px] text-ink tracking-[-0.005em]" data-voice="modalTitle">Aapka naam kya hai?</div>
+                <p class="text-ink3 text-[14px] mt-2 leading-relaxed" data-voice="modalBody">
+                  Yeh sirf personalisation ke liye hai. Aap chahein to skip kar sakte hain.
+                </p>
+                <input class="w-full bg-paper2 border border-rule rounded-xl px-4 py-3 text-[15px] text-ink placeholder:text-ink4 mt-5" placeholder="Aapka naam" />
+                <div class="flex items-center justify-between mt-5">
+                  <button class="tap text-ink3 text-[14px] hover:text-ink2 px-2 py-1" data-voice="skip">Skip</button>
+                  <button class="tap bg-teal hover:bg-tealDk text-paper text-[14px] font-medium rounded-xl px-5 py-2.5" data-voice="continue_">
+                    Continue
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 6.3a CHAT EMPTY ===================== -->
+      <div>
+        <div class="seclabel mb-3">// 6.3a chat — empty state</div>
+        <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+          <div class="phone-screen bg-paper flex flex-col" style="height:760px">
+            <div class="statusbar text-ink">
+              <span>9:41</span>
+              <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+
+            <!-- Header -->
+            <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+              <div class="serif text-[18px] text-ink tracking-[-0.005em]">Lernsaathi</div>
+              <button class="w-9 h-9 rounded-full hover:bg-paper2 flex items-center justify-center text-ink3" aria-label="menu">
+                <!-- lucide more-horizontal -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+              </button>
+            </div>
+            <div class="hairline"></div>
+
+            <!-- Empty body -->
+            <div class="flex-1 flex flex-col items-center justify-center px-8 text-center">
+              <div class="serif italic text-ink3 text-[15px] leading-[1.6]" data-voice="emptyHint">
+                German ka koi word ya phrase likhein.<br/>Main matlab aur ek example doonga.
+              </div>
+            </div>
+
+            <!-- Input -->
+            <div class="px-4 pb-5">
+              <div class="flex items-center gap-2 bg-paper2 border border-rule rounded-2xl pl-3 pr-2 py-2">
+                <button class="w-8 h-8 rounded-full hover:bg-rule flex items-center justify-center text-ink3" aria-label="attach">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                </button>
+                <input class="flex-1 bg-transparent text-[15px] text-ink placeholder:text-ink4 py-1.5" placeholder="Yahan likhein..." />
+                <button class="send-btn-disabled send-btn" aria-label="send">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row 2: 6.3b Chat with response (full width feature) -->
+    <div class="mt-20">
+      <div class="seclabel mb-3">// 6.3b main chat surface — structured response for <span class="text-ink2">die Leistung</span></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-16 justify-items-center">
+
+        <!-- Light mode chat -->
+        <div class="md:col-span-1">
+          <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+            <div class="phone-screen bg-paper flex flex-col" style="height:820px">
+              <div class="statusbar text-ink">
+                <span>9:41</span>
+                <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+              </div>
+
+              <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+                <div class="serif text-[18px] text-ink tracking-[-0.005em]">Lernsaathi</div>
+                <button class="w-9 h-9 rounded-full hover:bg-paper2 flex items-center justify-center text-ink3">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+                </button>
+              </div>
+              <div class="hairline"></div>
+
+              <!-- Thread -->
+              <div class="flex-1 overflow-y-auto px-4 py-5 space-y-5">
+
+                <!-- User msg -->
+                <div class="flex justify-end">
+                  <div class="bg-paper2 rounded-2xl rounded-br-md px-4 py-2.5 max-w-[78%] text-[15px] text-ink leading-relaxed">
+                    <span class="anchor">die Leistung</span> kya hota hai?
+                  </div>
+                </div>
+
+                <!-- Assistant -->
+                <div class="max-w-[92%]">
+                  <div class="serif italic text-ink3 text-[12px] mb-1.5 lowercase tracking-wide">wörter verstehen</div>
+                  <div class="assistant-bg rounded-2xl rounded-tl-md px-4 py-4 fade-in">
+
+                    <!-- Lemma -->
+                    <div class="flex items-baseline gap-2 flex-wrap">
+                      <span class="serif text-[22px] text-ink lemma-underline tracking-[-0.005em]">die Leistung</span>
+                    </div>
+                    <div class="text-ink2 text-[15px] mt-1 leading-[1.55]">
+                      kaam ka result, ya kaam kitna achha hua
+                    </div>
+                    <div class="mono text-[11px] text-ink4 mt-2">Plural: die Leistungen</div>
+
+                    <!-- Example -->
+                    <div class="mt-4">
+                      <div class="serif italic text-ink3 text-[12px] mb-1.5 lowercase">example</div>
+                      <div class="bipair">
+                        <div class="de text-ink text-[15px] leading-[1.55]">Seine Leistung in der Schule ist sehr gut.</div>
+                        <div class="hi text-ink text-[15px] leading-[1.55] mt-0.5">Uska school ka kaam bahut achha hai.</div>
+                      </div>
+                    </div>
+
+                    <!-- Use note -->
+                    <div class="mt-4">
+                      <div class="serif italic text-ink3 text-[12px] mb-1.5 lowercase">use</div>
+                      <p class="text-ink2 text-[14.5px] leading-[1.6]">
+                        School, office, sport — jahan bhi kisi ke kaam ka result dekhna ho, yeh word use hota hai.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- User follow-up -->
+                <div class="flex justify-end">
+                  <div class="bg-paper2 rounded-2xl rounded-br-md px-4 py-2.5 max-w-[78%] text-[15px] text-ink leading-relaxed">
+                    aur ek example dijiye
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Input -->
+              <div class="px-4 pb-5">
+                <div class="flex items-center gap-2 bg-paper2 border border-rule rounded-2xl pl-3 pr-2 py-2">
+                  <button class="w-8 h-8 rounded-full hover:bg-rule flex items-center justify-center text-ink3">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                  </button>
+                  <input class="flex-1 bg-transparent text-[15px] text-ink placeholder:text-ink4 py-1.5" placeholder="Yahan likhein..." />
+                  <button class="send-btn-disabled send-btn tap" aria-label="Send">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dark mode chat (mirror) -->
+        <div class="md:col-span-1">
+          <div class="seclabel mb-3 xl:-mt-9">// 6.3c dark mode</div>
+          <div class="phone bg-[#000] p-[10px] mx-auto">
+            <div class="phone-screen flex flex-col" style="height:820px;background:#191917">
+              <div class="statusbar" style="color:#E9E7DF">
+                <span>9:41</span>
+                <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+              </div>
+
+              <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+                <div class="serif text-[18px] tracking-[-0.005em]" style="color:#E9E7DF">Lernsaathi</div>
+                <button class="w-9 h-9 rounded-full flex items-center justify-center" style="color:#9B9B96">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+                </button>
+              </div>
+              <div class="hairline-dark"></div>
+
+              <div class="flex-1 overflow-y-auto px-4 py-5 space-y-5">
+
+                <div class="flex justify-end">
+                  <div class="rounded-2xl rounded-br-md px-4 py-2.5 max-w-[78%] text-[15px] leading-relaxed" style="background:#2C2C29;color:#E9E7DF">
+                    <span class="anchor-dark">die Leistung</span> kya hota hai?
+                  </div>
+                </div>
+
+                <div class="max-w-[92%]">
+                  <div class="serif italic text-[12px] mb-1.5 lowercase tracking-wide" style="color:#9B9B96">wörter verstehen</div>
+                  <div class="rounded-2xl rounded-tl-md px-4 py-4" style="background:#232825">
+                    <span class="serif text-[22px] tracking-[-0.005em]" style="color:#E9E7DF; background-image: linear-gradient(to top, rgba(120,170,168,0.45) 0, rgba(120,170,168,0.45) 6px, transparent 6px); background-repeat: no-repeat; background-position: 0 88%;">die Leistung</span>
+                    <div class="text-[15px] mt-1 leading-[1.55]" style="color:#CFCDC4">
+                      kaam ka result, ya kaam kitna achha hua
+                    </div>
+                    <div class="mono text-[11px] mt-2" style="color:#7E7E7A">Plural: die Leistungen</div>
+
+                    <div class="mt-4">
+                      <div class="serif italic text-[12px] mb-1.5 lowercase" style="color:#9B9B96">example</div>
+                      <div class="bipair-dark">
+                        <div class="de text-[15px] leading-[1.55]" style="color:#E9E7DF">Seine Leistung in der Schule ist sehr gut.</div>
+                        <div class="hi text-[15px] leading-[1.55] mt-0.5" style="color:#E9E7DF">Uska school ka kaam bahut achha hai.</div>
+                      </div>
+                    </div>
+
+                    <div class="mt-4">
+                      <div class="serif italic text-[12px] mb-1.5 lowercase" style="color:#9B9B96">use</div>
+                      <p class="text-[14.5px] leading-[1.6]" style="color:#CFCDC4">
+                        School, office, sport — jahan bhi kisi ke kaam ka result dekhna ho, yeh word use hota hai.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-4 pb-5">
+                <div class="flex items-center gap-2 rounded-2xl pl-3 pr-2 py-2" style="background:#222220;border:1px solid #2E2E2B">
+                  <button class="w-8 h-8 rounded-full flex items-center justify-center" style="color:#9B9B96">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                  </button>
+                  <input class="flex-1 bg-transparent text-[15px] py-1.5" placeholder="Yahan likhein..." style="color:#E9E7DF" />
+                  <button class="send-btn tap" style="background:#3D5C5A" aria-label="Send">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Component dictionary -->
+        <div class="md:col-span-2 xl:col-span-1 w-full max-w-[360px] xl:max-w-none">
+          <div class="seclabel mb-3 xl:-mt-9">// 9. component dictionary</div>
+          <div class="bg-paper rounded-2xl border border-rule p-6 vstack" style="min-height:820px">
+
+            <!-- 1. user bubble -->
+            <div>
+              <div class="mono text-[10px] text-ink4 mb-2">01 · user bubble</div>
+              <div class="flex justify-end">
+                <div class="bg-paper2 rounded-2xl rounded-br-md px-4 py-2.5 text-[15px] text-ink">aap kaise hain?</div>
+              </div>
+            </div>
+            <div class="hairline"></div>
+
+            <!-- 2. assistant label -->
+            <div>
+              <div class="mono text-[10px] text-ink4 mb-2">02 · label tag</div>
+              <div class="serif italic text-ink3 text-[12px] lowercase">wörter verstehen</div>
+              <div class="serif italic text-ink3 text-[12px] lowercase mt-1">grammatik samajhna</div>
+              <div class="serif italic text-ink3 text-[12px] lowercase mt-1">satz banana</div>
+            </div>
+            <div class="hairline"></div>
+
+            <!-- 3. bilingual pair -->
+            <div>
+              <div class="mono text-[10px] text-ink4 mb-2">03 · bilingual pair</div>
+              <div class="bipair">
+                <div class="de text-ink text-[14px]">Ich habe einen Termin.</div>
+                <div class="hi text-ink text-[14px] mt-0.5">Mera ek appointment hai.</div>
+              </div>
+            </div>
+            <div class="hairline"></div>
+
+            <!-- 4. lemma -->
+            <div>
+              <div class="mono text-[10px] text-ink4 mb-2">04 · lemma anchor</div>
+              <span class="serif text-[20px] text-ink lemma-underline">der Termin</span>
+              <div class="text-ink2 text-[14px] mt-1">milne ka time, appointment</div>
+            </div>
+            <div class="hairline"></div>
+
+            <!-- 5. status dots -->
+            <div>
+              <div class="mono text-[10px] text-ink4 mb-2">05 · status dot (mistake list)</div>
+              <div class="flex items-center gap-4 text-[12px] text-ink3">
+                <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full" style="background:#5C8C8A"></span>open</span>
+                <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full" style="background:#A8C2C0"></span>in revision</span>
+                <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full" style="background:#D7E2E1"></span>settled</span>
+              </div>
+            </div>
+            <div class="hairline"></div>
+
+            <!-- 6. buttons -->
+            <div>
+              <div class="mono text-[10px] text-ink4 mb-2">06 · buttons</div>
+              <div class="flex flex-wrap gap-2 items-center">
+                <button class="tap bg-teal text-paper text-[13px] font-medium rounded-xl px-4 py-2">Continue</button>
+                <button class="tap bg-paper2 text-ink text-[13px] rounded-xl px-4 py-2 border border-rule">Show</button>
+                <button class="tap text-ink3 text-[13px] underline-offset-4 px-2">Skip</button>
+              </div>
+            </div>
+            <div class="hairline"></div>
+
+            <!-- 7. acknowledgments -->
+            <div>
+              <div class="mono text-[10px] text-ink4 mb-2">07 · measured acknowledgment (no praise filler)</div>
+              <div class="serif italic text-ink2 text-[14px]">Achha kaam.</div>
+              <div class="serif italic text-ink2 text-[14px] mt-0.5">Theek hai.</div>
+              <div class="serif italic text-ink2 text-[14px] mt-0.5">Aage chaliye.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Row 3: 6.4 Revision + 6.4 empty + 6.5 Mistake list -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-16 mt-20 justify-items-center">
+
+      <!-- ===================== 6.4 REVISION CARD ===================== -->
+      <div>
+        <div class="seclabel mb-3">// 6.4 daily revision — single card</div>
+        <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+          <div class="phone-screen bg-paper flex flex-col" style="height:760px">
+            <div class="statusbar text-ink">
+              <span>9:41</span>
+              <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+
+            <!-- Tab header -->
+            <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+              <div class="serif text-[18px] text-ink tracking-[-0.005em]">Lernsaathi</div>
+              <button class="w-9 h-9 rounded-full hover:bg-paper2 flex items-center justify-center text-ink3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+              </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="px-5 flex items-center gap-1.5">
+              <button class="tabpill tap text-ink3 hover:text-ink2" data-voice="tab0">Chat</button>
+              <button class="tabpill tap bg-paper2 text-ink border border-rule" data-voice="tab1">Revise</button>
+              <button class="tabpill tap text-ink3 hover:text-ink2" data-voice="tab2">Mistakes</button>
+            </div>
+            <div class="hairline mt-3"></div>
+
+            <!-- Card -->
+            <div class="flex-1 px-5 py-8 flex flex-col">
+              <div class="flex-1 bg-paper2 rounded-2xl border border-rule p-6 flex flex-col">
+                <div class="serif italic text-ink3 text-[12px] lowercase" data-voice="revisionLabel">phir se sochein</div>
+
+                <div class="mt-5">
+                  <div class="serif text-[34px] text-ink tracking-[-0.015em] leading-[1.1] lemma-underline inline-block">die Leistung</div>
+                </div>
+
+                <div class="mt-6 text-ink2 text-[15.5px] leading-[1.6]" data-voice="revisionPrompt">
+                  Yeh word kab use hota hai? Apne shabdon mein bataein.
+                </div>
+
+                <div class="flex-1"></div>
+
+                <div class="flex items-center justify-between gap-3 mt-8">
+                  <button class="tap bg-paper text-ink text-[14px] rounded-xl px-4 py-2.5 border border-rule hover:bg-paper2" data-voice="show">Show</button>
+                  <button class="tap bg-teal hover:bg-tealDk text-paper text-[14px] font-medium rounded-xl px-5 py-2.5" data-voice="continue_">Continue</button>
+                </div>
+              </div>
+
+              <!-- Vague footer -->
+              <div class="text-center mt-5">
+                <div class="serif italic text-ink4 text-[12px]">kuch aur cards baaki hain</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 6.4 REVISION EMPTY ===================== -->
+      <div>
+        <div class="seclabel mb-3">// 6.4 revision — done for the day</div>
+        <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+          <div class="phone-screen bg-paper flex flex-col" style="height:760px">
+            <div class="statusbar text-ink">
+              <span>9:41</span>
+              <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+
+            <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+              <div class="serif text-[18px] text-ink tracking-[-0.005em]">Lernsaathi</div>
+              <button class="w-9 h-9 rounded-full hover:bg-paper2 flex items-center justify-center text-ink3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+              </button>
+            </div>
+
+            <div class="px-5 flex items-center gap-1.5">
+              <button class="tabpill tap text-ink3" data-voice="tab0">Chat</button>
+              <button class="tabpill tap bg-paper2 text-ink border border-rule" data-voice="tab1">Revise</button>
+              <button class="tabpill tap text-ink3" data-voice="tab2">Mistakes</button>
+            </div>
+            <div class="hairline mt-3"></div>
+
+            <div class="flex-1 flex flex-col items-center justify-center px-10 text-center">
+              <div class="serif text-[28px] text-ink tracking-[-0.015em] leading-[1.2]" data-voice="doneTitle">
+                Aaj ke liye<br/>bas itna.
+              </div>
+              <div class="serif italic text-ink3 text-[15px] mt-4" data-voice="doneAck">Achha kaam.</div>
+            </div>
+
+            <div class="px-5 pb-8 text-center">
+              <div class="hairline mb-4"></div>
+              <div class="serif italic text-ink4 text-[12px]" data-voice="doneFooter">kal phir milte hain</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 6.5 MISTAKE LIST (target word anchored on each row) ===================== -->
+      <div>
+        <div class="seclabel mb-3">// 6.5 mistake list — grouped by week</div>
+        <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+          <div class="phone-screen bg-paper flex flex-col" style="height:760px">
+            <div class="statusbar text-ink">
+              <span>9:41</span>
+              <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+
+            <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+              <div class="serif text-[18px] text-ink tracking-[-0.005em]">Lernsaathi</div>
+              <button class="w-9 h-9 rounded-full hover:bg-paper2 flex items-center justify-center text-ink3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+              </button>
+            </div>
+
+            <div class="px-5 flex items-center gap-1.5">
+              <button class="tabpill tap text-ink3" data-voice="tab0">Chat</button>
+              <button class="tabpill tap text-ink3" data-voice="tab1">Revise</button>
+              <button class="tabpill tap bg-paper2 text-ink border border-rule" data-voice="tab2">Mistakes</button>
+            </div>
+            <div class="hairline mt-3"></div>
+
+            <!-- Scrollable list -->
+            <div class="flex-1 overflow-y-auto">
+
+              <div class="px-5 pt-5 pb-2">
+                <div class="serif italic text-ink3 text-[12px] lowercase">is hafte</div>
+              </div>
+              <ul class="px-3">
+                <li class="flex items-start gap-3 px-2 py-3 rounded-xl hover:bg-paper2">
+                  <span class="inline-block w-2 h-2 rounded-full mt-2.5" style="background:#5C8C8A"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="serif text-[16px] text-ink tracking-[-0.005em]"><span class="lemma-underline">die Leistung</span></div>
+                    <div class="text-ink3 text-[13px] mt-0.5 leading-snug truncate">kaam ka result — school, office, sport mein</div>
+                  </div>
+                  <span class="text-ink4 text-[11px] mono mt-1">Mon</span>
+                </li>
+                <li class="flex items-start gap-3 px-2 py-3 rounded-xl hover:bg-paper2">
+                  <span class="inline-block w-2 h-2 rounded-full mt-2.5" style="background:#5C8C8A"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="serif text-[16px] text-ink tracking-[-0.005em]"><span class="lemma-underline">obwohl</span></div>
+                    <div class="text-ink3 text-[13px] mt-0.5 leading-snug truncate">"although" — verb akhri mein jaata hai</div>
+                  </div>
+                  <span class="text-ink4 text-[11px] mono mt-1">Mon</span>
+                </li>
+                <li class="flex items-start gap-3 px-2 py-3 rounded-xl hover:bg-paper2">
+                  <span class="inline-block w-2 h-2 rounded-full mt-2.5" style="background:#A8C2C0"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="serif text-[16px] text-ink tracking-[-0.005em]"><span class="lemma-underline">der Termin</span></div>
+                    <div class="text-ink3 text-[13px] mt-0.5 leading-snug truncate">milne ka time, appointment</div>
+                  </div>
+                  <span class="text-ink4 text-[11px] mono mt-1">Sun</span>
+                </li>
+              </ul>
+
+              <div class="px-5 pt-4 pb-2">
+                <div class="serif italic text-ink3 text-[12px] lowercase">pichle hafte</div>
+              </div>
+              <ul class="px-3 pb-6">
+                <li class="flex items-start gap-3 px-2 py-3 rounded-xl hover:bg-paper2">
+                  <span class="inline-block w-2 h-2 rounded-full mt-2.5" style="background:#A8C2C0"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="serif text-[16px] text-ink tracking-[-0.005em]"><span class="lemma-underline">sich freuen auf</span></div>
+                    <div class="text-ink3 text-[13px] mt-0.5 leading-snug truncate">aane wali baat ke liye khush hona</div>
+                  </div>
+                  <span class="text-ink4 text-[11px] mono mt-1">Fri</span>
+                </li>
+                <li class="flex items-start gap-3 px-2 py-3 rounded-xl hover:bg-paper2">
+                  <span class="inline-block w-2 h-2 rounded-full mt-2.5" style="background:#D7E2E1"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="serif text-[16px] text-ink tracking-[-0.005em]"><span class="lemma-underline">die Anmeldung</span></div>
+                    <div class="text-ink3 text-[13px] mt-0.5 leading-snug truncate">registration, naam likhwana</div>
+                  </div>
+                  <span class="text-ink4 text-[11px] mono mt-1">Wed</span>
+                </li>
+                <li class="flex items-start gap-3 px-2 py-3 rounded-xl hover:bg-paper2">
+                  <span class="inline-block w-2 h-2 rounded-full mt-2.5" style="background:#D7E2E1"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="serif text-[16px] text-ink tracking-[-0.005em]"><span class="lemma-underline">vielleicht</span></div>
+                    <div class="text-ink3 text-[13px] mt-0.5 leading-snug truncate">shaayad, ho sakta hai</div>
+                  </div>
+                  <span class="text-ink4 text-[11px] mono mt-1">Tue</span>
+                </li>
+              </ul>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row 4: 6.6 Image upload + Admin stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-16 mt-20 justify-items-center">
+
+      <!-- ===================== 6.6 IMAGE UPLOAD ===================== -->
+      <div>
+        <div class="seclabel mb-3">// 6.6 image upload — attached + sent</div>
+        <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+          <div class="phone-screen bg-paper flex flex-col" style="height:820px">
+            <div class="statusbar text-ink">
+              <span>9:41</span>
+              <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+
+            <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+              <div class="serif text-[18px] text-ink tracking-[-0.005em]">Lernsaathi</div>
+              <button class="w-9 h-9 rounded-full hover:bg-paper2 flex items-center justify-center text-ink3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+              </button>
+            </div>
+            <div class="hairline"></div>
+
+            <!-- Thread with image -->
+            <div class="flex-1 overflow-y-auto px-4 py-5 space-y-5">
+
+              <!-- User msg with image thumb -->
+              <div class="flex justify-end">
+                <div class="max-w-[80%]">
+                  <!-- placeholder image -->
+                  <div class="rounded-2xl rounded-br-md overflow-hidden border border-rule">
+                    <div style="background: repeating-linear-gradient(135deg, #E6E4DC 0 12px, #EFEDE6 12px 24px); height:170px; display:flex; align-items:center; justify-content:center;">
+                      <span class="mono text-[11px] text-ink3">[ class screenshot ]</span>
+                    </div>
+                  </div>
+                  <div class="bg-paper2 rounded-2xl rounded-br-md px-4 py-2.5 mt-1.5 text-[15px] text-ink leading-relaxed">
+                    yeh slide samjha dijiye
+                  </div>
+                </div>
+              </div>
+
+              <!-- Assistant referencing image -->
+              <div class="max-w-[92%]">
+                <div class="serif italic text-ink3 text-[12px] mb-1.5 lowercase tracking-wide">tasveer dekhna</div>
+                <div class="assistant-bg rounded-2xl rounded-tl-md px-4 py-4 fade-in">
+                  <p class="text-ink2 text-[15px] leading-[1.6]">
+                    Slide par <span class="serif text-ink" style="font-size:16px">Konjunktiv II</span> ka rule diya gaya hai. Yeh tab use hota hai jab koi baat sach nahi hai — sirf imagine kar rahe hain ya politely poochh rahe hain.
+                  </p>
+                  <div class="mt-4 bipair">
+                    <div class="de text-ink text-[15px] leading-[1.55]">Wenn ich Zeit hätte, würde ich kommen.</div>
+                    <div class="hi text-ink text-[15px] leading-[1.55] mt-0.5">Agar mere paas time hota, to main aata.</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Input with attached image chip -->
+            <div class="px-4 pb-5">
+              <!-- Chip -->
+              <div class="flex items-center gap-2 mb-2 ml-1">
+                <div class="flex items-center gap-2 bg-paper2 border border-rule rounded-full pl-2 pr-1 py-1">
+                  <div style="width:18px;height:18px;border-radius:4px;background: repeating-linear-gradient(135deg, #D7D5CC 0 4px, #E6E4DC 4px 8px);"></div>
+                  <span class="mono text-[11px] text-ink2">klasse-04.png</span>
+                  <button class="w-5 h-5 rounded-full bg-paper hover:bg-rule flex items-center justify-center text-ink3">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 bg-paper2 border border-rule rounded-2xl pl-3 pr-2 py-2">
+                <button class="w-8 h-8 rounded-full bg-tealLt flex items-center justify-center text-tealDk">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                </button>
+                <input class="flex-1 bg-transparent text-[15px] text-ink placeholder:text-ink4 py-1.5" placeholder="kuch aur likhein..." />
+                <button class="send-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 6.7 ADMIN STATS ===================== -->
+      <div class="md:col-span-2 w-full" style="justify-self:stretch">
+        <div class="seclabel mb-3">// 6.7 admin stats — operator view, dignified and boring</div>
+
+        <div class="bg-paper rounded-2xl border border-rule p-8" style="min-height:520px">
+          <div class="flex items-end justify-between mb-8">
+            <div>
+              <div class="mono text-[11px] text-ink4">/admin/stats</div>
+              <div class="serif text-[26px] text-ink tracking-[-0.01em] mt-1">Activity</div>
+            </div>
+            <div class="mono text-[11px] text-ink4">last sync · 9:38 am</div>
+          </div>
+
+          <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- Stat card -->
+            <div class="border border-rule rounded-xl p-5 bg-paper2/40">
+              <div class="text-ink4 text-[12px] uppercase tracking-wider">total logins</div>
+              <div class="serif text-[40px] text-ink tracking-[-0.015em] leading-none mt-3">147</div>
+            </div>
+            <div class="border border-rule rounded-xl p-5 bg-paper2/40">
+              <div class="text-ink4 text-[12px] uppercase tracking-wider">first login</div>
+              <div class="serif text-[26px] text-ink tracking-[-0.01em] leading-tight mt-3">12 Mar<br/><span class="text-ink3 text-[14px]">2026</span></div>
+            </div>
+            <div class="border border-rule rounded-xl p-5 bg-paper2/40">
+              <div class="text-ink4 text-[12px] uppercase tracking-wider">last login</div>
+              <div class="serif text-[26px] text-ink tracking-[-0.01em] leading-tight mt-3">today<br/><span class="text-ink3 text-[14px]">07:14</span></div>
+            </div>
+            <div class="border border-rule rounded-xl p-5 bg-paper2/40">
+              <div class="text-ink4 text-[12px] uppercase tracking-wider">events today</div>
+              <div class="serif text-[40px] text-ink tracking-[-0.015em] leading-none mt-3">38</div>
+            </div>
+            <div class="border border-rule rounded-xl p-5 bg-paper2/40">
+              <div class="text-ink4 text-[12px] uppercase tracking-wider">total events</div>
+              <div class="serif text-[40px] text-ink tracking-[-0.015em] leading-none mt-3">4,212</div>
+            </div>
+          </div>
+
+          <div class="hairline my-8"></div>
+
+          <div>
+            <div class="serif italic text-ink3 text-[13px] lowercase mb-3">recent · last 8 events</div>
+            <div class="mono text-[12px] text-ink2 leading-[1.9]">
+              <div class="grid grid-cols-12 gap-2">
+                <span class="col-span-3 text-ink4">07:14:22</span><span class="col-span-3">login</span><span class="col-span-6 text-ink3">session_start</span>
+                <span class="col-span-3 text-ink4">07:14:48</span><span class="col-span-3">message_sent</span><span class="col-span-6 text-ink3">word_query · die Leistung</span>
+                <span class="col-span-3 text-ink4">07:15:02</span><span class="col-span-3">response_rendered</span><span class="col-span-6 text-ink3">label · wörter_verstehen</span>
+                <span class="col-span-3 text-ink4">07:15:31</span><span class="col-span-3">message_sent</span><span class="col-span-6 text-ink3">followup · "aur ek example"</span>
+                <span class="col-span-3 text-ink4">07:16:10</span><span class="col-span-3">mistake_logged</span><span class="col-span-6 text-ink3">obwohl · word_order</span>
+                <span class="col-span-3 text-ink4">07:18:44</span><span class="col-span-3">revision_opened</span><span class="col-span-6 text-ink3">cards_remaining · n</span>
+                <span class="col-span-3 text-ink4">07:19:05</span><span class="col-span-3">revision_card_revealed</span><span class="col-span-6 text-ink3">die Leistung</span>
+                <span class="col-span-3 text-ink4">07:21:30</span><span class="col-span-3">revision_done</span><span class="col-span-6 text-ink3">session_end</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================
+         Row 5: ADD-ON 3 — Guided-not-direct response patterns
+    ============================================================ -->
+    <div class="mt-24">
+      <div class="max-w-[64ch] mb-10">
+        <div class="seclabel mb-3">// 10. guided-not-direct — design owns the refusal to hand over the answer</div>
+        <h2 class="serif text-[28px] tracking-[-0.015em] text-ink leading-tight">When the learner could try first, the design must visibly refuse.</h2>
+        <p class="text-ink3 mt-3 leading-relaxed text-[15px]">Three patterns. The first thing the learner sees is their own text reflected back, with the friction marked, and an invitation to look again. The reveal mechanic — inline input, hint cascade, or quiet ghost link — is what visually distinguishes a teaching surface from a chatbot.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-16 justify-items-center">
+
+        <!-- ============ PATTERN A — TRY-FIRST (full mock) ============ -->
+        <div>
+          <div class="seclabel mb-3">// 10.A try-first, then reveal</div>
+          <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+            <div class="phone-screen bg-paper flex flex-col" style="height:820px">
+              <div class="statusbar text-ink">
+                <span>9:41</span>
+                <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+              </div>
+              <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+                <div class="serif text-[18px] text-ink tracking-[-0.005em]">Lernsaathi</div>
+                <button class="tap w-9 h-9 rounded-full hover:bg-paper2 flex items-center justify-center text-ink3" aria-label="Menu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+                </button>
+              </div>
+              <div class="hairline"></div>
+
+              <div class="flex-1 overflow-y-auto px-4 py-5 space-y-5">
+                <!-- User attempt -->
+                <div class="flex justify-end">
+                  <div class="bg-paper2 rounded-2xl rounded-br-md px-4 py-2.5 max-w-[82%] text-[15px] text-ink leading-relaxed">
+                    Ich gehe in die Küche, um Essen zu machen.
+                  </div>
+                </div>
+
+                <!-- Assistant: try-first card -->
+                <div class="max-w-[94%]">
+                  <div class="serif italic text-ink3 text-[12px] mb-1.5 lowercase tracking-wide">phir se sochein</div>
+                  <div class="assistant-bg rounded-2xl rounded-tl-md px-4 py-4 fade-in">
+                    <div class="text-ink3 text-[13px]">Aapne likha:</div>
+                    <div class="mt-2 pl-3 border-l-2 border-rule">
+                      <div class="text-ink text-[15px] leading-[1.55]">Ich gehe <span class="friction">in die Küche</span>, um Essen zu machen.</div>
+                    </div>
+
+                    <p class="text-ink2 text-[14.5px] mt-4 leading-[1.65]">
+                      Yeh sentence batata hai ki aap kuch kar rahe hain — kahan? Ek baar dhyaan dijiye: yeh <span class="serif italic">"kahan ja rahe hain"</span> hai, ya <span class="serif italic">"kahan ho kar kuch kar rahe hain"</span>?
+                    </p>
+
+                    <!-- Inline attempt input -->
+                    <div class="mt-4 flex items-center gap-2 bg-paper border border-rule rounded-xl pl-3 pr-2 py-1.5">
+                      <input class="flex-1 bg-transparent text-[14.5px] text-ink placeholder:text-ink4 py-1.5" placeholder="Apna jawab likhein..." />
+                      <button class="tap send-btn" style="width:30px;height:30px" aria-label="Submit attempt">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                      </button>
+                    </div>
+
+                    <!-- Quiet escape hatch -->
+                    <div class="mt-3">
+                      <button class="tap text-ink4 hover:text-ink3 text-[12.5px] underline-offset-4 hover:underline">Show explanation anyway</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-4 pb-5">
+                <div class="flex items-center gap-2 bg-paper2 border border-rule rounded-2xl pl-3 pr-2 py-2">
+                  <button class="tap w-8 h-8 rounded-full hover:bg-rule flex items-center justify-center text-ink3" aria-label="Attach image">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                  </button>
+                  <input class="flex-1 bg-transparent text-[15px] text-ink placeholder:text-ink4 py-1.5" placeholder="Yahan likhein..." />
+                  <button class="send-btn-disabled send-btn tap" aria-label="Send">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ PATTERN B — HINT CASCADE ============ -->
+        <div>
+          <div class="seclabel mb-3">// 10.B hint cascade — three tap-to-reveal layers</div>
+          <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+            <div class="phone-screen bg-paper flex flex-col" style="height:820px">
+              <div class="statusbar text-ink">
+                <span>9:41</span>
+                <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+              </div>
+              <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+                <div class="serif text-[18px] text-ink tracking-[-0.005em]">Lernsaathi</div>
+                <button class="tap w-9 h-9 rounded-full hover:bg-paper2 flex items-center justify-center text-ink3" aria-label="Menu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+                </button>
+              </div>
+              <div class="hairline"></div>
+
+              <div class="flex-1 overflow-y-auto px-4 py-5 space-y-5">
+                <div class="flex justify-end">
+                  <div class="bg-paper2 rounded-2xl rounded-br-md px-4 py-2.5 max-w-[82%] text-[15px] text-ink leading-relaxed">
+                    Why is <span class="anchor">in der Küche</span> not <span class="anchor">in die Küche</span>?
+                  </div>
+                </div>
+
+                <div class="max-w-[94%]">
+                  <div class="serif italic text-ink3 text-[12px] mb-1.5 lowercase tracking-wide">grammatik samajhna</div>
+                  <div class="assistant-bg rounded-2xl rounded-tl-md px-4 py-4 fade-in space-y-2">
+                    <!-- Hint 1 visible -->
+                    <div class="bipair">
+                      <div class="text-ink2 text-[11px] mono uppercase tracking-wide mb-1">Hint 1</div>
+                      <div class="text-ink text-[14.5px] leading-[1.6]">Sochiye: yeh sentence movement dikhata hai, ya state dikhata hai?</div>
+                    </div>
+
+                    <!-- Hint 2 collapsed -->
+                    <details class="hint">
+                      <summary class="tap"><svg class="chev" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg> Aur hint dekhein</summary>
+                      <div class="reveal">
+                        Akkusativ = movement (kahan ja rahe hain).<br/>Dativ = state (kahan ho).
+                      </div>
+                    </details>
+
+                    <!-- Hint 3 collapsed (deeper indent) -->
+                    <details class="hint" style="margin-left:14px">
+                      <summary class="tap"><svg class="chev" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg> Pura jawab dekhein</summary>
+                      <div class="reveal">
+                        <div class="bipair">
+                          <div class="de text-ink text-[14.5px]">Ich gehe in die Küche.</div>
+                          <div class="hi text-ink2 text-[14px] mt-0.5">Main kitchen mein <span style="font-weight:500">ja raha hoon</span> — Akkusativ.</div>
+                        </div>
+                        <div class="bipair mt-3">
+                          <div class="de text-ink text-[14.5px]">Ich koche in der Küche.</div>
+                          <div class="hi text-ink2 text-[14px] mt-0.5">Main kitchen mein <span style="font-weight:500">hoon aur kuch kar raha hoon</span> — Dativ.</div>
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-4 pb-5">
+                <div class="flex items-center gap-2 bg-paper2 border border-rule rounded-2xl pl-3 pr-2 py-2">
+                  <button class="tap w-8 h-8 rounded-full hover:bg-rule flex items-center justify-center text-ink3" aria-label="Attach image">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                  </button>
+                  <input class="flex-1 bg-transparent text-[15px] text-ink placeholder:text-ink4 py-1.5" placeholder="Yahan likhein..." />
+                  <button class="send-btn-disabled send-btn tap" aria-label="Send">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ PATTERN C — DIAGNOSIS BEFORE CORRECTION ============ -->
+        <div>
+          <div class="seclabel mb-3">// 10.C diagnosis before correction (writing tasks)</div>
+          <div class="phone bg-[#0E0E0D] p-[10px] mx-auto">
+            <div class="phone-screen bg-paper flex flex-col" style="height:820px">
+              <div class="statusbar text-ink">
+                <span>9:41</span>
+                <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+              </div>
+              <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+                <div class="serif text-[18px] text-ink tracking-[-0.005em]">Lernsaathi</div>
+                <button class="tap w-9 h-9 rounded-full hover:bg-paper2 flex items-center justify-center text-ink3" aria-label="Menu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+                </button>
+              </div>
+              <div class="hairline"></div>
+
+              <div class="flex-1 overflow-y-auto px-4 py-5 space-y-5">
+                <!-- User: paragraph attempt -->
+                <div class="flex justify-end">
+                  <div class="bg-paper2 rounded-2xl rounded-br-md px-4 py-2.5 max-w-[88%] text-[14.5px] text-ink leading-[1.6]">
+                    Gestern ich bin nach Berlin gefahren mit meine Familie. Wir haben besucht das Museum und danach wir sind gegangen ins Restaurant.
+                  </div>
+                </div>
+
+                <!-- Assistant: diagnosis -->
+                <div class="max-w-[94%]">
+                  <div class="serif italic text-ink3 text-[12px] mb-1.5 lowercase tracking-wide">phir se dekhein</div>
+                  <div class="assistant-bg rounded-2xl rounded-tl-md px-4 py-4 fade-in">
+                    <p class="text-ink2 text-[14.5px] leading-[1.65]">Aapke text mein yeh part dhyaan dene wala hai:</p>
+                    <div class="mt-3 pl-3 border-l-2 border-rule">
+                      <div class="text-ink text-[14.5px] leading-[1.65]">
+                        <span class="friction">Gestern ich bin gefahren</span> ... <span class="friction">wir haben besucht das Museum</span> ...
+                      </div>
+                    </div>
+                    <p class="text-ink2 text-[14.5px] mt-4 leading-[1.65]">
+                      Iska reason kya ho sakta hai? Ek minute lijiye, phir bataein.
+                    </p>
+
+                    <div class="mt-4 flex items-center gap-2 bg-paper border border-rule rounded-xl pl-3 pr-2 py-1.5">
+                      <input class="flex-1 bg-transparent text-[14.5px] text-ink placeholder:text-ink4 py-1.5" placeholder="Apna observation likhein..." />
+                      <button class="tap send-btn" style="width:30px;height:30px" aria-label="Submit">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                      </button>
+                    </div>
+                    <div class="mt-3">
+                      <button class="tap text-ink4 hover:text-ink3 text-[12.5px] underline-offset-4 hover:underline">Show explanation anyway</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-4 pb-5">
+                <div class="flex items-center gap-2 bg-paper2 border border-rule rounded-2xl pl-3 pr-2 py-2">
+                  <button class="tap w-8 h-8 rounded-full hover:bg-rule flex items-center justify-center text-ink3" aria-label="Attach image">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                  </button>
+                  <input class="flex-1 bg-transparent text-[15px] text-ink placeholder:text-ink4 py-1.5" placeholder="Yahan likhein..." />
+                  <button class="send-btn-disabled send-btn tap" aria-label="Send">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Manifesto wall update -->
+      <div class="max-w-[64ch] mx-auto text-center mt-20">
+        <div class="serif italic text-ink2 text-[18px] leading-[1.6]">
+          "The app refuses to hand over an answer the learner could attempt themselves; the design must give that refusal a visible shape."
+        </div>
+        <div class="serif italic text-ink3 text-[14px] mt-3 leading-[1.7]">
+          "The same target word stays anchored across question, answer, revision and mistake list — the eye never loses the thread of what's being learned."
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer note -->
+    <div class="mt-24 max-w-[64ch] mx-auto text-center">
+      <div class="serif italic text-ink2 text-[18px] leading-[1.6]">
+        "The learner should feel calm and supported, never measured."
+      </div>
+      <div class="serif italic text-ink3 text-[14px] mt-3 leading-[1.7]">
+        "The interface should carry the bilingual respect inward — German and Hinglish as equals, neither dominating, neither apologizing."
+      </div>
+      <div class="seclabel mt-6">// end of artifact</div>
+    </div>
+
+  </main>
+
+  <!-- ============================================================
+       Tweaks panel — three expressive controls that reshape the feel
+  ============================================================ -->
+  <div id="tweaks-root"></div>
+
+  <script type="text/babel" data-presets="env,react">
+  const { useEffect } = React;
+
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "voice": "bilingual",
+    "feel": 78,
+    "anchor": "underline"
+  }/*EDITMODE-END*/;
+
+  // ─── Voice copy bank ────────────────────────────────────────────
+  // [chrome-key] : { bilingual, hinglishFirst, englishOnly }
+  // bilingual    = chrome English, content Hinglish (the brief's default)
+  // hinglishFirst = chrome ALSO Hinglish — full immersion
+  // englishOnly  = content ALSO English — strips the bilingual pedagogy entirely
+  const VOICE = {
+    bilingual: {
+      signin: "Sign in", continue_: "Continue", skip: "Skip", show: "Show",
+      tab0: "Chat", tab1: "Revise", tab2: "Mistakes",
+      modalTitle: "Aapka naam kya hai?",
+      modalBody: "Yeh sirf personalisation ke liye hai. Aap chahein to skip kar sakte hain.",
+      emptyHint: "German ka koi word ya phrase likhein.\nMain matlab aur ek example doonga.",
+      revisionPrompt: "Yeh word kab use hota hai? Apne shabdon mein bataein.",
+      revisionLabel: "phir se sochein",
+      doneTitle: "Aaj ke liye\nbas itna.",
+      doneAck: "Achha kaam.",
+      doneFooter: "kal phir milte hain",
+      tagline: "Aapka private German saathi.",
+      manifesto1: "ek learner ke liye banaya gaya"
+    },
+    hinglishFirst: {
+      signin: "Andar aaiye", continue_: "Aage badhein", skip: "Abhi nahi", show: "Dekhein",
+      tab0: "Baatcheet", tab1: "Dohraana", tab2: "Galtiyan",
+      modalTitle: "Aapka naam kya hai?",
+      modalBody: "Yeh sirf personalisation ke liye hai. Aap chahein to skip kar sakte hain.",
+      emptyHint: "German ka koi word ya phrase likhein.\nMain matlab aur ek example doonga.",
+      revisionPrompt: "Yeh word kab use hota hai? Apne shabdon mein bataein.",
+      revisionLabel: "phir se sochein",
+      doneTitle: "Aaj ke liye\nbas itna.",
+      doneAck: "Bahut achha.",
+      doneFooter: "kal phir milte hain",
+      tagline: "Aapka private German saathi.",
+      manifesto1: "ek learner ke liye banaya gaya"
+    },
+    englishOnly: {
+      signin: "Sign in", continue_: "Continue", skip: "Skip", show: "Show",
+      tab0: "Chat", tab1: "Revise", tab2: "Mistakes",
+      modalTitle: "What’s your name?",
+      modalBody: "Just for personalisation. You can skip if you’d rather.",
+      emptyHint: "Type a German word or phrase.\nI’ll give you the meaning and an example.",
+      revisionPrompt: "When is this word used? Say it in your own words.",
+      revisionLabel: "think again",
+      doneTitle: "That’s it\nfor today.",
+      doneAck: "Good work.",
+      doneFooter: "see you tomorrow",
+      tagline: "Your private German companion.",
+      manifesto1: "made for one learner"
+    }
+  };
+
+  // ─── Feel slider: 0=calm, 100=engaged. Fans across many properties. ───
+  function applyFeel(v) {
+    const t = v / 100;            // 0..1
+    const lerp = (a, b) => a + (b - a) * t;
+    const root = document.documentElement.style;
+    root.setProperty('--tw-card-pad-y', `${lerp(22, 14).toFixed(0)}px`);
+    root.setProperty('--tw-card-pad-x', `${lerp(20, 14).toFixed(0)}px`);
+    root.setProperty('--tw-line', lerp(1.75, 1.5).toFixed(3));
+    root.setProperty('--tw-anchor-opacity', lerp(0.30, 0.62).toFixed(3));
+    root.setProperty('--tw-anchor-thickness', `${lerp(3, 6).toFixed(1)}px`);
+    root.setProperty('--tw-accent-s', `${lerp(14, 38).toFixed(0)}%`);
+    root.setProperty('--tw-accent-l', `${lerp(50, 40).toFixed(0)}%`);
+    root.setProperty('--tw-fade-ms', `${lerp(320, 140).toFixed(0)}ms`);
+  }
+
+  // ─── Voice swap: rewrite text nodes carrying data-voice="key" ───
+  function applyVoice(key) {
+    const dict = VOICE[key] || VOICE.bilingual;
+    document.querySelectorAll('[data-voice]').forEach(el => {
+      const k = el.getAttribute('data-voice');
+      if (dict[k] != null) {
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+          el.placeholder = dict[k];
+        } else if (dict[k].includes('\n')) {
+          el.innerHTML = dict[k].split('\n').map(s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;')).join('<br/>');
+        } else {
+          el.textContent = dict[k];
+        }
+      }
+    });
+  }
+
+  function applyAnchor(mode) {
+    document.documentElement.setAttribute('data-anchor', mode);
+  }
+
+  function App() {
+    const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+    useEffect(() => { applyFeel(t.feel); }, [t.feel]);
+    useEffect(() => { applyVoice(t.voice); }, [t.voice]);
+    useEffect(() => { applyAnchor(t.anchor); }, [t.anchor]);
+
+    return (
+      <TweaksPanel>
+        <TweakSection label="Voice" />
+        <TweakRadio
+          label="Language"
+          value={t.voice}
+          options={[
+            { value: 'bilingual',     label: 'Bilingual' },
+            { value: 'hinglishFirst', label: 'Hinglish' },
+            { value: 'englishOnly',   label: 'English' },
+          ]}
+          onChange={(v) => setTweak('voice', v)}
+        />
+
+        <TweakSection label="Feel" />
+        <TweakSlider
+          label="Calm ↔ Engaged"
+          value={t.feel}
+          min={0} max={100} step={1}
+          onChange={(v) => setTweak('feel', v)}
+        />
+
+        <TweakSection label="Anchor" />
+        <TweakRadio
+          label="Target word"
+          value={t.anchor}
+          options={[
+            { value: 'underline',  label: 'Underline' },
+            { value: 'capsule',    label: 'Capsule'   },
+            { value: 'quietbold',  label: 'Bold'      },
+          ]}
+          onChange={(v) => setTweak('anchor', v)}
+        />
+      </TweaksPanel>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<App/>);
+  </script>
+
+</body>
+</html>

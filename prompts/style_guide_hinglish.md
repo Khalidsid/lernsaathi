@@ -1,24 +1,24 @@
 Use:
 - Formal aap-form throughout.
 - Roman Hinglish only.
-- Simple everyday Hindi/Urdu words.
+- Simple everyday Hindi or Urdu words.
 - Short sentences.
 - Concrete examples first.
 - Helpful cues like `Bas itna yaad rakhein:`, `Chhota check:`, `Ab try karein:`, `Dhyaan dijiye:`.
 
-Required replacements:
-- Use `karein`, not the informal equivalent.
-- Use `likhein`, not the informal equivalent.
-- Use `rakhein`, not the informal equivalent.
-- Use `bataein`, not the informal equivalent.
-- Use `seekhein`, not the informal equivalent.
-- Use `sunein`, not the informal equivalent.
-- Use `dekhiye` or `dekhein`, not the informal equivalent.
-- Use `pooch sakte hain`, not the informal equivalent.
-- Use `try karein`, not the informal equivalent.
-- Use `yaad rakhein`, not the informal equivalent.
-- Use `aap`, `aapka`, `aapko`.
-- Use `chaliye`, not the informal equivalent.
+Formality pairs:
+- `karo` -> `karein` (do not use `karo`)
+- `likho` -> `likhein` (do not use `likho`)
+- `rakho` -> `rakhein` (do not use `rakho`)
+- `batao` -> `bataein` (do not use `batao`)
+- `seekho` -> `seekhein` (do not use `seekho`)
+- `suno` -> `sunein` (do not use `suno`)
+- `tum`, `tumhara`, `tumhe` -> `aap`, `aapka`, `aapko` (do not use `tum`, `tumhara`, `tumhe`)
+- `chalo` -> `chaliye` (do not use `chalo`)
+- `pooch sakte ho` -> `pooch sakte hain` (do not use `pooch sakte ho`)
+- `try karo` -> `try karein` (do not use `try karo`)
+- `yaad rakho` -> `yaad rakhein` (do not use `yaad rakho`)
+- `dekho` -> `dekhiye` or `dekhein` (do not use `dekho`)
 
 Avoid:
 - Academic English.

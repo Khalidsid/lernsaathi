@@ -16,8 +16,22 @@ const informalTokens = [
   "chalo",
 ];
 
-const forbiddenExamWords = ["B1", "TELC", "Goethe", "DTZ", "Prüfung", "readiness", "score"];
+const forbiddenExamWords = ["B1", "TELC", "Goethe", "DTZ", "Prüfung", "exam", "readiness", "score"];
 const scanRoots = ["app", "components"];
+const requiredSystemCoreWords = forbiddenExamWords;
+const requiredStyleGuidePairs = [
+  "`karo` -> `karein`",
+  "`likho` -> `likhein`",
+  "`rakho` -> `rakhein`",
+  "`batao` -> `bataein`",
+  "`seekho` -> `seekhein`",
+  "`suno` -> `sunein`",
+  "`tum`, `tumhara`, `tumhe` -> `aap`, `aapka`, `aapko`",
+  "`chalo` -> `chaliye`",
+  "`pooch sakte ho` -> `pooch sakte hain`",
+  "`try karo` -> `try karein`",
+  "`yaad rakho` -> `yaad rakhein`",
+];
 
 async function walk(directory) {
   const entries = await fs.readdir(directory, { withFileTypes: true });
@@ -34,9 +48,17 @@ async function walk(directory) {
   return files.flat();
 }
 
+function containsForbiddenExamWord(content, token) {
+  if (/^[A-Za-z]+$/.test(token)) {
+    return new RegExp(`\\b${token}\\b`, "i").test(content);
+  }
+
+  return content.includes(token);
+}
+
 async function main() {
-  const files = (await Promise.all(scanRoots.map((root) => walk(path.join(process.cwd(), root))))).flat();
   let failed = false;
+  const files = (await Promise.all(scanRoots.map((root) => walk(path.join(process.cwd(), root))))).flat();
 
   for (const file of files) {
     const content = await fs.readFile(file, "utf8");
@@ -49,10 +71,34 @@ async function main() {
     }
 
     for (const token of forbiddenExamWords) {
-      if (content.includes(token)) {
+      if (containsForbiddenExamWord(content, token)) {
         console.error(`Forbidden learner-facing exam token found in ${file}: ${token}`);
         failed = true;
       }
+    }
+  }
+
+  const systemCore = await fs.readFile(path.join(process.cwd(), "prompts", "system_core.md"), "utf8");
+  for (const token of requiredSystemCoreWords) {
+    if (!systemCore.includes(token)) {
+      console.error(`Missing forbidden-word entry in prompts/system_core.md: ${token}`);
+      failed = true;
+    }
+  }
+
+  const styleGuide = await fs.readFile(path.join(process.cwd(), "prompts", "style_guide_hinglish.md"), "utf8");
+  for (const pair of requiredStyleGuidePairs) {
+    if (!styleGuide.includes(pair)) {
+      console.error(`Missing formality pair in prompts/style_guide_hinglish.md: ${pair}`);
+      failed = true;
+    }
+  }
+
+  const classifierPrompt = await fs.readFile(path.join(process.cwd(), "prompts", "classifier.md"), "utf8");
+  for (const key of ['"inputType"', '"taskType"', '"hiddenExamRelevance"', '"depthHint"']) {
+    if (!classifierPrompt.includes(key)) {
+      console.error(`Missing schema key in prompts/classifier.md: ${key}`);
+      failed = true;
     }
   }
 

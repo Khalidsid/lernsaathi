@@ -30,31 +30,31 @@ export function NamePromptModal({ onClose }: NamePromptModalProps) {
       return;
     }
 
-    window.sessionStorage.setItem("display-name-prompt-dismissed", "1");
     onClose();
   }
 
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-[rgba(32,25,19,0.28)] px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-shell border border-border bg-surface-strong p-6 shadow-soft">
-        <p className="font-display text-2xl text-ink">Aapka naam kya hai?</p>
-        <p className="mt-3 text-sm leading-6 text-muted">
+    <div className="absolute inset-0 z-30 bg-[rgba(20,20,18,0.28)] backdrop-blur-[8px]">
+      <div className="absolute inset-x-0 bottom-0 px-4 pb-6">
+        <div className="fade-in rounded-2xl bg-paper p-6 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.25)] dark:bg-night2">
+        <p className="serif text-[22px] tracking-[-0.005em] text-ink dark:text-mist">Aapka naam kya hai?</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-ink3 dark:text-ink4">
           Yeh sirf personalisation ke liye hai. Aap chahein to skip kar sakte hain.
         </p>
-        <label className="mt-6 block">
-          <span className="mb-2 block text-sm text-muted">Naam</span>
+        <label className="mt-5 block">
+          <span className="sr-only">Aapka naam</span>
           <input
-            className="w-full rounded-2xl border border-border bg-[rgba(255,255,255,0.7)] px-4 py-3 text-sm text-ink outline-none transition focus:border-accent"
+            className="w-full rounded-xl border border-rule bg-paper2 px-4 py-3 text-[15px] text-ink outline-none placeholder:text-ink4 focus:border-teal dark:border-[#2E2E2B] dark:bg-night3 dark:text-mist"
             disabled={isPending}
             onChange={(event) => setDisplayName(event.target.value)}
-            placeholder="Jaise: Sana"
+            placeholder="Aapka naam"
             value={displayName}
           />
         </label>
         {error ? <p className="mt-3 text-sm text-[#9a4d32]">{error}</p> : null}
-        <div className="mt-6 flex items-center justify-between gap-4">
+        <div className="mt-5 flex items-center justify-between gap-4">
           <button
-            className="text-sm text-muted underline-offset-4 transition hover:text-ink hover:underline disabled:opacity-70"
+            className="px-2 py-1 text-[14px] text-ink3 transition hover:text-ink2 disabled:opacity-70 dark:text-ink4 dark:hover:text-mist"
             disabled={isPending}
             onClick={() => submit({ skip: true })}
             type="button"
@@ -62,13 +62,14 @@ export function NamePromptModal({ onClose }: NamePromptModalProps) {
             Abhi nahi
           </button>
           <button
-            className="inline-flex items-center justify-center rounded-2xl bg-ink px-5 py-3 text-sm font-medium text-white transition hover:bg-[#3a3024] disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-xl bg-teal px-5 py-2.5 text-[14px] font-medium text-paper transition hover:bg-tealDk disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isPending || !displayName.trim()}
             onClick={() => submit({ displayName })}
             type="button"
           >
             {isPending ? "Rukiye..." : "Aage badhein"}
           </button>
+        </div>
         </div>
       </div>
     </div>

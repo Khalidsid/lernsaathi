@@ -3,17 +3,8 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 import { db } from "@/lib/db";
+import { logPipelineEvent } from "@/lib/logging";
 import { ensureSeededUser } from "@/lib/seed";
-
-function getAdminPasswordHash() {
-  const passwordHash = process.env.ADMIN_PASSWORD_HASH?.trim();
-
-  if (!passwordHash) {
-    throw new Error("Missing ADMIN_PASSWORD_HASH");
-  }
-
-  return passwordHash;
-}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -34,12 +25,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const seededUser = await ensureSeededUser();
         const username = credentials.username?.toString().trim();
         const password = credentials.password?.toString() ?? "";
+        const passwordHash = process.env.ADMIN_PASSWORD_HASH?.trim();
 
         if (!username || username !== seededUser.username) {
+          logPipelineEvent("auth_authorize_rejected_username", {
+            providedUsername: username ?? null,
+            expectedUsername: seededUser.username,
+          });
           return null;
         }
 
-        const isValid = await bcrypt.compare(password, getAdminPasswordHash());
+        if (!passwordHash) {
+          logPipelineEvent("auth_authorize_missing_hash", {});
+          return null;
+        }
+
+        const isValid = await bcrypt.compare(password, passwordHash);
+        logPipelineEvent("auth_authorize_password_check", {
+          username,
+          hashLength: passwordHash.length,
+          passwordProvided: password.length > 0,
+          isValid,
+        });
 
         if (!isValid) {
           return null;

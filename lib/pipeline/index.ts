@@ -1,4 +1,5 @@
 import { LEARNER_VISIBLE_LABELS } from "@/lib/pipeline/labels";
+import { logPipelineEvent } from "@/lib/logging";
 import { getDailyLimitMessage, DailySpendCapError } from "@/lib/openai";
 import { classifyInput } from "@/lib/pipeline/classifier";
 import { buildResponse } from "@/lib/pipeline/responder";
@@ -26,9 +27,17 @@ function combineUsage(meta: Array<{ inputTokens: number | null; outputTokens: nu
 
 export async function runLearningPipeline(input: string) {
   try {
+    logPipelineEvent("pipeline_start", {
+      inputPreview: input.slice(0, 80),
+    });
     const classifier = await classifyInput(input);
 
     if (classifier.data.inputType === "out_of_scope") {
+      logPipelineEvent("pipeline_out_of_scope_short_circuit", {
+        inputType: classifier.data.inputType,
+        taskType: classifier.data.taskType,
+        depthHint: classifier.data.depthHint,
+      });
       const usage = combineUsage([classifier.meta]);
       return {
         inputType: "out_of_scope" as const,
@@ -39,6 +48,7 @@ export async function runLearningPipeline(input: string) {
         learnerVisibleLabel: LEARNER_VISIBLE_LABELS.task_instruction_decoding,
         diagnosis: ["feature_not_available_yet"],
         verificationPrompt: null,
+        structured: null,
         verificationUsed: false,
         uncertaintyFlagged: false,
         mistakeCreated: false,
@@ -49,6 +59,10 @@ export async function runLearningPipeline(input: string) {
     const responder = await buildResponse(input, classifier.data);
     const verifier = await buildVerificationPrompt();
     const usage = combineUsage([classifier.meta, responder.meta]);
+    logPipelineEvent("pipeline_response_complete", {
+      inputType: classifier.data.inputType,
+      depthHint: classifier.data.depthHint,
+    });
 
     return {
       inputType: classifier.data.inputType,
@@ -59,6 +73,7 @@ export async function runLearningPipeline(input: string) {
       learnerVisibleLabel: responder.data.learnerVisibleLabel,
       diagnosis: responder.data.diagnosis,
       verificationPrompt: verifier.verificationPrompt,
+      structured: responder.data.structured ?? null,
       verificationUsed: false,
       uncertaintyFlagged: false,
       mistakeCreated: false,
@@ -66,6 +81,7 @@ export async function runLearningPipeline(input: string) {
     };
   } catch (error) {
     if (error instanceof DailySpendCapError) {
+      logPipelineEvent("pipeline_daily_limit_short_circuit", {});
       return {
         inputType: "out_of_scope" as const,
         taskType: null,
@@ -75,6 +91,7 @@ export async function runLearningPipeline(input: string) {
         learnerVisibleLabel: LEARNER_VISIBLE_LABELS.vocabulary_in_context,
         diagnosis: ["daily_limit_reached"],
         verificationPrompt: null,
+        structured: null,
         verificationUsed: false,
         uncertaintyFlagged: false,
         mistakeCreated: false,

@@ -14,5 +14,15 @@ Output rules:
 - `hiddenExamRelevance` should usually contain `vocabulary_in_context` for in-scope inputs.
 - `depthHint` should be `quick_answer` for all supported slice-1 inputs.
 
+Expected schema:
+```json
+{
+  "inputType": "word_query | phrase_query | out_of_scope",
+  "taskType": "string | null",
+  "hiddenExamRelevance": ["string"],
+  "depthHint": "quick_answer | guided_explanation | full_diagnostic"
+}
+```
+
 Important:
 - Be strict. If the learner asks for something beyond word or phrase meaning help, classify as `out_of_scope`.

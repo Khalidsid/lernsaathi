@@ -31,6 +31,7 @@ export async function POST(request: Request) {
       diagnosis: result.diagnosis,
       responseDepth: result.responseDepth,
       response: result.response,
+      structured: result.structured ?? undefined,
       learnerVisibleLabel: result.learnerVisibleLabel,
       verificationUsed: result.verificationUsed,
       verificationPrompt: result.verificationPrompt,
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     response: result.response,
+    structured: result.structured,
     learnerVisibleLabel: result.learnerVisibleLabel,
     verificationPrompt: result.verificationPrompt,
   });

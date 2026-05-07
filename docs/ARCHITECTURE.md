@@ -84,3 +84,12 @@
 ## Dependency notes
 - `bcryptjs` is used instead of native `bcrypt` to keep Railway deployment simpler while still validating bcrypt-format password hashes.
 - OpenAI daily spend checks use the current `LearningEvent` token history and a fixed GPT-5 price estimate in code. If model pricing changes, update `lib/openai.ts`.
+- `lucide-react` is used for the visual integration icon contract from `docs/design_concept/Lernsaathi.html`.
+
+## Visual System
+- Design source of truth: `docs/design_concept/Lernsaathi.html`.
+- Component dictionary: `components/` (see `docs/VISUAL_INTEGRATION_NOTES.md` for the `// 9.x` mapping).
+- Design tokens: `tailwind.config.ts` and `app/globals.css`, ported from the `<style>` and `tailwind.config` blocks of the design HTML.
+- Structured render hints: `AssistantResponse.structured` is optional and mirrors the markdown response, letting components render lemma anchors and bilingual pairs without parsing markdown client-side.
+- Label values come from `lib/pipeline/labels.ts`. Design HTML strings are visual reference only; `labels.ts` is data truth.
+- Tabs `Dohraana` and `Galtiyan` are visual placeholders in this pass; data wiring lands in Slice 3.

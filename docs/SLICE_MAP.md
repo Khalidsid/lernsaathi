@@ -4,6 +4,7 @@
 |---|---|---|
 | 0 | Foundation | Scaffold, full schema, auth, OpenAI wrapper, prompt pipeline shape, logging |
 | 1 | Word & phrase queries | Single text input, classifier-lite, Hinglish response, event logging |
+| 1.5 | Visual Integration | Apply design system from Lernsaathi.html to existing slice 1 surfaces; build component dictionary; add tab placeholders |
 | 2 | Grammar Q & sentence correction | Full classifier, adaptive depth router, verifier, mistake creation |
 | 3 | Mistake memory & revision queue | SM-2 scheduling, daily review UI, prior-mistake injection |
 | 4 | Image input | File upload, vision, multi-exercise handling |

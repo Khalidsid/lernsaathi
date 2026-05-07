@@ -19,6 +19,7 @@ Forbidden in learner-facing response:
 - Goethe
 - DTZ
 - Prüfung
+- exam
 - readiness
 - score
 

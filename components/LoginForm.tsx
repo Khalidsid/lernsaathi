@@ -12,12 +12,15 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleSubmit() {
+    if (!username.trim() || !password || isPending) {
+      return;
+    }
+
     setIsPending(true);
     setError(null);
 
-    const callbackUrl = searchParams.get("next") || "/";
+    const callbackUrl = searchParams.get("next") || "/chat";
     const result = await signIn("credentials", {
       username,
       password,
@@ -37,24 +40,35 @@ export function LoginForm() {
   }
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <div className="space-y-4">
       <label className="block">
-        <span className="mb-2 block text-sm text-muted">Username</span>
+        <span className="mb-1.5 ml-1 block text-[12px] text-ink3">Username</span>
         <input
           autoComplete="username"
-          className="w-full rounded-2xl border border-border bg-surface-strong px-4 py-3 text-sm text-ink outline-none ring-0 transition focus:border-accent"
+          className="w-full rounded-xl border border-rule bg-paper2 px-4 py-3 text-[15px] text-ink outline-none placeholder:text-ink4 transition focus:border-teal"
           onChange={(event) => setUsername(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              void handleSubmit();
+            }
+          }}
+          placeholder="username"
           required
           type="text"
           value={username}
         />
       </label>
       <label className="block">
-        <span className="mb-2 block text-sm text-muted">Password</span>
+        <span className="mb-1.5 ml-1 block text-[12px] text-ink3">Password</span>
         <input
           autoComplete="current-password"
-          className="w-full rounded-2xl border border-border bg-surface-strong px-4 py-3 text-sm text-ink outline-none ring-0 transition focus:border-accent"
+          className="w-full rounded-xl border border-rule bg-paper2 px-4 py-3 text-[15px] text-ink outline-none transition focus:border-teal"
           onChange={(event) => setPassword(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              void handleSubmit();
+            }
+          }}
           required
           type="password"
           value={password}
@@ -62,12 +76,13 @@ export function LoginForm() {
       </label>
       {error ? <p className="text-sm text-[#9a4d32]">{error}</p> : null}
       <button
-        className="inline-flex w-full items-center justify-center rounded-2xl bg-ink px-4 py-3 text-sm font-medium text-white transition hover:bg-[#3a3024] disabled:cursor-not-allowed disabled:opacity-70"
-        disabled={isPending}
-        type="submit"
+        className="mt-2 w-full rounded-xl bg-teal py-3 text-[15px] font-medium text-paper transition hover:bg-tealDk active:bg-tealDk disabled:cursor-not-allowed disabled:opacity-70"
+        disabled={isPending || !username.trim() || !password}
+        onClick={() => void handleSubmit()}
+        type="button"
       >
-        {isPending ? "Rukiye..." : "Login karein"}
+        {isPending ? "Rukiye..." : "Sign in"}
       </button>
-    </form>
+    </div>
   );
 }

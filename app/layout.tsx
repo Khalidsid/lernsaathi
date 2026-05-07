@@ -1,21 +1,29 @@
 import type { Metadata } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
 
-const bodyFont = Plus_Jakarta_Sans({
-  variable: "--font-body",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
-const displayFont = Fraunces({
-  variable: "--font-display",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "Sprachhilfe",
+  title: "Lernsaathi",
   description: "Hinglish-mediated German learning companion",
 };
 
@@ -26,12 +34,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${bodyFont.variable} ${displayFont.variable} min-h-screen bg-app text-ink antialiased`}>
-        <div className="relative min-h-screen overflow-hidden">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,rgba(240,180,113,0.22),transparent_60%)]" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-72 bg-[radial-gradient(circle_at_center,rgba(88,132,123,0.12),transparent_65%)]" />
-          {children}
-        </div>
+      <body className={`${inter.variable} ${fraunces.variable} ${jetBrainsMono.variable} min-h-screen antialiased`}>
+        {children}
       </body>
     </html>
   );

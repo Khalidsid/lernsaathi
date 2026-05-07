@@ -22,3 +22,9 @@ Rules:
 - `learnerVisibleLabel` should be `Wörter verstehen`.
 - `diagnosis` should reflect likely difficulty such as `phrase_meaning`, `fixed_expression`, or `pattern_support`.
 - `suggestedVerification` stays null in this slice.
+- Also return `structured` as a render mirror of the same answer.
+- `structured.lemma` should use the phrase as the word and the same Hinglish gloss from the meaning line; article and plural can be null.
+- `structured.examples` should include the same German example and Hinglish translation from `response`.
+- Put the one-line Use text in `structured.use`, pattern text in `structured.pattern`, common context in `structured.common`, and extra note text in `structured.note`.
+- If a part is not present in `response`, set that structured field to null.
+- Do not add anything to `structured` that is not already present in `response`.
