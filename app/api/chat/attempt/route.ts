@@ -2,32 +2,9 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getDailyLimitMessage, DailySpendCapError } from "@/lib/openai";
+import { buildAttemptFeedback } from "@/lib/pipeline/attempt_feedback";
 import { getLearnerVisibleLabelForEvent } from "@/lib/pipeline/labels";
-
-function normalize(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/\p{Diacritic}/gu, "")
-    .replace(/[^\p{Letter}\p{Number}\s]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function getReflectionFeedback(attemptText: string, corrected: string, explanation: string) {
-  const normalizedAttempt = normalize(attemptText);
-  const normalizedCorrected = normalize(corrected);
-
-  if (normalizedAttempt && normalizedCorrected && normalizedAttempt === normalizedCorrected) {
-    return "Yeh form sahi hai. Isi pattern ko agle sentence mein bhi lagayein.";
-  }
-
-  return `Is attempt mein abhi wahi point reh gaya hai.\n\nCorrect form:\n${corrected}\n\nReason:\n${explanation}`;
-}
-
-function getChhotaCheckFeedback(attemptText: string) {
-  return `Aapka jawab note ho gaya: ${attemptText}\n\nIs point ko hum agle step mein dobara use karenge.`;
-}
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -59,6 +36,7 @@ export async function POST(request: Request) {
       inputType: true,
       rawInput: true,
       structured: true,
+      verificationPrompt: true,
     },
   });
 
@@ -66,19 +44,63 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Original event nahi mila." }, { status: 404 });
   }
 
-  const structured = parent.structured as {
-    reflection?: {
-      corrected?: string;
-      explanation?: string;
-    } | null;
-  } | null;
-  const corrected = structured?.reflection?.corrected ?? "";
-  const explanation = structured?.reflection?.explanation ?? "";
-  const response =
-    kind === "reflection"
-      ? getReflectionFeedback(attemptText, corrected, explanation)
-      : getChhotaCheckFeedback(attemptText);
   const learnerVisibleLabel = getLearnerVisibleLabelForEvent("sentence_correction");
+  const profile = await db.learnerProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { displayName: true },
+  });
+  let feedback;
+
+  try {
+    feedback = await buildAttemptFeedback({
+      attemptText,
+      displayName: profile?.displayName ?? null,
+      kind,
+      parentInputType: parent.inputType,
+      parentRawInput: parent.rawInput,
+      parentStructured: parent.structured,
+      verificationPrompt: parent.verificationPrompt,
+    });
+  } catch (error) {
+    if (!(error instanceof DailySpendCapError)) {
+      throw error;
+    }
+
+    const response = getDailyLimitMessage();
+    const event = await db.learningEvent.create({
+      data: {
+        userId: session.user.id,
+        inputType: "daily_limit_reached",
+        rawInput: parent.rawInput,
+        attemptText,
+        attemptParentEventId: parent.id,
+        taskType: "attempt_feedback",
+        hiddenExamRelevance: [],
+        diagnosis: ["daily_limit_reached"],
+        responseDepth: "quick_answer",
+        response,
+        learnerVisibleLabel: getLearnerVisibleLabelForEvent("daily_limit_reached"),
+        verificationUsed: false,
+        learnerResult: "unknown",
+        mistakeCreated: false,
+        uncertaintyFlagged: false,
+        llmModel: "gpt-5",
+        llmTokensIn: 0,
+        llmTokensOut: 0,
+        llmLatencyMs: 0,
+      },
+      select: { id: true },
+    });
+
+    return NextResponse.json({
+      eventId: event.id,
+      response,
+      learnerVisibleLabel: getLearnerVisibleLabelForEvent("daily_limit_reached"),
+      responseDepth: "quick_answer",
+    });
+  }
+
+  const response = feedback.data.response;
   const event = await db.learningEvent.create({
     data: {
       userId: session.user.id,
@@ -93,13 +115,13 @@ export async function POST(request: Request) {
       response,
       learnerVisibleLabel,
       verificationUsed: false,
-      learnerResult: "unknown",
+      learnerResult: feedback.data.learnerResult,
       mistakeCreated: false,
       uncertaintyFlagged: false,
-      llmModel: "template",
-      llmTokensIn: 0,
-      llmTokensOut: 0,
-      llmLatencyMs: 0,
+      llmModel: feedback.meta.model,
+      llmTokensIn: feedback.meta.inputTokens ?? 0,
+      llmTokensOut: feedback.meta.outputTokens ?? 0,
+      llmLatencyMs: feedback.meta.latencyMs,
     },
     select: { id: true },
   });

@@ -70,7 +70,7 @@ export async function createMistakesFromCandidates({
       continue;
     }
 
-    if (inputType === "grammar_question" && candidate.topic && !isCoreGrammarTopic(candidate.topic)) {
+    if (inputType === "grammar_question" && (!candidate.topic || !isCoreGrammarTopic(candidate.topic))) {
       continue;
     }
 

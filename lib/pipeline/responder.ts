@@ -1,4 +1,4 @@
-import { LEARNER_VISIBLE_LABELS } from "@/lib/pipeline/labels";
+import { getLearnerVisibleLabelForEvent } from "@/lib/pipeline/labels";
 import { loadPrompt } from "@/lib/prompts";
 import { runStructuredPrompt } from "@/lib/openai";
 import { getMistakeTypesForGrammarTopic, isCoreGrammarTopic } from "@/lib/pipeline/grammar_topics";
@@ -256,6 +256,26 @@ function addDisplayNameFallback(
   };
 }
 
+function enforceDisplayNameOnce(result: ResponderResult, displayName: string | null) {
+  if (!displayName) {
+    return result;
+  }
+
+  const firstIndex = result.response.indexOf(displayName);
+
+  if (firstIndex === -1) {
+    return result;
+  }
+
+  const beforeAndFirst = result.response.slice(0, firstIndex + displayName.length);
+  const afterFirst = result.response.slice(firstIndex + displayName.length).replaceAll(displayName, "");
+
+  return {
+    ...result,
+    response: `${beforeAndFirst}${afterFirst}`,
+  };
+}
+
 function isMistakeType(value: string): value is MistakeType {
   return MISTAKE_TYPES.includes(value as MistakeType);
 }
@@ -311,15 +331,18 @@ function normalizeDiagnosticContent(result: ResponderResult): ResponderResult {
     return result;
   }
 
+  const normalizedItems = items.map((item) => ({
+    ...item,
+    mistakeType: normalizeMistakeType(item),
+    hiddenExamImpact: normalizeHiddenExamImpact(item),
+  }));
+
   return {
     ...result,
+    diagnosis: [...new Set(normalizedItems.map((item) => item.mistakeType))],
     structured: {
       ...(result.structured ?? {}),
-      diagnosis: items.map((item) => ({
-        ...item,
-        mistakeType: normalizeMistakeType(item),
-        hiddenExamImpact: normalizeHiddenExamImpact(item),
-      })),
+      diagnosis: normalizedItems,
     },
   };
 }
@@ -365,15 +388,18 @@ export async function buildResponse(
     schemaName: getSchemaName(classification.inputType),
     schema: getResponderSchema(classification.inputType),
   });
-  const data = normalizeDiagnosticContent(
-    addDisplayNameFallback(result.data, classification.inputType, options.responseDepth, options.displayName ?? null),
+  const data = enforceDisplayNameOnce(
+    normalizeDiagnosticContent(
+      addDisplayNameFallback(result.data, classification.inputType, options.responseDepth, options.displayName ?? null),
+    ),
+    options.displayName ?? null,
   );
 
   return {
     ...result,
     data: {
       ...data,
-      learnerVisibleLabel: data.learnerVisibleLabel || LEARNER_VISIBLE_LABELS.vocabulary_in_context,
+      learnerVisibleLabel: getLearnerVisibleLabelForEvent(classification.inputType),
     },
   };
 }
