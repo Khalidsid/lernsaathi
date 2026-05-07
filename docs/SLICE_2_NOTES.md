@@ -69,6 +69,6 @@ complete locally; Railway route smoke verified; authenticated production verific
 - `22` production Mistake row: pending.
 
 ## Issues / Deferrals
-- `docs/build_prompts/visual_integration_pass.md` is referenced by the Slice 2 prompt but is missing from the repo. The visual rules were read from `docs/VISUAL_INTEGRATION_NOTES.md` and `docs/design_concept/Lernsaathi.html`.
+- `docs/build_prompts/visual_integration_pass.md` has been restored in the repo for future slice context. During early Slice 2 work it was unavailable, so the visual rules were read from `docs/VISUAL_INTEGRATION_NOTES.md` and `docs/design_concept/Lernsaathi.html`.
 - Authenticated production verification is not complete yet. Slice 2 is live at route level, but the public URL still needs the logged-in behavior walk and Railway Postgres `Mistake` row evidence.
 - Slice 3 remains deferred: no revision queue UI, mistake-list data wiring, or spaced-repetition scheduling.
