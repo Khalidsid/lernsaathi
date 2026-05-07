@@ -26,3 +26,15 @@ Expected schema:
 
 Important:
 - Be strict. If the learner asks for something beyond word or phrase meaning help, classify as `out_of_scope`.
+- Long German compound nouns are still single-word queries when the input is only that word.
+
+Compound-word positive examples:
+- `staatsangehörigkeit` -> `word_query`
+- `Krankenversicherung` -> `word_query`
+- `Aufenthaltsgenehmigung` -> `word_query`
+- `Sehenswürdigkeit` -> `word_query`
+- `Lebensmittelgeschäft` -> `word_query`
+
+Compound boundary examples:
+- `Krankenversicherung erklären und einen Brief schreiben` -> `out_of_scope`
+- `Tell me everything about Aufenthaltsgenehmigung` -> `out_of_scope`
