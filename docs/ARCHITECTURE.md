@@ -94,3 +94,8 @@
 - Structured render hints: `AssistantResponse.structured` is optional and mirrors the markdown response, letting components render lemma anchors and bilingual pairs without parsing markdown client-side.
 - Label values come from `lib/pipeline/labels.ts`. Design HTML strings are visual reference only; `labels.ts` is data truth.
 - Tabs `Dohraana` and `Galtiyan` are visual placeholders in this pass; data wiring lands in Slice 3.
+
+## Slice 2 Label Routing
+- Templated out-of-scope responses use `getLearnerVisibleLabelForEvent("out_of_scope")`, which always returns `Aufgabe verstehen`.
+- Templated daily-limit responses use `getLearnerVisibleLabelForEvent("daily_limit_reached")`, which returns `Wörter verstehen` because the learner's original task is still a word or phrase lookup even though the cap blocked the answer.
+- Both templated refusal paths are logged with `responseDepth = quick_answer`; guided explanation depth is reserved for real diagnostic responses.

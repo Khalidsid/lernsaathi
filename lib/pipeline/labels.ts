@@ -10,3 +10,19 @@ export const LEARNER_VISIBLE_LABELS = {
   picture_speaking: "Bild beschreiben",
   answer_strategy: "Antwort finden",
 } as const;
+
+export function getLearnerVisibleLabelForEvent(inputType: string) {
+  if (inputType === "out_of_scope") {
+    return LEARNER_VISIBLE_LABELS.task_instruction_decoding;
+  }
+
+  if (inputType === "daily_limit_reached") {
+    return LEARNER_VISIBLE_LABELS.vocabulary_in_context;
+  }
+
+  if (inputType === "grammar_question" || inputType === "sentence_correction") {
+    return LEARNER_VISIBLE_LABELS.grammar_accuracy;
+  }
+
+  return LEARNER_VISIBLE_LABELS.vocabulary_in_context;
+}

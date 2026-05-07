@@ -1,4 +1,4 @@
-import { LEARNER_VISIBLE_LABELS } from "@/lib/pipeline/labels";
+import { getLearnerVisibleLabelForEvent } from "@/lib/pipeline/labels";
 import { logPipelineEvent } from "@/lib/logging";
 import { getDailyLimitMessage, DailySpendCapError } from "@/lib/openai";
 import { classifyInput } from "@/lib/pipeline/classifier";
@@ -43,9 +43,9 @@ export async function runLearningPipeline(input: string) {
         inputType: "out_of_scope" as const,
         taskType: classifier.data.taskType,
         hiddenExamRelevance: classifier.data.hiddenExamRelevance,
-        responseDepth: classifier.data.depthHint,
+        responseDepth: "quick_answer" as const,
         response: OUT_OF_SCOPE_MESSAGE,
-        learnerVisibleLabel: LEARNER_VISIBLE_LABELS.task_instruction_decoding,
+        learnerVisibleLabel: getLearnerVisibleLabelForEvent("out_of_scope"),
         diagnosis: ["feature_not_available_yet"],
         verificationPrompt: null,
         structured: null,
@@ -83,12 +83,12 @@ export async function runLearningPipeline(input: string) {
     if (error instanceof DailySpendCapError) {
       logPipelineEvent("pipeline_daily_limit_short_circuit", {});
       return {
-        inputType: "out_of_scope" as const,
+        inputType: "daily_limit_reached" as const,
         taskType: null,
         hiddenExamRelevance: [],
         responseDepth: "quick_answer" as const,
         response: getDailyLimitMessage(),
-        learnerVisibleLabel: LEARNER_VISIBLE_LABELS.vocabulary_in_context,
+        learnerVisibleLabel: getLearnerVisibleLabelForEvent("daily_limit_reached"),
         diagnosis: ["daily_limit_reached"],
         verificationPrompt: null,
         structured: null,
