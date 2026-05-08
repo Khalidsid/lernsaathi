@@ -77,9 +77,11 @@
 - The prompts reinforce this, and the eval script checks outputs for drift.
 
 ## Display name rule
-- Slice 1 captures `displayName` only.
-- The name is not injected into routine word or phrase responses.
-- Future slices may use the name only in genuinely difficult diagnostic moments.
+- Slice 1 captures `displayName`.
+- Slice 2 uses the name only at `guided_explanation` depth for genuinely tricky grammar or sentence-correction moments.
+- The name is used at most once per assistant turn, at the start of a sentence.
+- The name is never injected into routine word or phrase responses, and never into a meaning gloss line.
+- Null `displayName` is valid and must render without placeholders.
 
 ## Dependency notes
 - `bcryptjs` is used instead of native `bcrypt` to keep Railway deployment simpler while still validating bcrypt-format password hashes.
@@ -94,6 +96,12 @@
 - Structured render hints: `AssistantResponse.structured` is optional and mirrors the markdown response, letting components render lemma anchors and bilingual pairs without parsing markdown client-side.
 - Label values come from `lib/pipeline/labels.ts`. Design HTML strings are visual reference only; `labels.ts` is data truth.
 - Tabs `Dohraana` and `Galtiyan` are visual placeholders in this pass; data wiring lands in Slice 3.
+- UI chrome copy decision after inspection: the design HTML's default `bilingual` voice bank uses English chrome for tabs and action buttons (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). Learner-facing content remains formal aap-form Hinglish plus German. Current Hinglish chrome labels from the visual integration pass are a documented UI-copy mismatch, not an architectural decision.
+
+## Frontend persistence boundary
+- Every `/api/chat` call persists a `LearningEvent` row.
+- The visible message list remains browser/in-memory state until Slice 3 introduces DB-backed history/revision surfaces.
+- Refresh clearing the visible chat transcript is expected before Slice 3. Database rows disappearing on refresh would be a persistence bug or environment reset issue, not intended behavior.
 
 ## Slice 2 Label Routing
 - Templated out-of-scope responses use `getLearnerVisibleLabelForEvent("out_of_scope")`, which always returns `Aufgabe verstehen`.

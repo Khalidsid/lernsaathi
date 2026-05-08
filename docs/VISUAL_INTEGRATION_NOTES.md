@@ -22,6 +22,7 @@
 - Runtime does not port `.phone`, `.statusbar`, or canvas-only scaffolding, per the visual integration prompt.
 - `learnerVisibleLabel` values remain sourced from `lib/pipeline/labels.ts`; design HTML lowercase labels are typography references only.
 - Modal actions use the Hinglish voice-bank copy `Abhi nahi` and `Aage badhein`, preserving the Slice 1 name-modal protocol.
+- Post-Slice-2 inspection corrected the UI chrome decision: the design HTML's default `bilingual` voice bank uses English chrome (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). The current Hinglish chrome labels are now documented as a future UI-copy correction.
 - `/admin/stats` keeps a hidden JSON block for the Slice 1 admin data contract while visually rendering the five design stat cards.
 - Recent admin rows are derived from `LearningEvent`; no generic `Event` table was added.
 - `Dohraana` and `Galtiyan` render calm placeholders instead of the 6.4/6.5 functional screens because those are deferred to Slice 3.
@@ -29,7 +30,7 @@
 
 ## Components built
 - `AppShell` - authenticated shell with `Lernsaathi` wordmark, menu button, and tab pills; maps to `// 6.3a` and the `// 9` shell pattern.
-- `TabBar` - `Baatcheet`, `Dohraana`, `Galtiyan` active-state pills from `// 6.4` and `// 6.5`.
+- `TabBar` - active-state pills from `// 6.4` and `// 6.5`; current labels use the Hinglish voice bank, but English chrome is the intended correction.
 - `Composer` - input, attach button, and send button from `// 6.3a` and `// 6.6`.
 - `UserBubble` - right-aligned user bubble from `// 9.01`.
 - `AssistantBlock` - assistant response card with label tag, lemma, examples, and notes from `// 6.3b` and `// 9.02`.
@@ -69,14 +70,14 @@
 - Railway public smoke: unauthenticated `POST https://lernsaathi-production.up.railway.app/api/chat` returned `401 {"error":"Unauthorized"}` on 2026-05-07.
 - Railway production login: verified working after the production migration ran.
 - Railway production prompt pipeline: real authenticated queries `fliesend` and `sich vorstellen` executed through classifier, responder, OpenAI, structured response parsing, and `AssistantBlock` rendering.
-- Railway production visual system: dark mode, lemma underline gradient, bilingual left rule, assistant/user bubble contrast, italic `Wörter verstehen` label, and active `Baatcheet` tab rendered intact.
+- Railway production visual system: dark mode, lemma underline gradient, bilingual left rule, assistant/user bubble contrast, italic label tag, and active tab styling rendered intact. Tab/action copy still needs the documented English chrome correction.
 - Railway production Hinglish voice: formal aap-form held in the observed responses, with no tum-form leakage or praise filler.
 - Railway production nuance: typo input `fliesend` returned normalized `fließend`; `sich vorstellen` returned both meanings and the case-pattern distinction.
 - Railway remaining spot-checks: query production `LearningEvent.structured` for exact persisted lemma values, and re-open production `/admin/stats` after the public chat events.
 
 ## What was NOT built (deferred)
-- Dohraana tab data wiring - Slice 3.
-- Galtiyan tab data wiring - Slice 3.
+- Revise/Dohraana tab data wiring - Slice 3.
+- Mistakes/Galtiyan tab data wiring - Slice 3.
 - Image upload backend - Slice 4.
 - RevisionCard data wiring - Slice 3.
 - MistakeRow data wiring - Slice 3.

@@ -24,4 +24,6 @@
 - Local dev auth: username `admin`, password `testpass123`; the prior failure was a local bcrypt hash mismatch, not production credentials being requested.
 - Remaining evidence follow-up: authenticated production behavior walk, production `LearningEvent.structured` DB spot-check, first production `Mistake` row, and production `/admin/stats` spot-check.
 - Pairing protocol: developer owns visual/browser validation and production DB evidence; Codex records unavailable evidence as pending instead of changing code to manufacture a minor validation pass.
-- Latest pushed commit: `8f21697` (`Restore visual integration build prompt`).
+- Frontend persistence note: visible chat history is in-memory until Slice 3; database event rows should persist across refresh.
+- UI chrome decision: English tabs/actions from the design HTML default voice bank are intended (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). Current Hinglish chrome labels are documented as a future UI-copy correction.
+- Exact latest commit is tracked by git history; this status page avoids commit hashes that go stale after doc-only updates.

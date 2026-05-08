@@ -39,7 +39,7 @@ complete locally; Railway route smoke verified; authenticated production verific
 - ExamReadinessMap after mistake creation showed `grammar_accuracy.cases = weak` and `text_understanding.vocabulary_in_context = weak`; unrelated skills stayed `unknown`.
 
 ## Verified on Railway
-- `origin/main` pushed and GitHub confirmed at Slice 2 commit `08e75e9`.
+- `origin/main` pushed; Slice 2 code reached Railway and later documentation commits are also pushed.
 - Public `POST /api/chat` without a session returns `401 Unauthorized`.
 - Public `POST /api/chat/attempt` without a session returns `401 Unauthorized`, confirming the new Slice 2 route is live on Railway.
 - Authenticated production behavior checks and production DB row evidence are still pending.
@@ -49,6 +49,11 @@ complete locally; Railway route smoke verified; authenticated production verific
 - The developer is the visual validator for production UI behavior: login, first-login modal, Pattern A reveal, ChhotaCheck placement, tab feel, dark-mode appearance, and any browser/session-specific issues.
 - Production DB evidence requires Railway Postgres access or a developer-provided query result. Remaining DB proof: first production `Mistake` row, `LearningEvent.structured`, `Mistake.reviewCount`, `lastReviewedAt`, and `ExamReadinessMap.skills`.
 - Do not make code changes just to force a minor validation success. If a check cannot be completed from the current access level, record it as pending with the exact missing evidence.
+
+## Post-Slice-2 Documentation Cleanup
+- Refresh clearing the visible chat transcript is expected before Slice 3 because visible message history is still in-memory. Persisted database rows should not reset on refresh.
+- No saved-word or stored-vocabulary frontend is part of Slice 2. Word and phrase lookups are persisted as `LearningEvent` rows; review and mistake-list surfaces are Slice 3.
+- UI chrome copy decision after inspection: tabs and action buttons should follow the design HTML's default English chrome (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). Current Hinglish chrome labels from the visual integration pass are documented as a future UI-copy correction. No code was changed in this cleanup.
 
 ## Section 13 Exit Criteria Walked
 - `1` grammar question diagnostic: verified locally.
@@ -78,4 +83,5 @@ complete locally; Railway route smoke verified; authenticated production verific
 - `docs/build_prompts/visual_integration_pass.md` has been restored in the repo for future slice context. During early Slice 2 work it was unavailable, so the visual rules were read from `docs/VISUAL_INTEGRATION_NOTES.md` and `docs/design_concept/Lernsaathi.html`.
 - Authenticated production verification is not complete yet. Slice 2 is live at route level, but the public URL still needs the logged-in behavior walk and Railway Postgres `Mistake` row evidence.
 - Local dev-server restart was not treated as a release blocker. The local build and checks passed; browser-level validation can be run by the developer when needed.
+- English UI chrome correction is deferred to a future UI-copy pass; this cleanup documents the decision only.
 - Slice 3 remains deferred: no revision queue UI, mistake-list data wiring, or spaced-repetition scheduling.
