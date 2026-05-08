@@ -44,6 +44,12 @@ complete locally; Railway route smoke verified; authenticated production verific
 - Public `POST /api/chat/attempt` without a session returns `401 Unauthorized`, confirming the new Slice 2 route is live on Railway.
 - Authenticated production behavior checks and production DB row evidence are still pending.
 
+## Validation Boundary
+- Codex can validate code paths, local API behavior, checks, build output, GitHub push state, and unauthenticated Railway route smoke.
+- The developer is the visual validator for production UI behavior: login, first-login modal, Pattern A reveal, ChhotaCheck placement, tab feel, dark-mode appearance, and any browser/session-specific issues.
+- Production DB evidence requires Railway Postgres access or a developer-provided query result. Remaining DB proof: first production `Mistake` row, `LearningEvent.structured`, `Mistake.reviewCount`, `lastReviewedAt`, and `ExamReadinessMap.skills`.
+- Do not make code changes just to force a minor validation success. If a check cannot be completed from the current access level, record it as pending with the exact missing evidence.
+
 ## Section 13 Exit Criteria Walked
 - `1` grammar question diagnostic: verified locally.
 - `2` sentence correction Pattern A: verified locally.
@@ -71,4 +77,5 @@ complete locally; Railway route smoke verified; authenticated production verific
 ## Issues / Deferrals
 - `docs/build_prompts/visual_integration_pass.md` has been restored in the repo for future slice context. During early Slice 2 work it was unavailable, so the visual rules were read from `docs/VISUAL_INTEGRATION_NOTES.md` and `docs/design_concept/Lernsaathi.html`.
 - Authenticated production verification is not complete yet. Slice 2 is live at route level, but the public URL still needs the logged-in behavior walk and Railway Postgres `Mistake` row evidence.
+- Local dev-server restart was not treated as a release blocker. The local build and checks passed; browser-level validation can be run by the developer when needed.
 - Slice 3 remains deferred: no revision queue UI, mistake-list data wiring, or spaced-repetition scheduling.
