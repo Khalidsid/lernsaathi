@@ -6,6 +6,7 @@
 | 1 | Word & phrase queries | Single text input, classifier-lite, Hinglish response, event logging |
 | 1.5 | Visual Integration | Apply design system from Lernsaathi.html to existing slice 1 surfaces; build component dictionary; add tab placeholders |
 | 2 | Grammar Q & sentence correction | Full classifier, adaptive depth router, verifier, mistake creation; local complete 2026-05-08, Railway route smoke verified |
+| 2.5 | Chat UI Stabilization Patch | Safe overflow menu, Light/Dark/System theme control, fixed chat viewport, internal message scrolling, composer focus correction, pending assistant placeholder, desktop visual tightening |
 | 3 | Mistake memory & revision queue | SM-2 scheduling, daily review UI, prior-mistake injection |
 | 4 | Image input | File upload, vision, multi-exercise handling |
 | 5 | Writing prompts | Scaffolded writing support |
@@ -26,4 +27,6 @@
 - Pairing protocol: developer owns visual/browser validation and production DB evidence; Codex records unavailable evidence as pending instead of changing code to manufacture a minor validation pass.
 - Frontend persistence note: visible chat history is in-memory until Slice 3; database event rows should persist across refresh.
 - UI chrome decision: English tabs/actions from the design HTML default voice bank are intended (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). Current Hinglish chrome labels are documented as a future UI-copy correction.
+- Slice 2.5 is a stabilization patch after Slice 2 and before Slice 3. It fixes chat shell behavior, safe menu/theme controls, composer focus, pending state, and visual width. It does not implement DB-backed conversation history.
+- Slice 3 still owns persisted chat history, revision queue data wiring, mistake-memory surfaces, and any collapsible conversation/history panel.
 - Exact latest commit is tracked by git history; this status page avoids commit hashes that go stale after doc-only updates.

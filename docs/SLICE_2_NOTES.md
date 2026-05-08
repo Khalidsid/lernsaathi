@@ -55,6 +55,14 @@ complete locally; Railway route smoke verified; authenticated production verific
 - No saved-word or stored-vocabulary frontend is part of Slice 2. Word and phrase lookups are persisted as `LearningEvent` rows; review and mistake-list surfaces are Slice 3.
 - UI chrome copy decision after inspection: tabs and action buttons should follow the design HTML's default English chrome (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). Current Hinglish chrome labels from the visual integration pass are documented as a future UI-copy correction. No code was changed in this cleanup.
 
+## Post-Slice-2 UI Patch Required
+- RCA found the three-dot menu button is wired directly to logout. This must be stabilized before Slice 3: the three-dot button opens an overflow menu, and logout becomes a separate explicit `Sign out` menu item.
+- RCA found manual theme control is absent. Slice 2.5 must add `System`, `Light`, and `Dark` theme choices while keeping `System` as the default and persisting user choice in `localStorage`.
+- RCA found pending assistant placeholder is absent. Slice 2.5 must show `Soch raha hoon...` while `/api/chat` or `/api/chat/attempt` is waiting.
+- RCA found the chat shell scroll model behaves too much like a long webpage. Slice 2.5 must make TopBar and Composer stable regions and MessageStream the internal scroll container.
+- RCA found composer focus can show browser/default colored outlines. Slice 2.5 must replace that with calm token-based focus styling in light and dark modes.
+- This is not a Slice 3 feature. Slice 2.5 must not add DB-backed conversation history, revision queue UI, mistake-list data wiring, or a collapsible history panel.
+
 ## Section 13 Exit Criteria Walked
 - `1` grammar question diagnostic: verified locally.
 - `2` sentence correction Pattern A: verified locally.
@@ -84,4 +92,5 @@ complete locally; Railway route smoke verified; authenticated production verific
 - Authenticated production verification is not complete yet. Slice 2 is live at route level, but the public URL still needs the logged-in behavior walk and Railway Postgres `Mistake` row evidence.
 - Local dev-server restart was not treated as a release blocker. The local build and checks passed; browser-level validation can be run by the developer when needed.
 - English UI chrome correction is deferred to a future UI-copy pass; this cleanup documents the decision only.
+- Chat UI stabilization is tracked as Slice 2.5 and must be completed before Slice 3 starts.
 - Slice 3 remains deferred: no revision queue UI, mistake-list data wiring, or spaced-repetition scheduling.

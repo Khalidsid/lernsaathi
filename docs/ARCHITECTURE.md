@@ -103,6 +103,21 @@
 - The visible message list remains browser/in-memory state until Slice 3 introduces DB-backed history/revision surfaces.
 - Refresh clearing the visible chat transcript is expected before Slice 3. Database rows disappearing on refresh would be a persistence bug or environment reset issue, not intended behavior.
 
+## Chat shell interaction invariants
+- The authenticated chat UI behaves like a chat application, not a long scrolling webpage.
+- The app shell owns the fixed viewport region, using dynamic viewport height semantics such as `h-dvh` / `min-h-dvh`.
+- TopBar, MessageStream, Composer, and OverflowMenu are distinct UI regions.
+- TopBar and Composer are stable chrome and must remain visible during normal chat use.
+- MessageStream is the independent scroll container for long conversations.
+- Browser/body/page scrolling must not be required to reach the composer or keep using chat.
+- Composer contains only input-related controls: attach, send, and staged image removal if image staging is active.
+- Theme, logout, navigation, settings, and future history controls do not live inside Composer.
+- The three-dot button opens OverflowMenu only. It must not directly log the user out.
+- OverflowMenu contains explicit menu actions, including theme control and a separate `Sign out` action.
+- Composer focus states must use Lernsaathi design tokens and remain keyboard-visible in light and dark modes. Browser/default orange or red focus outlines are not allowed.
+- Mobile layouts must respect safe-area bottom padding so the composer and latest message are not hidden.
+- Pending chat requests render a temporary assistant placeholder (`Soch raha hoon...`) in the MessageStream and replace it with the response or existing error surface.
+
 ## Slice 2 Label Routing
 - Templated out-of-scope responses use `getLearnerVisibleLabelForEvent("out_of_scope")`, which always returns `Aufgabe verstehen`.
 - Templated daily-limit responses use `getLearnerVisibleLabelForEvent("daily_limit_reached")`, which returns `Wörter verstehen` because the learner's original task is still a word or phrase lookup even though the cap blocked the answer.

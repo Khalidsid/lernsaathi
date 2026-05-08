@@ -81,3 +81,62 @@
 - Image upload backend - Slice 4.
 - RevisionCard data wiring - Slice 3.
 - MistakeRow data wiring - Slice 3.
+
+## Post-Slice-2 UI stabilization requirements
+
+### Root cause summary
+- The three-dot button currently logs out directly because `components/AppShell.tsx` wires the MoreHorizontal button to `signOut()`.
+- Theme is system-only through `prefers-color-scheme`; there is no manual `System` / `Light` / `Dark` control.
+- The runtime chat shell is too broad on desktop and feels more like a webpage than the mobile-first design surface.
+- Pending chat requests disable the composer but do not show a temporary assistant placeholder.
+- Composer focus must not show browser/default orange or red outlines.
+- The chat surface must behave like a chat app with fixed chrome and an internal message scroll area.
+
+### Safe overflow menu
+- The three-dot button is a menu affordance, not a logout button.
+- Clicking it opens an overflow menu, popover, or drawer.
+- Opening the menu must never log out the user.
+- `Sign out` is a separate explicit menu item.
+- Menu behavior must support keyboard access, Escape close, and outside-click close.
+
+### Manual theme behavior
+- Theme choices are `System`, `Light`, and `Dark`.
+- Default is `System`.
+- User choice persists in `localStorage`.
+- Theme is applied on `<html>` using `data-theme` or an equivalent root-level mechanism.
+- System preference remains supported.
+- No new colors are introduced; use existing design tokens (`paper`, `paper2`, `ink`, `ink3`, `rule`, `night`, `night2`, `night3`, `mist`, `tealNight`).
+
+### Fixed chat viewport behavior
+- Browser/body/page is not the normal chat scroll container.
+- The authenticated app shell uses viewport height (`h-dvh` / `min-h-dvh`) and `overflow-hidden`.
+- TopBar remains visible.
+- Composer remains visible at the bottom and respects mobile safe-area padding.
+- MessageStream is the independent scroll container.
+- Long conversations must not push TopBar or Composer out of view.
+
+### Composer focus behavior
+- Composer input must not show orange/red/default browser focus outlines.
+- Focus state uses Lernsaathi tokens and remains calm.
+- Focus state remains visible and keyboard-accessible in light and dark modes.
+
+### Pending assistant placeholder
+- User bubble appears immediately.
+- Composer disables while a request is pending.
+- A temporary assistant card appears with `Soch raha hoon...`.
+- The placeholder is replaced by the assistant response.
+- On error, the placeholder is replaced by the existing error surface.
+- Motion respects `prefers-reduced-motion`.
+
+### Visual tightening
+- Do not reintroduce `.phone`.
+- Do not reintroduce fake `.statusbar`.
+- Do not add design-canvas browser chrome.
+- Desktop shell should be deliberately constrained, not broad like `max-w-3xl`.
+- Runtime should approximate the calm feel of `// 6.3b` and `// 6.3c` without using the artificial phone frame.
+
+### Deferred conversation history
+- No DB-backed conversation history in Slice 2.5.
+- No full collapsible ChatGPT-like conversation panel in Slice 2.5.
+- No desktop sidebar with real recent conversations in Slice 2.5.
+- Conversation history and the collapsible history panel remain Slice 3.
