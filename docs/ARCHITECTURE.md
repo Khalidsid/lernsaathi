@@ -146,3 +146,21 @@
 - `Again` keeps the interval at 1 day, lowers ease slightly, and does not count toward settling.
 - `Got it` increases ease, grows the interval up to 14 days, and settles the source mistake after three successful reviews.
 - Mistakes tab groups persisted `Mistake` rows by recency and maps active/reviewed/settled state onto the existing teal status dots.
+
+## Decision Contract (Slice 3.6)
+- Slice 3.6 defines the `TurnDecision` contract that formalizes how learner input becomes a controlled decision.
+- The contract types live in `lib/decision-contract.ts` with full TypeScript enforcement.
+- 10 learning modules are defined: `word_query`, `phrase_query`, `grammar_question`, `sentence_correction`, `revision_attempt`, `mistake_practice`, `writing_support`, `exam_task_decoding`, `image_description`, `out_of_scope`.
+- Each turn decision specifies: module, response depth (quick_answer | guided_explanation | full_diagnostic), memory action (none | create_mistake | update_mistake | schedule_revision), and next action.
+- Decision logic considers learner context: recent events, active mistakes, due revision cards, profile, and exam readiness.
+- Prior mistakes upgrade word/phrase queries from quick_answer to guided_explanation automatically.
+- Unit tests in `tests/unit/decision-contract.test.ts` prove all routing rules and depth logic work correctly.
+
+## Future Slice Direction
+- Future prompt-level implementation guidance lives in `docs/build_prompts/future_slice_prompts.md`.
+- The retrospective note for this roadmap shift lives in `docs/SLICE_3_RETROSPECTIVE_ROADMAP_RESTRUCTURE_NOTES.md`.
+- The roadmap inserts Slice 3.6-3.9 between auth hardening and image input so the app does not jump from basic memory into broad multimodal features without a stronger learning engine.
+- Slice 3.6 (complete): defines the decision contract types, modules, and routing rules.
+- Slice 3.7 (next): implements the first decision engine, inserting decision planning between classifier and responder, loading learner context, and routing to module-specific responders.
+- Slice 3.8: exposes learning momentum in the UI through next actions, due counts, active mistake counts, stronger empty states, and visible saved/scheduled feedback.
+- Slice 3.9: deepens the revision and mistake-practice loop before image, writing, picture-description, reading/listening, speaking, and personal-story modules expand the product surface.

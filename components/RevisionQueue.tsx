@@ -41,6 +41,7 @@ export function RevisionQueue({ initialCards }: RevisionQueueProps) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-idempotency-key": crypto.randomUUID(),
       },
       body: JSON.stringify({
         itemId: current.id,

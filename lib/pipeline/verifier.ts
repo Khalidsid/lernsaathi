@@ -19,11 +19,13 @@ export type VerifierResult = {
 };
 
 export async function buildVerificationPrompt({
+  userId,
   input,
   inputType,
   responseDepth,
   responder,
 }: {
+  userId?: string;
   input: string;
   inputType: ClassifierResult["inputType"];
   responseDepth: ResponseDepth;
@@ -54,6 +56,7 @@ export async function buildVerificationPrompt({
   ].join("\n");
 
   return runStructuredPrompt<VerifierResult>({
+    userId,
     systemPrompt,
     userPrompt,
     schemaName: "slice_two_chhota_check",

@@ -91,7 +91,7 @@ export async function runLearningPipeline(input: string, context: { userId: stri
     logPipelineEvent("pipeline_start", {
       inputPreview: input.slice(0, 80),
     });
-    const classifier = await classifyInput(input);
+    const classifier = await classifyInput(input, { userId: context.userId });
     const priorMistakes = await findOpenMistakesForInput(context.userId, input, classifier.data.inputType);
     const responseDepth = selectResponseDepth(classifier.data.inputType, classifier.data, priorMistakes);
     const profile = await db.learnerProfile.findUnique({
@@ -126,11 +126,13 @@ export async function runLearningPipeline(input: string, context: { userId: stri
     }
 
     const responder = await buildResponse(input, classifier.data, {
+      userId: context.userId,
       responseDepth,
       displayName: profile?.displayName ?? null,
       priorMistakes,
     });
     const verifier = await buildVerificationPrompt({
+      userId: context.userId,
       input,
       inputType: classifier.data.inputType,
       responseDepth,

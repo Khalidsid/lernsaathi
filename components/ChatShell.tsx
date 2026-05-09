@@ -62,6 +62,7 @@ export function ChatShell({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-idempotency-key": crypto.randomUUID(),
         },
         body: JSON.stringify({ input: value }),
       });
@@ -120,6 +121,7 @@ export function ChatShell({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-idempotency-key": crypto.randomUUID(),
         },
         body: JSON.stringify({
           attemptText: value,

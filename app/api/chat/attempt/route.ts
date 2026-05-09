@@ -2,15 +2,25 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { buildIdempotencyHash, getIdempotencyKey, getIdempotencyResult, storeIdempotencyResponse } from "@/lib/idempotency";
 import { getDailyLimitMessage, DailySpendCapError } from "@/lib/openai";
 import { buildAttemptFeedback } from "@/lib/pipeline/attempt_feedback";
 import { getLearnerVisibleLabelForEvent } from "@/lib/pipeline/labels";
+import { checkUserRateLimit } from "@/lib/ratelimit";
 
 export async function POST(request: Request) {
   const session = await auth();
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rateLimit = checkUserRateLimit(session.user.id);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Bahut jaldi requests aa rahi hain. Thoda ruk kar phir try karein." },
+      { status: 429 },
+    );
   }
 
   const body = (await request.json()) as {
@@ -24,6 +34,23 @@ export async function POST(request: Request) {
 
   if (!attemptText || !parentEventId) {
     return NextResponse.json({ error: "Apna jawab likhein." }, { status: 400 });
+  }
+
+  const idempotencyKey = getIdempotencyKey(request);
+  const requestHash = buildIdempotencyHash({ attemptText, kind, parentEventId });
+  const idempotencyResult = await getIdempotencyResult({
+    key: idempotencyKey,
+    requestHash,
+    route: "/api/chat/attempt",
+    userId: session.user.id,
+  });
+
+  if (idempotencyResult.kind === "hash_mismatch") {
+    return NextResponse.json({ error: "Idempotency key already used with different payload." }, { status: 409 });
+  }
+
+  if (idempotencyResult.kind === "replay") {
+    return NextResponse.json(idempotencyResult.payload, { status: idempotencyResult.statusCode });
   }
 
   const parent = await db.learningEvent.findFirst({
@@ -53,6 +80,7 @@ export async function POST(request: Request) {
 
   try {
     feedback = await buildAttemptFeedback({
+      userId: session.user.id,
       attemptText,
       displayName: profile?.displayName ?? null,
       kind,
@@ -79,6 +107,7 @@ export async function POST(request: Request) {
         diagnosis: ["daily_limit_reached"],
         responseDepth: "quick_answer",
         response,
+        idempotencyKey: idempotencyKey ?? undefined,
         learnerVisibleLabel: getLearnerVisibleLabelForEvent("daily_limit_reached"),
         verificationUsed: false,
         learnerResult: "unknown",
@@ -92,12 +121,23 @@ export async function POST(request: Request) {
       select: { id: true },
     });
 
-    return NextResponse.json({
+    const responsePayload = {
       eventId: event.id,
       response,
       learnerVisibleLabel: getLearnerVisibleLabelForEvent("daily_limit_reached"),
       responseDepth: "quick_answer",
+    };
+
+    await storeIdempotencyResponse({
+      key: idempotencyKey,
+      requestHash,
+      response: responsePayload,
+      route: "/api/chat/attempt",
+      statusCode: 200,
+      userId: session.user.id,
     });
+
+    return NextResponse.json(responsePayload);
   }
 
   const response = feedback.data.response;
@@ -113,6 +153,7 @@ export async function POST(request: Request) {
       diagnosis: [],
       responseDepth: "guided_explanation",
       response,
+      idempotencyKey: idempotencyKey ?? undefined,
       learnerVisibleLabel,
       verificationUsed: false,
       learnerResult: feedback.data.learnerResult,
@@ -126,10 +167,21 @@ export async function POST(request: Request) {
     select: { id: true },
   });
 
-  return NextResponse.json({
+  const responsePayload = {
     eventId: event.id,
     response,
     learnerVisibleLabel,
     responseDepth: "guided_explanation",
+  };
+
+  await storeIdempotencyResponse({
+    key: idempotencyKey,
+    requestHash,
+    response: responsePayload,
+    route: "/api/chat/attempt",
+    statusCode: 200,
+    userId: session.user.id,
   });
+
+  return NextResponse.json(responsePayload);
 }

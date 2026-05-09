@@ -1,10 +1,12 @@
 import { db } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { DEFAULT_EXAM_READINESS_SKILLS } from "@/lib/exam-map";
 import { updateExamReadinessSkills } from "@/lib/pipeline/exam_map";
 import { getExamImpactForGrammarTopic, isCoreGrammarTopic } from "@/lib/pipeline/grammar_topics";
 import { assignMistakePriority } from "@/lib/pipeline/mistake_priority";
 import { MISTAKE_TYPES } from "@/lib/pipeline/taxonomy";
 import { createRevisionItemForMistake } from "@/lib/revision-data";
+import { createHash } from "node:crypto";
 
 import type { StructuredDiagnosisItem } from "@/lib/assistant-response";
 import type { MistakeType } from "@/lib/pipeline/taxonomy";
@@ -23,6 +25,22 @@ function getHiddenExamImpact(candidate: StructuredDiagnosisItem) {
   }
 
   return ["writing.simple_sentence_accuracy"];
+}
+
+function buildMistakeDedupeKey({
+  userId,
+  mistakeType,
+  rawInput,
+}: {
+  userId: string;
+  mistakeType: string;
+  rawInput: string;
+}) {
+  const normalizedInput = rawInput
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+  return createHash("sha256").update(`${userId}|${mistakeType}|${normalizedInput}`).digest("hex");
 }
 
 async function updateExamMap(userId: string, hiddenExamImpact: string[]) {
@@ -101,22 +119,36 @@ export async function createMistakesFromCandidates({
       },
     });
     const hiddenExamImpact = getHiddenExamImpact(candidate);
-    const mistake = await db.mistake.create({
-      data: {
-        userId,
-        sourceEventId,
-        mistakeType: candidate.mistakeType,
-        subtype: candidate.subtype,
-        exampleInput: rawInput,
-        correctForm: inputType === "sentence_correction" ? candidate.correctForm || "" : "",
-        explanationGiven: candidate.explanation || response,
-        priority: assignMistakePriority(candidate.mistakeType, openMistakesOfSameType),
-        hiddenExamImpact,
-        likelyTransferContexts: candidate.likelyTransferContexts ?? [],
-        status: "active",
-      },
-      select: { id: true },
+    const dedupeKey = buildMistakeDedupeKey({
+      userId,
+      mistakeType: candidate.mistakeType,
+      rawInput,
     });
+    let mistake;
+    try {
+      mistake = await db.mistake.create({
+        data: {
+          userId,
+          sourceEventId,
+          mistakeType: candidate.mistakeType,
+          subtype: candidate.subtype,
+          exampleInput: rawInput,
+          correctForm: inputType === "sentence_correction" ? candidate.correctForm || "" : "",
+          explanationGiven: candidate.explanation || response,
+          priority: assignMistakePriority(candidate.mistakeType, openMistakesOfSameType),
+          hiddenExamImpact,
+          likelyTransferContexts: candidate.likelyTransferContexts ?? [],
+          status: "active",
+          dedupeKey,
+        },
+        select: { id: true },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        continue;
+      }
+      throw error;
+    }
 
     await createRevisionItemForMistake(mistake.id);
     await updateExamMap(userId, hiddenExamImpact);

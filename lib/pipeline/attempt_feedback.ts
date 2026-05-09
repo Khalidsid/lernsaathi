@@ -20,6 +20,7 @@ export type AttemptFeedbackResult = {
 };
 
 export async function buildAttemptFeedback({
+  userId,
   attemptText,
   displayName,
   kind,
@@ -28,6 +29,7 @@ export async function buildAttemptFeedback({
   parentStructured,
   verificationPrompt,
 }: {
+  userId?: string;
   attemptText: string;
   displayName: string | null;
   kind: "reflection" | "chhota_check";
@@ -56,6 +58,7 @@ export async function buildAttemptFeedback({
   ].join("\n");
 
   return runStructuredPrompt<AttemptFeedbackResult>({
+    userId,
     systemPrompt,
     userPrompt,
     schemaName: "slice_two_attempt_feedback",

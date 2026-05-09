@@ -7,24 +7,24 @@ const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 10;
 const buckets = new Map<string, Bucket>();
 
-export function checkRateLimit(ip: string) {
+function checkWithConfig(key: string, maxRequests: number, windowMs: number) {
   const now = Date.now();
-  const existing = buckets.get(ip);
+  const existing = buckets.get(key);
 
   if (!existing || existing.resetAt <= now) {
     const next = {
       count: 1,
-      resetAt: now + WINDOW_MS,
+      resetAt: now + windowMs,
     };
-    buckets.set(ip, next);
+    buckets.set(key, next);
     return {
       allowed: true,
-      remaining: MAX_REQUESTS - next.count,
+      remaining: maxRequests - next.count,
       resetAt: next.resetAt,
     };
   }
 
-  if (existing.count >= MAX_REQUESTS) {
+  if (existing.count >= maxRequests) {
     return {
       allowed: false,
       remaining: 0,
@@ -36,7 +36,15 @@ export function checkRateLimit(ip: string) {
 
   return {
     allowed: true,
-    remaining: MAX_REQUESTS - existing.count,
+    remaining: maxRequests - existing.count,
     resetAt: existing.resetAt,
   };
+}
+
+export function checkRateLimit(ip: string) {
+  return checkWithConfig(`ip:${ip}`, MAX_REQUESTS, WINDOW_MS);
+}
+
+export function checkUserRateLimit(userId: string) {
+  return checkWithConfig(`user:${userId}`, MAX_REQUESTS, WINDOW_MS);
 }

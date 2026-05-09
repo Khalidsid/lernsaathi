@@ -10,6 +10,11 @@ datasource db {
 model User {
   id           String            @id @default(cuid())
   username     String            @unique
+  email        String?           @unique
+  authProvider String            @default("credentials")
+  providerAccountId String?      @unique
+  passwordHash String?
+  allowlisted  Boolean           @default(false)
   loginCount   Int               @default(0)
   firstLoginAt DateTime?
   lastLoginAt  DateTime?
@@ -18,6 +23,7 @@ model User {
   events       LearningEvent[]
   mistakes     Mistake[]
   examMap      ExamReadinessMap?
+  idempotencyRequests IdempotencyRequest[]
 }
 
 model LearnerProfile {
@@ -56,6 +62,7 @@ model LearningEvent {
   response             String          @db.Text
   structured           Json?
   imagePath            String?
+  idempotencyKey       String?
   learnerVisibleLabel  String
   verificationUsed     Boolean         @default(false)
   verificationPrompt   String?         @db.Text
@@ -71,6 +78,7 @@ model LearningEvent {
 
   @@index([userId, createdAt])
   @@index([attemptParentEventId])
+  @@index([userId, idempotencyKey])
 }
 
 model Mistake {
@@ -90,6 +98,7 @@ model Mistake {
   reviewCount            Int            @default(0)
   lastReviewedAt         DateTime?
   createdAt              DateTime       @default(now())
+  dedupeKey              String?        @unique
   revisionItems          RevisionItem[]
 
   @@index([userId, status])
@@ -112,6 +121,7 @@ model RevisionItem {
   createdAt           DateTime @default(now())
 
   @@index([nextReview])
+  @@unique([sourceMistakeId])
 }
 
 model ExamReadinessMap {
@@ -121,4 +131,20 @@ model ExamReadinessMap {
   examGoalInternal String   @default("B1_or_DTZ")
   skills           Json     @default("{}")
   updatedAt        DateTime @updatedAt
+}
+
+model IdempotencyRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  route       String
+  key         String
+  requestHash String
+  statusCode  Int
+  response    Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, route, key])
+  @@index([createdAt])
 }

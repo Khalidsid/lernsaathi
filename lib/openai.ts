@@ -46,7 +46,7 @@ function estimateCostUsd(inputTokens: number, outputTokens: number) {
   return (inputTokens / 1_000_000) * INPUT_COST_PER_MILLION + (outputTokens / 1_000_000) * OUTPUT_COST_PER_MILLION;
 }
 
-async function assertDailySpendAvailable() {
+async function assertDailySpendAvailable(userId?: string) {
   const sums = await db.learningEvent.aggregate({
     _sum: {
       llmTokensIn: true,
@@ -56,6 +56,7 @@ async function assertDailySpendAvailable() {
       createdAt: {
         gte: getDayStart(),
       },
+      ...(userId ? { userId } : {}),
     },
   });
 
@@ -88,17 +89,19 @@ function getUsageValue(usage: unknown, keys: string[]) {
 }
 
 export async function runStructuredPrompt<T>({
+  userId,
   systemPrompt,
   userPrompt,
   schemaName,
   schema,
 }: {
+  userId?: string;
   systemPrompt: string;
   userPrompt: string;
   schemaName: string;
   schema: JsonSchema;
 }) {
-  await assertDailySpendAvailable();
+  await assertDailySpendAvailable(userId);
 
   const client = getClient();
   const startedAt = Date.now();

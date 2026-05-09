@@ -93,6 +93,7 @@ export async function ensureRevisionItemsForActiveMistakes(userId: string) {
       sourceMistakeId: mistake.id,
       ...buildRevisionItemFromMistake(mistake),
     })),
+    skipDuplicates: true,
   });
 }
 
@@ -114,8 +115,10 @@ export async function createRevisionItemForMistake(mistakeId: string) {
     return;
   }
 
-  await db.revisionItem.create({
-    data: {
+  await db.revisionItem.upsert({
+    where: { sourceMistakeId: mistake.id },
+    update: {},
+    create: {
       sourceMistakeId: mistake.id,
       ...buildRevisionItemFromMistake(mistake),
     },
@@ -159,46 +162,53 @@ export async function reviewRevisionItem({
   rating: RevisionRating;
   userId: string;
 }) {
-  const item = await db.revisionItem.findFirst({
-    where: {
-      id: itemId,
-      mistake: {
-        userId,
-        status: "active",
+  return db.$transaction(async (tx) => {
+    const item = await tx.revisionItem.findFirst({
+      where: {
+        id: itemId,
+        mistake: {
+          userId,
+          status: "active",
+        },
       },
-    },
-    select: {
-      id: true,
-      ease: true,
-      intervalDays: true,
-      reviewCount: true,
-      sourceMistakeId: true,
-    },
-  });
+      select: {
+        id: true,
+        ease: true,
+        intervalDays: true,
+        reviewCount: true,
+        sourceMistakeId: true,
+      },
+    });
 
-  if (!item) {
-    return null;
-  }
+    if (!item) {
+      return null;
+    }
 
-  const nextState = calculateNextRevisionState({
-    ease: item.ease,
-    intervalDays: item.intervalDays,
-    rating,
-    reviewCount: item.reviewCount,
-  });
-  const now = new Date();
-
-  await db.$transaction([
-    db.revisionItem.update({
-      where: { id: item.id },
+    const nextState = calculateNextRevisionState({
+      ease: item.ease,
+      intervalDays: item.intervalDays,
+      rating,
+      reviewCount: item.reviewCount,
+    });
+    const now = new Date();
+    const updateResult = await tx.revisionItem.updateMany({
+      where: {
+        id: item.id,
+        reviewCount: item.reviewCount,
+      },
       data: {
         ease: nextState.ease,
         intervalDays: nextState.intervalDays,
         nextReview: addDays(now, nextState.intervalDays),
         reviewCount: nextState.reviewCount,
       },
-    }),
-    db.mistake.update({
+    });
+
+    if (updateResult.count === 0) {
+      return null;
+    }
+
+    await tx.mistake.update({
       where: { id: item.sourceMistakeId },
       data: {
         lastReviewedAt: now,
@@ -207,10 +217,10 @@ export async function reviewRevisionItem({
         },
         status: nextState.shouldSettle ? "settled" : "active",
       },
-    }),
-  ]);
+    });
 
-  return nextState;
+    return nextState;
+  });
 }
 
 export async function getMistakeGroups(userId: string): Promise<MistakeGroup[]> {

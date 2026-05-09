@@ -377,6 +377,7 @@ export async function buildResponse(
   input: string,
   classification: ClassifierResult,
   options: {
+    userId?: string;
     responseDepth: ResponseDepth;
     displayName?: string | null;
     priorMistakes?: PriorMistakeNote[];
@@ -410,6 +411,7 @@ export async function buildResponse(
   ].join("\n");
 
   const result = await runStructuredPrompt<ResponderResult>({
+    userId: options.userId,
     systemPrompt,
     userPrompt,
     schemaName: getSchemaName(classification.inputType),

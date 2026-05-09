@@ -31,9 +31,10 @@ const classifierSchema = {
   required: ["inputType", "taskType", "hiddenExamRelevance", "depthHint"],
 } as const;
 
-export async function classifyInput(input: string) {
+export async function classifyInput(input: string, options?: { userId?: string }) {
   const systemPrompt = await loadPrompt("classifier.md");
   const result = await runStructuredPrompt<ClassifierResult>({
+    userId: options?.userId,
     systemPrompt,
     userPrompt: input,
     schemaName: "slice_two_classifier",

@@ -13,6 +13,7 @@ function getAdminUsername() {
 
 export async function ensureSeededUser() {
   const username = getAdminUsername();
+  const passwordHash = process.env.ADMIN_PASSWORD_HASH?.trim() || null;
 
   let existingUser = await db.user.findUnique({
     where: { username },
@@ -26,11 +27,20 @@ export async function ensureSeededUser() {
     existingUser = await db.user.create({
       data: {
         username,
+        passwordHash,
+        authProvider: "credentials",
       },
       include: {
         profile: true,
         examMap: true,
       },
+    });
+  }
+
+  if (!existingUser.passwordHash && passwordHash) {
+    await db.user.update({
+      where: { id: existingUser.id },
+      data: { passwordHash },
     });
   }
 

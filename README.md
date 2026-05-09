@@ -28,4 +28,5 @@ Single-user German learning companion for a Hinglish-speaking learner. Current b
 - Prompt files are loaded from `prompts/` at runtime, so prompt edits stay reviewable.
 - Visible chat history hydrates from recent persisted `LearningEvent` rows.
 - UI chrome convention after inspection: tabs and action buttons should use English labels, while learner-facing explanation content remains formal aap-form Hinglish plus German.
-- Next planned intermediate slice: Slice 3.5 Auth & Session Hardening before Slice 4 image input.
+- Next planned intermediate slice: Slice 3.5 Auth & Session Hardening.
+- Future slice prompts are documented in `docs/build_prompts/future_slice_prompts.md`; the roadmap now inserts Slice 3.6-3.9 before Slice 4 so decision quality and learning UI are strengthened before image input.
