@@ -16,7 +16,13 @@ import type { ChatMessage } from "@/lib/chat-types";
 import type { MistakeGroup, RevisionCardData } from "@/lib/revision-types";
 import type { StructuredAssistantContent } from "@/lib/assistant-response";
 
+type AccountIdentity = {
+  label: string;
+  email?: string | null;
+};
+
 type ChatShellProps = {
+  account: AccountIdentity;
   activeTab: ChatTab;
   initialMessages: ChatMessage[];
   mistakeGroups: MistakeGroup[];
@@ -25,6 +31,7 @@ type ChatShellProps = {
 };
 
 export function ChatShell({
+  account,
   activeTab,
   initialMessages = [],
   mistakeGroups = [],
@@ -164,7 +171,7 @@ export function ChatShell({
 
   if (activeTab === "revision") {
     return (
-      <AppShell activeTab={activeTab}>
+      <AppShell account={account} activeTab={activeTab}>
         <RevisionQueue initialCards={revisionCards} />
       </AppShell>
     );
@@ -172,7 +179,7 @@ export function ChatShell({
 
   if (activeTab === "mistakes") {
     return (
-      <AppShell activeTab={activeTab}>
+      <AppShell account={account} activeTab={activeTab}>
         <MistakesPanel groups={mistakeGroups} />
       </AppShell>
     );
@@ -180,6 +187,7 @@ export function ChatShell({
 
   return (
     <AppShell
+      account={account}
       activeTab={activeTab}
       footer={<Composer disabled={showNamePrompt} isSending={isSending} onSend={handleSend} />}
       learningState={<LearningStatePanel />}

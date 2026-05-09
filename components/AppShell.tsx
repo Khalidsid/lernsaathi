@@ -12,7 +12,13 @@ import type { LucideIcon } from "lucide-react";
 
 type ThemePreference = "system" | "light" | "dark";
 
+type AccountIdentity = {
+  label: string;
+  email?: string | null;
+};
+
 type AppShellProps = React.HTMLAttributes<HTMLDivElement> & {
+  account?: AccountIdentity;
   activeTab: ChatTab;
   children: React.ReactNode;
   footer?: React.ReactNode;
@@ -105,7 +111,7 @@ function useThemePreference() {
 }
 
 export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppShell(
-  { activeTab, children, className, footer, learningState, ...props },
+  { account, activeTab, children, className, footer, learningState, ...props },
   ref,
 ) {
   const menuId = useId();
@@ -170,6 +176,17 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
                 id={menuId}
                 role="menu"
               >
+                {account ? (
+                  <>
+                    <div className="px-3 pb-2 pt-1.5">
+                      <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink4">Signed in as</div>
+                      <div className="mt-1 truncate text-[13px] text-ink2 dark:text-[#CFCDC4]" title={account.email ?? account.label}>
+                        {account.email ?? account.label}
+                      </div>
+                    </div>
+                    <div className="my-2 h-px bg-rule dark:bg-[#2E2E2B]" />
+                  </>
+                ) : null}
                 <div className="px-3 pb-1.5 pt-1 text-[11px] font-medium uppercase tracking-[0.08em] text-ink4">
                   Theme
                 </div>

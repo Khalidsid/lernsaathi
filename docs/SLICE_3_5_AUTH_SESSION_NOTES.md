@@ -1,7 +1,22 @@
 # Slice 3.5 Auth & Session Hardening Notes
 
 ## Status
-Complete locally on 2026-05-09. All core functionality implemented: Google OAuth with allowlist, user data preservation, idempotency for chat/attempt/revision routes, duplicate guards for mistakes/revision items, and user-based rate limiting.
+Implemented locally on 2026-05-09 for provider plumbing and request hardening. Google OAuth with allowlist, user data preservation, idempotency for chat/attempt/revision routes, duplicate guards for mistakes/revision items, and user-based rate limiting exist in code.
+
+Post-retrospective correction on 2026-05-09: this slice must not be treated as product-grade auth until Slice 3.5.1 is completed or explicitly waived. The missed scope is auth UX and account provisioning:
+
+- Login method visibility was not treated as an explicit UI acceptance gate.
+- The authenticated app shell does not clearly show which account owns the current learning data.
+- Non-Google email/password registration is only schema-provisioned through `User.passwordHash`; no safe registration flow, visibility rule, or provisioning contract exists.
+- Manual OAuth/account-state evidence was not recorded.
+
+Corrective brief: `docs/slices/SLICE_3_5_1_AUTH_REALIGNMENT_BRIEF.md`.
+
+Execution briefs:
+
+- `docs/slices/SLICE_3_5_1A_ACCOUNT_VISIBILITY_BRIEF.md`
+- `docs/slices/SLICE_3_5_1B_LOGIN_VISIBILITY_BRIEF.md`
+- `docs/slices/SLICE_3_5_1C_EMAIL_REGISTRATION_PROVISIONING_BRIEF.md`
 
 ## Implementation Prompt
 Original prompt: `docs/build_prompts/future_slice_prompts.md#slice-35---auth-and-session-hardening`
@@ -82,3 +97,73 @@ Google-based authenticated login is now the preferred next auth direction, but t
 - **In-memory rate limiting**: Current implementation uses Map, not durable across restarts or multiple instances
 - **Future work needed**: Move to Redis/database-backed rate limiting before horizontal scaling
 - **Testing gap**: No automated tests for auth flows or idempotency edge cases
+- **Auth UX gap**: Signed-in account identity is not visible in the app shell
+- **Registration gap**: Non-Google email/password account provisioning is not implemented as a controlled registration flow
+- **Evidence gap**: Google OAuth visibility and allowlist behavior need manual and production verification
+
+## Slice 3.5.1 Required Decisions
+
+Before implementing the corrective slice, record these answers:
+
+1. Is non-Google registration enabled in production now, or only behind an env flag?
+2. Is registration controlled by email allowlist, invite code, or admin-created account?
+3. What env vars control registration visibility?
+4. Does an email/password registration create a new `User`, or attach to the seeded user when the email matches?
+5. What account label appears after login: email, display name, or username?
+6. Where is the label shown: header, menu, or both?
+7. What manual checks are required before auth can be called complete?
+
+Recommended starting point:
+
+- `AUTH_ENABLE_EMAIL_REGISTRATION=true` controls registration visibility.
+- `EMAIL_REGISTRATION_ALLOWED_EMAILS` controls allowed non-Google emails.
+- Registration creates or updates a real `User` and provisions `LearnerProfile` plus `ExamReadinessMap`.
+- The authenticated shell shows email when available, otherwise username/name.
+
+---
+
+## Slice 3.5.1A Completion Report (2026-05-10)
+
+### Changed:
+- `app/chat/page.tsx`: Added AccountIdentity derivation from session.user.email/profile.displayName/session.user.name, passed account prop to ChatShell
+- `components/ChatShell.tsx`: Added AccountIdentity type, added account prop to ChatShellProps, passed account to all three AppShell instances (chat, revision, mistakes tabs)
+- `components/AppShell.tsx`: Added AccountIdentity type, added optional account prop to AppShellProps, rendered account block in menu above Theme section with "Signed in as" label and truncated email/label display
+
+### Validation:
+- `npm run typecheck`: **pass**
+- `npm run lint`: not run
+- `npm run check:policy`: not run
+- `npm run build`: **pass** (compiled successfully in 38.3s)
+- `npm run validate:slice docs/slices/SLICE_3_5_1A_ACCOUNT_VISIBILITY_BRIEF.md`: **pass** (no violations, warnings only from previous meta-work)
+
+### Manual Testing Results:
+- [x] Account visible in menu: **PASS** - Username displayed in menu (credentials login)
+- [x] Revision tab shows same account: **PASS** - Username visible in revision tab menu
+- [x] Mistakes tab shows same account: **PASS** - Username visible in mistakes tab menu
+- [ ] Sign out works: **pending** - Not yet tested
+- [ ] 375px menu: **pending** - Not yet tested for overflow
+- [ ] Long username truncates with title attribute: **pending** - Not yet tested
+
+### Findings:
+- **Email field**: `session.user.email` is `null` for credentials-based login (expected - seeded user has no email in DB)
+- **Name field**: `session.user.name` contains username (working correctly)
+- **Fallback logic**: Working as designed - shows username when email unavailable
+- **All tabs**: Account identity (username) displays consistently across chat, revision, and mistakes tabs
+- **Not a stop condition**: Brief only stops if BOTH email AND name are unavailable; name exists so implementation is correct
+
+### Remaining Manual Checks:
+- Verify sign-out functionality returns to /login
+- Test menu at 375px width for horizontal overflow
+- Test with long username to verify truncation and title attribute
+
+### Implementation Notes:
+- Followed exact data shape from brief section 4 (session.user.email ?? profile?.displayName ?? session.user.name ?? "Account")
+- Used exact UI classes from brief section 5 for menu account block
+- Account prop is optional in AppShell to maintain backward compatibility (menu still works if account prop missing)
+- Added divider after account block to separate from Theme section
+- Title attribute added for truncated text accessibility
+
+### Next Slices:
+- SLICE_3_5_1B: Login method visibility (show provider in login form)
+- SLICE_3_5_1C: Email/password registration provisioning
+

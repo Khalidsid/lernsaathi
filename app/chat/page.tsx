@@ -51,8 +51,15 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
 
   const shouldPromptForName = Boolean(profile && !profile.displayName && profile.displayNamePromptCount < 2);
 
+  const accountLabel = session.user.email ?? profile?.displayName ?? session.user.name ?? "Account";
+  const account = {
+    label: accountLabel,
+    email: session.user.email ?? null,
+  };
+
   return (
     <ChatShell
+      account={account}
       activeTab={activeTab}
       initialMessages={initialMessages}
       mistakeGroups={mistakeGroups}
