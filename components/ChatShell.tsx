@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { Composer } from "@/components/Composer";
+import { LearningStatePanel } from "@/components/LearningStatePanel";
 import { MessageList } from "@/components/MessageList";
 import { MistakesPanel } from "@/components/MistakesPanel";
 import { NamePromptModal } from "@/components/NamePromptModal";
@@ -80,7 +81,7 @@ export function ChatShell({
         id: crypto.randomUUID(),
         eventId: payload.eventId,
         role: "assistant",
-        text: payload.response || payload.error || "Abhi jawab nahi aa paaya.",
+        text: payload.response || payload.error || "Couldn't get a response right now.",
         learnerVisibleLabel: payload.learnerVisibleLabel,
         structured: payload.structured ?? null,
         verificationPrompt: payload.verificationPrompt ?? null,
@@ -91,7 +92,7 @@ export function ChatShell({
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
-        text: "Abhi jawab nahi aa paaya.",
+        text: "Couldn't get a response right now.",
         structured: null,
         verificationPrompt: null,
       };
@@ -139,7 +140,7 @@ export function ChatShell({
         id: crypto.randomUUID(),
         eventId: payload.eventId,
         role: "assistant",
-        text: payload.response || payload.error || "Abhi jawab nahi aa paaya.",
+        text: payload.response || payload.error || "Couldn't get a response right now.",
         learnerVisibleLabel: payload.learnerVisibleLabel,
         structured: null,
         verificationPrompt: null,
@@ -150,7 +151,7 @@ export function ChatShell({
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
-        text: "Abhi jawab nahi aa paaya.",
+        text: "Couldn't get a response right now.",
         structured: null,
         verificationPrompt: null,
       };
@@ -181,10 +182,11 @@ export function ChatShell({
     <AppShell
       activeTab={activeTab}
       footer={<Composer disabled={showNamePrompt} isSending={isSending} onSend={handleSend} />}
+      learningState={<LearningStatePanel />}
     >
       <div className="relative h-full overflow-hidden">
         <div className="h-full overflow-y-auto px-4 py-5">
-          <MessageList isPending={isSending} messages={messages} onAttempt={handleAttempt} />
+          <MessageList isPending={isSending} messages={messages} onAttempt={handleAttempt} onQuickStart={handleSend} />
           <div ref={streamEndRef} />
         </div>
         {showNamePrompt ? <NamePromptModal onClose={() => setShowNamePrompt(false)} /> : null}

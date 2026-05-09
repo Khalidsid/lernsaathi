@@ -22,7 +22,7 @@ export default async function LoginPage() {
         <div className="px-7 pt-28">
           <div className="text-center">
             <div className="serif text-[44px] leading-none tracking-[-0.02em] text-ink">Lernsaathi</div>
-            <div className="serif mt-3 text-[15px] italic text-ink3">Aapka private German saathi.</div>
+            <div className="serif mt-3 text-[15px] italic text-ink3">Your private German companion.</div>
           </div>
           <div className="mt-16">
             <LoginForm credentialsEnabled={credentialsEnabled} googleEnabled={googleEnabled} />

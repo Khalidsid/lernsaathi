@@ -7,7 +7,7 @@ import { reviewRevisionItem } from "@/lib/revision-data";
 import type { RevisionRating } from "@/lib/revision-types";
 
 function isRevisionRating(value: string | undefined): value is RevisionRating {
-  return value === "again" || value === "good";
+  return value === "again" || value === "hard" || value === "good" || value === "easy";
 }
 
 export async function POST(request: Request) {
@@ -54,7 +54,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Revision item nahi mila." }, { status: 404 });
   }
 
-  const responsePayload = { ok: true, settled: result.shouldSettle };
+  const responsePayload = {
+    ok: true,
+    settled: result.shouldSettle,
+    nextReviewDays: result.intervalDays,
+  };
 
   await storeIdempotencyResponse({
     key: idempotencyKey,

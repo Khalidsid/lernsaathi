@@ -51,7 +51,7 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
               void submit();
             }
           }}
-          placeholder="Yahan likhein..."
+          placeholder="Write here..."
           value={value}
         />
         <button

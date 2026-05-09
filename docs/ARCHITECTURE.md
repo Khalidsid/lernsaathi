@@ -59,9 +59,12 @@
 ```
 
 ## Pipeline rationale
-- The runtime is intentionally split into classifier, responder, and verifier stages.
+- The runtime is intentionally split into classifier, decision-planner, responder, and verifier stages.
 - Slice 1 keeps verifier as a stub, but the function boundary is already in place.
-- This keeps later slices from turning one oversized prompt into a refactor problem.
+- Slice 3.7 adds the decision-planner stage between classification and response generation.
+- Decision planner loads learner context (recent events, active mistakes, due revision cards, profile, exam readiness) and produces a `TurnDecision` object.
+- The `TurnDecision` maps input types to learning modules, determines response depth (with prior mistake upgrades), selects memory actions, and suggests next actions.
+- This keeps later slices from turning one oversized prompt into a refactor problem and enables systematic routing to module-specific response contracts.
 
 ## Prompt-file convention
 - Prompts live in `prompts/` and are loaded from disk at runtime.
@@ -90,9 +93,11 @@
 - `npm run build` runs `prisma generate && next build` so Railway deployments do not fail with a missing Prisma Client.
 
 ## Auth Direction
-- Current implementation is still the Slice 0 single-user NextAuth Credentials provider with `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH`.
-- Google OAuth, allowlisted account access, future password-account provisions, and duplicate-request/session hardening are planned as Slice 3.5 before Slice 4 image input.
-- Until Slice 3.5 lands, do not treat the app as ready for open registration, multi-user public access, durable per-user rate limiting, or parallel request idempotency.
+- Current implementation supports NextAuth Credentials as a fallback and Google OAuth when `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` are configured.
+- Google access is allowlisted through `GOOGLE_ALLOWED_EMAILS`; open registration is not supported.
+- Slice 3.5 is implemented locally and added idempotency guards plus per-user rate limiting for current chat/attempt/revision routes.
+- Known limitation: rate limiting still uses in-memory state and is not suitable for multi-instance deployments until Slice 3.12 replaces or waives it.
+- Do not treat the app as ready for open registration, broad multi-user public access, or durable distributed abuse controls until the Slice 3.12 reliability baseline lands.
 
 ## Visual System
 - Design source of truth: `docs/design_concept/Lernsaathi.html`.
@@ -159,8 +164,23 @@
 ## Future Slice Direction
 - Future prompt-level implementation guidance lives in `docs/build_prompts/future_slice_prompts.md`.
 - The retrospective note for this roadmap shift lives in `docs/SLICE_3_RETROSPECTIVE_ROADMAP_RESTRUCTURE_NOTES.md`.
-- The roadmap inserts Slice 3.6-3.9 between auth hardening and image input so the app does not jump from basic memory into broad multimodal features without a stronger learning engine.
-- Slice 3.6 (complete): defines the decision contract types, modules, and routing rules.
-- Slice 3.7 (next): implements the first decision engine, inserting decision planning between classifier and responder, loading learner context, and routing to module-specific responders.
-- Slice 3.8: exposes learning momentum in the UI through next actions, due counts, active mistake counts, stronger empty states, and visible saved/scheduled feedback.
-- Slice 3.9: deepens the revision and mistake-practice loop before image, writing, picture-description, reading/listening, speaking, and personal-story modules expand the product surface.
+- The realignment control plan lives in `docs/RETROSPECTIVE_ARCHITECTURAL_ANALYSIS.md`.
+- The low-reasoning execution protocol lives in `docs/LOW_REASONING_DEV_PROTOCOL.md`.
+- UI/design contracts live in `docs/UX_ARCHITECTURE.md`, `docs/COMPONENT_CONTRACTS.md`, and `docs/NAMING.md`.
+- Future slice briefs live in `docs/slices/`.
+- The roadmap inserts Slice 3.6-3.13 between auth hardening and image input so the app does not jump from basic memory into broad multimodal features without a stronger learning engine and production baseline.
+- Slice 3.6 (implemented locally): defines the decision contract types, modules, and routing rules.
+- Slice 3.7 (implemented locally): implements the first decision engine, inserting decision planning between classifier and responder, loading learner context, and routing to module-specific responders.
+- Slice 3.8 (implemented locally): exposes learning momentum in the UI through next actions, due counts, active mistake counts, stronger empty states, and visible saved/scheduled feedback.
+- Slice 3.9 (implemented locally): deepens the revision and mistake-practice loop before image, writing, picture-description, reading/listening, speaking, and personal-story modules expand the product surface.
+- Slice 3.10 (planned): adds framework loading/error boundaries and executable gates.
+- Slice 3.11 (planned): establishes low-reasoning UI contracts and accessibility baseline.
+- Slice 3.12 (planned): establishes API validation, error envelope, privacy, reliability, and AI safety/model policy.
+- Slice 3.13 (planned): fixes evidence and debt gaps before Slice 4.
+
+## Development Control Protocol
+- Future tasks should not require a model to infer the whole architecture from scattered docs.
+- Use `docs/LOW_REASONING_DEV_PROTOCOL.md` to define the exact context pack, allowed files, non-goals, steps, validation commands, and stop conditions.
+- Use `docs/slices/SLICE_TEMPLATE.md` for every new slice brief.
+- For UI work, use `docs/UX_ARCHITECTURE.md` and `docs/COMPONENT_CONTRACTS.md` as the immediate source of truth.
+- Use exact status words in `docs/SLICE_MAP.md`: planned, implemented locally, verified locally, manual evidence pending, production smoke passed, complete, waived.

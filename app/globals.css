@@ -15,6 +15,16 @@
   --tw-anchor-opacity: 0.4;
   --tw-anchor-thickness: 4px;
   --tw-fade-ms: 220ms;
+
+  /* Slice 3.8: Motion Design Tokens */
+  --motion-duration-instant: 100ms;
+  --motion-duration-fast: 200ms;
+  --motion-duration-normal: 300ms;
+  --motion-duration-slow: 500ms;
+  --motion-ease-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --motion-ease-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --motion-ease-accelerate: cubic-bezier(0.4, 0.0, 1, 1);
+  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 html,
@@ -190,5 +200,192 @@ textarea:focus-visible {
 
   to {
     opacity: 1;
+  }
+}
+
+/* Slice 3.8: Motion Design Animations */
+
+/* Fade-in with scale */
+.animate-fade-in {
+  animation: fadeInScale var(--motion-duration-fast) var(--motion-ease-decelerate) both;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Shimmer loading skeleton */
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
+html[data-theme="dark"] .animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Subtle pulse for notifications */
+.animate-pulse-subtle {
+  animation: pulseSubtle var(--motion-duration-normal) var(--motion-ease-spring) infinite;
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Active press feedback */
+.active-press:active {
+  transform: scale(0.96);
+  transition: transform var(--motion-duration-instant) var(--motion-ease-standard);
+}
+
+/* Count badge pulse (one-time) */
+@keyframes countPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Success checkmark animation */
+@keyframes successPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Shake for errors */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+/* Slide up for toasts */
+.animate-slide-up {
+  animation: slideUp var(--motion-duration-normal) var(--motion-ease-decelerate) both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Fade out for toasts */
+.animate-fade-out {
+  animation: fadeOut var(--motion-duration-fast) var(--motion-ease-accelerate) both;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Slice 3.9: Card transition animations */
+.animate-slide-out-left {
+  animation: slideOutLeft var(--motion-duration-normal) var(--motion-ease-accelerate) both;
+}
+
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.95);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight var(--motion-duration-normal) var(--motion-ease-decelerate) both;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-shimmer,
+  .animate-pulse-subtle,
+  .animate-slide-up,
+  .animate-fade-out,
+  .animate-slide-out-left,
+  .animate-slide-in-right,
+  .active-press:active {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
   }
 }

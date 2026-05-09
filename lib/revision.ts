@@ -43,6 +43,7 @@ export function buildRevisionItemFromMistake(mistake: RevisionSourceMistake, now
 }
 
 export function calculateNextRevisionState({ ease, intervalDays, rating, reviewCount }: RevisionStateInput) {
+  // Again: Reset to start, decrease ease
   if (rating === "again") {
     return {
       ease: Math.max(1.3, Number((ease - 0.2).toFixed(2))),
@@ -53,14 +54,41 @@ export function calculateNextRevisionState({ ease, intervalDays, rating, reviewC
   }
 
   const nextReviewCount = reviewCount + 1;
-  const nextEase = Math.min(3, Number((ease + 0.1).toFixed(2)));
-  const nextInterval =
-    reviewCount === 0 ? 1 : Math.min(14, Math.max(intervalDays + 1, Math.ceil(intervalDays * nextEase)));
+
+  // Hard: Small interval increase, slight ease decrease
+  if (rating === "hard") {
+    const nextEase = Math.max(1.3, Number((ease - 0.05).toFixed(2)));
+    const nextInterval = reviewCount === 0 ? 1 : Math.min(14, Math.max(2, Math.ceil(intervalDays * 1.2)));
+
+    return {
+      ease: nextEase,
+      intervalDays: nextInterval,
+      reviewCount: nextReviewCount,
+      shouldSettle: false,
+    };
+  }
+
+  // Good: Standard interval increase, slight ease increase
+  if (rating === "good") {
+    const nextEase = Math.min(3, Number((ease + 0.1).toFixed(2)));
+    const nextInterval = reviewCount === 0 ? 1 : Math.min(14, Math.max(intervalDays + 1, Math.ceil(intervalDays * nextEase)));
+
+    return {
+      ease: nextEase,
+      intervalDays: nextInterval,
+      reviewCount: nextReviewCount,
+      shouldSettle: nextReviewCount >= 3,
+    };
+  }
+
+  // Easy: Larger interval increase, larger ease increase
+  const nextEase = Math.min(3, Number((ease + 0.15).toFixed(2)));
+  const nextInterval = reviewCount === 0 ? 2 : Math.min(14, Math.ceil(intervalDays * nextEase * 1.3));
 
   return {
     ease: nextEase,
     intervalDays: nextInterval,
     reviewCount: nextReviewCount,
-    shouldSettle: nextReviewCount >= 3,
+    shouldSettle: nextReviewCount >= 2,
   };
 }

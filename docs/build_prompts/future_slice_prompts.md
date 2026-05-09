@@ -2,10 +2,15 @@
 
 > Read this file before starting any future slice after Slice 3. It turns the current product insights into implementation prompts. The goal is not to build a large "smart tutor" in one pass. The goal is to build a reliable learning system one bounded slice at a time.
 
+**Current process note:** This file is now a legacy prompt library and product-direction reference. Future implementation should start from `docs/LOW_REASONING_DEV_PROTOCOL.md` plus the active `docs/slices/SLICE_*_BRIEF.md`. Use this file only for slice-specific product intent when the active brief points here.
+
 ## How To Use This File
 
 - Treat each slice section as the prompt for that slice.
-- Do not start a later slice until the earlier slice is complete, documented, and verified.
+- Do not start a later slice until the earlier slice reaches its required status in `docs/SLICE_MAP.md`, is documented, and is verified.
+- For lower-reasoning sessions, do not paste a large slice section directly into the task. Convert it into a work packet using `docs/LOW_REASONING_DEV_PROTOCOL.md`.
+- Every future slice must have a short brief in `docs/slices/` before implementation starts.
+- The active brief controls allowed files, non-goals, required reads, validation, and stop conditions.
 - If a slice exposes UI, do a browser walk in light and dark mode before calling it done.
 - If a slice changes the learning pipeline, add unit/eval coverage before relying on manual inspection.
 - If a slice changes data ownership, auth, request identity, persistence, or scheduling, add server-side tests.
@@ -28,25 +33,32 @@ Every slice must preserve these standards:
 
 ## Mandatory Reads Before Any Future Slice
 
-Read these first:
+Read these first for every future slice:
 
 1. `docs/SLICE_MAP.md`
-2. `docs/ARCHITECTURE.md`
-3. `docs/PROMPT_PIPELINE.md`
-4. `docs/SLICE_3_NOTES.md`
-5. `docs/SLICE_3_5_AUTH_SESSION_NOTES.md`
-6. This file
-7. The code touched by the slice
+2. `docs/LOW_REASONING_DEV_PROTOCOL.md`
+3. The active `docs/slices/SLICE_*_BRIEF.md`
+4. The code touched by the slice
+
+Read these only when the active brief requires them:
+
+1. `docs/ARCHITECTURE.md`
+2. `docs/PROMPT_PIPELINE.md`
+3. `docs/RETROSPECTIVE_ARCHITECTURAL_ANALYSIS.md`
+4. This file
 
 For UI slices also read:
 
-1. `docs/VISUAL_INTEGRATION_NOTES.md`
-2. `docs/UI_PATCH_NOTES.md`
-3. `components/AppShell.tsx`
-4. `components/ChatShell.tsx`
-5. `components/Composer.tsx`
-6. `app/globals.css`
-7. `tailwind.config.ts`
+1. `docs/UX_ARCHITECTURE.md`
+2. `docs/COMPONENT_CONTRACTS.md`
+3. `docs/NAMING.md`
+4. `components/AppShell.tsx`
+5. `components/ChatShell.tsx`
+6. `components/Composer.tsx`
+7. `app/globals.css`
+8. `tailwind.config.ts`
+
+Read `docs/VISUAL_INTEGRATION_NOTES.md` and `docs/UI_PATCH_NOTES.md` only when changing established visual language or shell behavior.
 
 For pipeline slices also read:
 
@@ -59,11 +71,12 @@ For pipeline slices also read:
 
 ## Shared Completion Checklist
 
-Each slice is complete only when:
+Each slice reaches `complete` only when:
 
 - Scope is implemented without pulling in later slices.
 - Typecheck, lint, policy checks, unit tests, eval, and build are run when relevant.
 - Docs record what was built, what was deferred, and what evidence remains pending.
+- `docs/SLICE_MAP.md` uses exact status words from `docs/LOW_REASONING_DEV_PROTOCOL.md`.
 - User-facing text follows formal aap-form rules.
 - The UI has no known overflow, hidden composer, inaccessible menu, or dead control.
 - Existing Slice 2 and Slice 3 learning flows still work.

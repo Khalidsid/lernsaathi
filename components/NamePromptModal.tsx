@@ -26,7 +26,7 @@ export function NamePromptModal({ onClose }: NamePromptModalProps) {
     setIsPending(false);
 
     if (!response.ok) {
-      setError("Abhi save nahi ho paaya. Thoda baad phir try karein.");
+      setError("Couldn't save right now. Please try again in a moment.");
       return;
     }
 
@@ -37,17 +37,17 @@ export function NamePromptModal({ onClose }: NamePromptModalProps) {
     <div className="absolute inset-0 z-30 bg-[rgba(20,20,18,0.28)] backdrop-blur-[8px]">
       <div className="absolute inset-x-0 bottom-0 px-4 pb-6">
         <div className="fade-in rounded-2xl bg-paper p-6 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.25)] dark:bg-night2">
-        <p className="serif text-[22px] tracking-[-0.005em] text-ink dark:text-mist">Aapka naam kya hai?</p>
+        <p className="serif text-[22px] tracking-[-0.005em] text-ink dark:text-mist">What's your name?</p>
         <p className="mt-2 text-[14px] leading-relaxed text-ink3 dark:text-ink4">
-          Yeh sirf personalisation ke liye hai. Aap chahein to skip kar sakte hain.
+          This is just for personalization. You can skip if you prefer.
         </p>
         <label className="mt-5 block">
-          <span className="sr-only">Aapka naam</span>
+          <span className="sr-only">Your name</span>
           <input
             className="w-full rounded-xl border border-rule bg-paper2 px-4 py-3 text-[15px] text-ink outline-none placeholder:text-ink4 focus:border-teal dark:border-[#2E2E2B] dark:bg-night3 dark:text-mist"
             disabled={isPending}
             onChange={(event) => setDisplayName(event.target.value)}
-            placeholder="Aapka naam"
+            placeholder="Your name"
             value={displayName}
           />
         </label>
@@ -59,7 +59,7 @@ export function NamePromptModal({ onClose }: NamePromptModalProps) {
             onClick={() => submit({ skip: true })}
             type="button"
           >
-            Abhi nahi
+            Skip for now
           </button>
           <button
             className="rounded-xl bg-teal px-5 py-2.5 text-[14px] font-medium text-paper transition hover:bg-tealDk disabled:cursor-not-allowed disabled:opacity-70"
@@ -67,7 +67,7 @@ export function NamePromptModal({ onClose }: NamePromptModalProps) {
             onClick={() => submit({ displayName })}
             type="button"
           >
-            {isPending ? "Rukiye..." : "Aage badhein"}
+            {isPending ? "Saving..." : "Continue"}
           </button>
         </div>
         </div>

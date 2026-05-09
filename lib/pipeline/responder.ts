@@ -8,6 +8,7 @@ import type { ClassifierResult } from "@/lib/pipeline/classifier";
 import type { ResponseDepth } from "@/lib/pipeline/depth";
 import type { StructuredAssistantContent, StructuredDiagnosisItem } from "@/lib/assistant-response";
 import type { MistakeType } from "@/lib/pipeline/taxonomy";
+import type { TurnDecision } from "@/lib/decision-contract";
 
 export type ResponderResult = {
   response: string;
@@ -381,6 +382,7 @@ export async function buildResponse(
     responseDepth: ResponseDepth;
     displayName?: string | null;
     priorMistakes?: PriorMistakeNote[];
+    decision?: TurnDecision; // Slice 3.7: Optional decision object
   },
 ) {
   const [systemCore, styleGuide, taskPrompt, fewShot] = await Promise.all([
@@ -398,7 +400,23 @@ export async function buildResponse(
     "Use it at most once. Never use it in a meaning gloss line.",
   ].join("\n");
 
-  const systemPrompt = [systemCore, styleGuide, taskPrompt, fewShot, displayNameRule, priorMistakeNote]
+  // Slice 3.7: Include decision context when available
+  const decisionContext = options.decision
+    ? [
+        `Decision context (internal, for assistant reference):`,
+        `- Learning module: ${options.decision.module}`,
+        `- Learner need: ${options.decision.learnerNeed ?? "general inquiry"}`,
+        `- Real-world context: ${options.decision.realWorldLens ?? "not specified"}`,
+        `- Suggested next action: ${options.decision.nextAction}`,
+        options.decision.nextAction === "chhota_check"
+          ? "Note: Plan to offer a quick verification question after this explanation."
+          : "",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : null;
+
+  const systemPrompt = [systemCore, styleGuide, taskPrompt, fewShot, displayNameRule, priorMistakeNote, decisionContext]
     .filter(Boolean)
     .join("\n\n---\n\n");
   const userPrompt = [

@@ -40,7 +40,7 @@ export function LoginForm({ credentialsEnabled = true, googleEnabled = false }: 
     setIsPending(false);
 
     if (result?.error) {
-      setError("Username ya password sahi nahi hai.");
+      setError("Incorrect username or password.");
       return;
     }
 
@@ -124,7 +124,7 @@ export function LoginForm({ credentialsEnabled = true, googleEnabled = false }: 
           onClick={() => void handleSubmit()}
           type="button"
         >
-          {isPending ? "Rukiye..." : "Sign in"}
+          {isPending ? "Signing in..." : "Sign in"}
         </button>
       ) : null}
     </div>

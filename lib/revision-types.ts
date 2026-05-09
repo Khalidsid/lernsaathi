@@ -1,4 +1,4 @@
-export type RevisionRating = "again" | "good";
+export type RevisionRating = "again" | "hard" | "good" | "easy";
 
 export type RevisionCardData = {
   back: string;

@@ -16,6 +16,7 @@ type AppShellProps = React.HTMLAttributes<HTMLDivElement> & {
   activeTab: ChatTab;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  learningState?: React.ReactNode; // Slice 3.8: Optional learning state panel
 };
 
 const themeStorageKey = "lernsaathi-theme";
@@ -104,7 +105,7 @@ function useThemePreference() {
 }
 
 export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppShell(
-  { activeTab, children, className, footer, ...props },
+  { activeTab, children, className, footer, learningState, ...props },
   ref,
 ) {
   const menuId = useId();
@@ -218,6 +219,13 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
         </div>
         <div className="hairline dark:bg-[#2E2E2B]" />
       </header>
+
+      {/* Slice 3.8: Optional learning state panel */}
+      {learningState ? (
+        <div className="shrink-0 px-5 pt-4">
+          {learningState}
+        </div>
+      ) : null}
 
       <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
       {footer ? <div className="shrink-0 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3">{footer}</div> : null}

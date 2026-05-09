@@ -3,9 +3,9 @@ import { db } from "@/lib/db";
 import { logPipelineEvent } from "@/lib/logging";
 import { getDailyLimitMessage, DailySpendCapError } from "@/lib/openai";
 import { classifyInput } from "@/lib/pipeline/classifier";
-import { selectResponseDepth } from "@/lib/pipeline/depth";
 import { buildResponse } from "@/lib/pipeline/responder";
 import { buildVerificationPrompt } from "@/lib/pipeline/verifier";
+import { loadContextAndPlanDecision } from "@/lib/pipeline/decision-planner";
 
 import type { StructuredDiagnosisItem } from "@/lib/assistant-response";
 import type { Mistake } from "@prisma/client";
@@ -91,26 +91,34 @@ export async function runLearningPipeline(input: string, context: { userId: stri
     logPipelineEvent("pipeline_start", {
       inputPreview: input.slice(0, 80),
     });
-    const classifier = await classifyInput(input, { userId: context.userId });
-    const priorMistakes = await findOpenMistakesForInput(context.userId, input, classifier.data.inputType);
-    const responseDepth = selectResponseDepth(classifier.data.inputType, classifier.data, priorMistakes);
-    const profile = await db.learnerProfile.findUnique({
-      where: { userId: context.userId },
-      select: { displayName: true },
-    });
 
-    if (classifier.data.inputType === "out_of_scope") {
+    // Stage 1: Classify input
+    const classifier = await classifyInput(input, { userId: context.userId });
+
+    // Stage 2: Load learner context and plan decision (Slice 3.7)
+    const { decision, context: learnerContext } = await loadContextAndPlanDecision(
+      input,
+      classifier.data,
+      context.userId,
+    );
+
+    // Legacy: Keep prior mistakes extraction for backward compatibility
+    const priorMistakes = await findOpenMistakesForInput(context.userId, input, classifier.data.inputType);
+
+    // Handle out-of-scope short circuit
+    if (decision.module === "out_of_scope") {
       logPipelineEvent("pipeline_out_of_scope_short_circuit", {
         inputType: classifier.data.inputType,
         taskType: classifier.data.taskType,
-        depthHint: classifier.data.depthHint,
+        module: decision.module,
+        confidence: decision.confidence,
       });
       const usage = combineUsage([classifier.meta]);
       return {
         inputType: "out_of_scope" as const,
         taskType: classifier.data.taskType,
         hiddenExamRelevance: classifier.data.hiddenExamRelevance,
-        responseDepth,
+        responseDepth: decision.responseDepth,
         response: OUT_OF_SCOPE_MESSAGE,
         learnerVisibleLabel: getLearnerVisibleLabelForEvent("out_of_scope"),
         diagnosis: ["feature_not_available_yet"],
@@ -121,34 +129,42 @@ export async function runLearningPipeline(input: string, context: { userId: stri
         mistakeCreated: false,
         mistakeCandidates: [],
         priorMistakeReviewIds: [],
+        decision, // Include decision metadata
         ...usage,
       };
     }
 
+    // Stage 3: Build response (consuming decision object)
     const responder = await buildResponse(input, classifier.data, {
       userId: context.userId,
-      responseDepth,
-      displayName: profile?.displayName ?? null,
+      responseDepth: decision.responseDepth,
+      displayName: learnerContext.profile?.displayName ?? null,
       priorMistakes,
+      decision, // Pass decision to responder
     });
+
+    // Stage 4: Build verification prompt
     const verifier = await buildVerificationPrompt({
       userId: context.userId,
       input,
       inputType: classifier.data.inputType,
-      responseDepth,
+      responseDepth: decision.responseDepth,
       responder: responder.data,
     });
+
     const usage = combineUsage([classifier.meta, responder.meta, verifier.meta]);
     logPipelineEvent("pipeline_response_complete", {
       inputType: classifier.data.inputType,
-      depthHint: responseDepth,
+      module: decision.module,
+      responseDepth: decision.responseDepth,
+      confidence: decision.confidence,
     });
 
     return {
       inputType: classifier.data.inputType,
       taskType: classifier.data.taskType,
       hiddenExamRelevance: classifier.data.hiddenExamRelevance,
-      responseDepth,
+      responseDepth: decision.responseDepth,
       response: responder.data.response,
       learnerVisibleLabel: responder.data.learnerVisibleLabel,
       diagnosis: responder.data.diagnosis,
@@ -159,6 +175,7 @@ export async function runLearningPipeline(input: string, context: { userId: stri
       mistakeCreated: false,
       mistakeCandidates: getMistakeCandidates(classifier.data.inputType, responder.data.structured?.diagnosis),
       priorMistakeReviewIds: priorMistakes.map((mistake) => mistake.id),
+      decision, // Include decision metadata in result
       ...usage,
     };
   } catch (error) {
@@ -179,6 +196,7 @@ export async function runLearningPipeline(input: string, context: { userId: stri
         mistakeCreated: false,
         mistakeCandidates: [],
         priorMistakeReviewIds: [],
+        decision: null, // No decision for daily limit
         llmModel: "gpt-5",
         llmTokensIn: 0,
         llmTokensOut: 0,
