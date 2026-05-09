@@ -6,12 +6,13 @@ import { AttemptInput } from "@/components/AttemptInput";
 import { cn } from "@/lib/cn";
 
 type ChhotaCheckProps = React.HTMLAttributes<HTMLDivElement> & {
+  disabled?: boolean;
   onReply?: (value: string) => Promise<void>;
   prompt: string;
 };
 
 export const ChhotaCheck = forwardRef<HTMLDivElement, ChhotaCheckProps>(function ChhotaCheck(
-  { className, onReply, prompt, ...props },
+  { className, disabled = false, onReply, prompt, ...props },
   ref,
 ) {
   return (
@@ -20,7 +21,9 @@ export const ChhotaCheck = forwardRef<HTMLDivElement, ChhotaCheckProps>(function
         chhota check
       </div>
       <p className="text-[14.5px] leading-[1.65] text-ink2 dark:text-[#CFCDC4]">{prompt}</p>
-      {onReply ? <AttemptInput className="mt-3" onSubmit={onReply} placeholder="Apna jawab likhein..." /> : null}
+      {onReply ? (
+        <AttemptInput className="mt-3" disabled={disabled} onSubmit={onReply} placeholder="Apna jawab likhein..." />
+      ) : null}
     </div>
   );
 });

@@ -23,6 +23,14 @@ body {
   background: #edebe3;
 }
 
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 body {
   background-color: #edebe3;
   background-image: radial-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px);
@@ -30,6 +38,17 @@ body {
   color: #1f1f1f;
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  background: #0e0e0d;
+}
+
+html[data-theme="dark"] body {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: #e9e7df;
 }
 
 ::selection {
@@ -171,16 +190,5 @@ textarea:focus-visible {
 
   to {
     opacity: 1;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  html,
-  body {
-    background: #0e0e0d;
-  }
-
-  body {
-    color: #e9e7df;
   }
 }

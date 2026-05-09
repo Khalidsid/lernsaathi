@@ -6,9 +6,9 @@ import { cn } from "@/lib/cn";
 export type ChatTab = "chat" | "revision" | "mistakes";
 
 const tabs: Array<{ id: ChatTab; label: string; href: string }> = [
-  { id: "chat", label: "Baatcheet", href: "/chat" },
-  { id: "revision", label: "Dohraana", href: "/chat?tab=revision" },
-  { id: "mistakes", label: "Galtiyan", href: "/chat?tab=mistakes" },
+  { id: "chat", label: "Chat", href: "/chat" },
+  { id: "revision", label: "Revise", href: "/chat?tab=revision" },
+  { id: "mistakes", label: "Mistakes", href: "/chat?tab=mistakes" },
 ];
 
 type TabBarProps = React.HTMLAttributes<HTMLDivElement> & {

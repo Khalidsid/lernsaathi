@@ -26,7 +26,7 @@
 - `/admin/stats` keeps a hidden JSON block for the Slice 1 admin data contract while visually rendering the five design stat cards.
 - Recent admin rows are derived from `LearningEvent`; no generic `Event` table was added.
 - `Dohraana` and `Galtiyan` render calm placeholders instead of the 6.4/6.5 functional screens because those are deferred to Slice 3.
-- The design HTML's image upload is represented by `ImageChip` and composer attach styling only; no backend upload was added.
+- The design HTML's image upload is represented by disabled composer attach styling only until Slice 4; no dummy image staging or backend upload is active.
 
 ## Components built
 - `AppShell` - authenticated shell with `Lernsaathi` wordmark, menu button, and tab pills; maps to `// 6.3a` and the `// 9` shell pattern.

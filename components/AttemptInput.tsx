@@ -38,14 +38,14 @@ export const AttemptInput = forwardRef<HTMLDivElement, AttemptInputProps>(functi
   return (
     <div
       className={cn(
-        "flex items-center gap-2 rounded-xl border border-rule bg-paper py-1.5 pl-3 pr-2 dark:border-[#2E2E2B] dark:bg-night2",
+        "flex items-center gap-2 rounded-xl border border-rule bg-paper py-1.5 pl-3 pr-2 transition focus-within:border-teal focus-within:ring-2 focus-within:ring-teal/20 dark:border-[#2E2E2B] dark:bg-night2 dark:focus-within:border-tealNight dark:focus-within:ring-tealNight/45",
         className,
       )}
       ref={ref}
       {...props}
     >
       <input
-        className="min-w-0 flex-1 bg-transparent py-1.5 text-[14.5px] text-ink outline-none placeholder:text-ink4 disabled:opacity-70 dark:text-mist"
+        className="min-w-0 flex-1 bg-transparent py-1.5 text-[14.5px] text-ink outline-none placeholder:text-ink4 focus-visible:outline-none disabled:opacity-70 dark:text-mist"
         disabled={disabled || isSubmitting}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={(event) => {

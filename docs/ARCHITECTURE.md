@@ -89,19 +89,24 @@
 - `lucide-react` is used for the visual integration icon contract from `docs/design_concept/Lernsaathi.html`.
 - `npm run build` runs `prisma generate && next build` so Railway deployments do not fail with a missing Prisma Client.
 
+## Auth Direction
+- Current implementation is still the Slice 0 single-user NextAuth Credentials provider with `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH`.
+- Google OAuth, allowlisted account access, future password-account provisions, and duplicate-request/session hardening are planned as Slice 3.5 before Slice 4 image input.
+- Until Slice 3.5 lands, do not treat the app as ready for open registration, multi-user public access, durable per-user rate limiting, or parallel request idempotency.
+
 ## Visual System
 - Design source of truth: `docs/design_concept/Lernsaathi.html`.
 - Component dictionary: `components/` (see `docs/VISUAL_INTEGRATION_NOTES.md` for the `// 9.x` mapping).
 - Design tokens: `tailwind.config.ts` and `app/globals.css`, ported from the `<style>` and `tailwind.config` blocks of the design HTML.
 - Structured render hints: `AssistantResponse.structured` is optional and mirrors the markdown response, letting components render lemma anchors and bilingual pairs without parsing markdown client-side.
 - Label values come from `lib/pipeline/labels.ts`. Design HTML strings are visual reference only; `labels.ts` is data truth.
-- Tabs `Dohraana` and `Galtiyan` are visual placeholders in this pass; data wiring lands in Slice 3.
-- UI chrome copy decision after inspection: the design HTML's default `bilingual` voice bank uses English chrome for tabs and action buttons (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). Learner-facing content remains formal aap-form Hinglish plus German. Current Hinglish chrome labels from the visual integration pass are a documented UI-copy mismatch, not an architectural decision.
+- Tabs `Revise` and `Mistakes` are data-backed from Slice 3 onward. Revise reads due `RevisionItem` rows; Mistakes reads persisted `Mistake` rows.
+- UI chrome copy decision after inspection: the design HTML's default `bilingual` voice bank uses English chrome for tabs and action buttons (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). Learner-facing content remains formal aap-form Hinglish plus German.
 
 ## Frontend persistence boundary
 - Every `/api/chat` call persists a `LearningEvent` row.
-- The visible message list remains browser/in-memory state until Slice 3 introduces DB-backed history/revision surfaces.
-- Refresh clearing the visible chat transcript is expected before Slice 3. Database rows disappearing on refresh would be a persistence bug or environment reset issue, not intended behavior.
+- The visible message list hydrates recent history from `LearningEvent` rows through `lib/chat-history.ts`.
+- New messages still append optimistically in the client, but refresh should restore recent persisted turns.
 
 ## Chat shell interaction invariants
 - The authenticated chat UI behaves like a chat application, not a long scrolling webpage.
@@ -110,7 +115,7 @@
 - TopBar and Composer are stable chrome and must remain visible during normal chat use.
 - MessageStream is the independent scroll container for long conversations.
 - Browser/body/page scrolling must not be required to reach the composer or keep using chat.
-- Composer contains only input-related controls: attach, send, and staged image removal if image staging is active.
+- Composer contains only input-related controls. The attach icon is disabled until Slice 4 implements real image upload/capture; it must not stage dummy files.
 - Theme, logout, navigation, settings, and future history controls do not live inside Composer.
 - The three-dot button opens OverflowMenu only. It must not directly log the user out.
 - OverflowMenu contains explicit menu actions, including theme control and a separate `Sign out` action.
@@ -132,3 +137,12 @@
 - Attempt feedback uses `prompts/response_attempt_feedback.md` through `lib/pipeline/attempt_feedback.ts`, so follow-up replies still use the prompt pipeline and log token counts.
 - ExamReadinessMap updates run through `lib/pipeline/exam_map.ts`; only dot-path skill keys such as `grammar_accuracy.cases` are bumped from `unknown` to `weak`.
 - Prior-mistake awareness uses normalized local matching over active mistakes. When a lookup matches, the responder gets a prior-note injection, the response depth becomes `guided_explanation`, a visible `pehle` reminder is guaranteed, and the matched mistake's `reviewCount` / `lastReviewedAt` are updated.
+
+## Slice 3 Revision Loop
+- New mistakes create one `RevisionItem` through `lib/revision-data.ts`, using the existing Slice 0 schema.
+- Active mistakes that predate Slice 3 are backfilled with missing revision items when the Revise tab loads.
+- Revise tab shows due `RevisionItem` rows where `nextReview <= now` and the source mistake is still active.
+- Review actions post to `POST /api/revision/review`.
+- `Again` keeps the interval at 1 day, lowers ease slightly, and does not count toward settling.
+- `Got it` increases ease, grows the interval up to 14 days, and settles the source mistake after three successful reviews.
+- Mistakes tab groups persisted `Mistake` rows by recency and maps active/reviewed/settled state onto the existing teal status dots.

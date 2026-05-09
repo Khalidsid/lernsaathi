@@ -7,7 +7,8 @@
 | 1.5 | Visual Integration | Apply design system from Lernsaathi.html to existing slice 1 surfaces; build component dictionary; add tab placeholders |
 | 2 | Grammar Q & sentence correction | Full classifier, adaptive depth router, verifier, mistake creation; local complete 2026-05-08, Railway route smoke verified |
 | 2.5 | Chat UI Stabilization Patch | Safe overflow menu, Light/Dark/System theme control, fixed chat viewport, internal message scrolling, composer focus correction, pending assistant placeholder, desktop visual tightening |
-| 3 | Mistake memory & revision queue | SM-2 scheduling, daily review UI, prior-mistake injection |
+| 3 | Mistake memory & revision queue | DB-backed chat hydration, revision scheduling, daily review UI, real mistake list |
+| 3.5 | Auth & Session Hardening | Google OAuth allowlist, preserve existing user data, future password-account provisions, idempotency and concurrency guards |
 | 4 | Image input | File upload, vision, multi-exercise handling |
 | 5 | Writing prompts | Scaffolded writing support |
 | 6 | Picture description | Observation-first guidance |
@@ -25,8 +26,9 @@
 - Local dev auth: username `admin`, password `testpass123`; the prior failure was a local bcrypt hash mismatch, not production credentials being requested.
 - Remaining evidence follow-up: authenticated production behavior walk, production `LearningEvent.structured` DB spot-check, first production `Mistake` row, and production `/admin/stats` spot-check.
 - Pairing protocol: developer owns visual/browser validation and production DB evidence; Codex records unavailable evidence as pending instead of changing code to manufacture a minor validation pass.
-- Frontend persistence note: visible chat history is in-memory until Slice 3; database event rows should persist across refresh.
-- UI chrome decision: English tabs/actions from the design HTML default voice bank are intended (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). Current Hinglish chrome labels are documented as a future UI-copy correction.
-- Slice 2.5 is a stabilization patch after Slice 2 and before Slice 3. It fixes chat shell behavior, safe menu/theme controls, composer focus, pending state, and visual width. It does not implement DB-backed conversation history.
-- Slice 3 still owns persisted chat history, revision queue data wiring, mistake-memory surfaces, and any collapsible conversation/history panel.
+- Frontend persistence note: visible chat history now hydrates from persisted `LearningEvent` rows.
+- UI chrome decision: English tabs/actions from the design HTML default voice bank are intended (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). Slice 3 updates the tab labels to `Chat`, `Revise`, and `Mistakes`.
+- Slice 2.5: complete locally on 2026-05-09. It fixes chat shell behavior, safe menu/theme controls, composer focus, pending state, and visual width. It does not implement DB-backed conversation history.
+- Slice 3: complete locally on 2026-05-09. It wires DB-backed chat hydration, revision cards, review scheduling, and the real mistake list. A full collapsible conversation/history panel remains out of scope.
+- Slice 3.5: planned before Slice 4. It should move auth from single-user credentials toward Google OAuth with allowlisted account access, preserve current learning data, and add idempotency/concurrency protection for duplicate or parallel requests.
 - Exact latest commit is tracked by git history; this status page avoids commit hashes that go stale after doc-only updates.

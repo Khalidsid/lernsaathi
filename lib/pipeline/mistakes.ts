@@ -4,6 +4,7 @@ import { updateExamReadinessSkills } from "@/lib/pipeline/exam_map";
 import { getExamImpactForGrammarTopic, isCoreGrammarTopic } from "@/lib/pipeline/grammar_topics";
 import { assignMistakePriority } from "@/lib/pipeline/mistake_priority";
 import { MISTAKE_TYPES } from "@/lib/pipeline/taxonomy";
+import { createRevisionItemForMistake } from "@/lib/revision-data";
 
 import type { StructuredDiagnosisItem } from "@/lib/assistant-response";
 import type { MistakeType } from "@/lib/pipeline/taxonomy";
@@ -117,6 +118,7 @@ export async function createMistakesFromCandidates({
       select: { id: true },
     });
 
+    await createRevisionItemForMistake(mistake.id);
     await updateExamMap(userId, hiddenExamImpact);
     createdIds.push(mistake.id);
   }

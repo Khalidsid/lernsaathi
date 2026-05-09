@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 
 type ReflectionCardProps = React.HTMLAttributes<HTMLDivElement> & {
   corrected: string;
+  disabled?: boolean;
   explanation: string;
   friction: string;
   onAttempt?: (value: string) => Promise<void>;
@@ -33,7 +34,7 @@ function highlightFriction(original: string, friction: string) {
 }
 
 export const ReflectionCard = forwardRef<HTMLDivElement, ReflectionCardProps>(function ReflectionCard(
-  { className, corrected, explanation, friction, onAttempt, original, question, ...props },
+  { className, corrected, disabled = false, explanation, friction, onAttempt, original, question, ...props },
   ref,
 ) {
   const [isRevealed, setIsRevealed] = useState(false);
@@ -48,7 +49,7 @@ export const ReflectionCard = forwardRef<HTMLDivElement, ReflectionCardProps>(fu
       </div>
       <p className="text-[14.5px] leading-[1.65] text-ink2 dark:text-[#CFCDC4]">{question}</p>
 
-      {onAttempt ? <AttemptInput className="mt-4" onSubmit={onAttempt} /> : null}
+      {onAttempt ? <AttemptInput className="mt-4" disabled={disabled} onSubmit={onAttempt} /> : null}
 
       <div>
         <GhostRevealLink onClick={() => setIsRevealed((current) => !current)}>

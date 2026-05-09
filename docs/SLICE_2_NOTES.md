@@ -63,6 +63,16 @@ complete locally; Railway route smoke verified; authenticated production verific
 - RCA found composer focus can show browser/default colored outlines. Slice 2.5 must replace that with calm token-based focus styling in light and dark modes.
 - This is not a Slice 3 feature. Slice 2.5 must not add DB-backed conversation history, revision queue UI, mistake-list data wiring, or a collapsible history panel.
 
+## Slice 2.5 Completion
+- Completed locally on 2026-05-09.
+- Three-dot button now opens a safe overflow menu; `Sign out` is a separate explicit item.
+- `System`, `Light`, and `Dark` theme controls persist to `localStorage` and apply via `<html data-theme>`.
+- Chat shell now uses fixed viewport sizing, stable header/footer regions, a constrained desktop width, and an internal message scroll container.
+- Composer and attempt inputs use calm token-based focus states in light and dark modes.
+- Pending `/api/chat` and `/api/chat/attempt` calls render `Soch raha hoon...` until the response or fallback error message arrives.
+- No Slice 3 work was added: no DB-backed conversation history, revision queue wiring, mistake-list data wiring, or collapsible history panel.
+- Local validation: `npm run typecheck`, `npm run lint`, `npm run check:policy`, `npm run test:unit`, `npm run eval`, and `npm run build` pass. The first sandboxed build hit `spawn EPERM`; rerunning the same build outside the sandbox passed.
+
 ## Section 13 Exit Criteria Walked
 - `1` grammar question diagnostic: verified locally.
 - `2` sentence correction Pattern A: verified locally.
@@ -93,4 +103,4 @@ complete locally; Railway route smoke verified; authenticated production verific
 - Local dev-server restart was not treated as a release blocker. The local build and checks passed; browser-level validation can be run by the developer when needed.
 - English UI chrome correction is deferred to a future UI-copy pass; this cleanup documents the decision only.
 - Chat UI stabilization is tracked as Slice 2.5 and must be completed before Slice 3 starts.
-- Slice 3 remains deferred: no revision queue UI, mistake-list data wiring, or spaced-repetition scheduling.
+- Superseded on 2026-05-09: Slice 3 now wires revision queue UI, mistake-list data, and review scheduling locally. See `docs/SLICE_3_NOTES.md`.

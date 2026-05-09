@@ -1,48 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { Composer } from "@/components/Composer";
 import { MessageList } from "@/components/MessageList";
+import { MistakesPanel } from "@/components/MistakesPanel";
 import { NamePromptModal } from "@/components/NamePromptModal";
+import { RevisionQueue } from "@/components/RevisionQueue";
 
 import type { AssistantAttemptKind } from "@/components/AssistantBlock";
 import type { ChatTab } from "@/components/TabBar";
+import type { ChatMessage } from "@/lib/chat-types";
+import type { MistakeGroup, RevisionCardData } from "@/lib/revision-types";
 import type { StructuredAssistantContent } from "@/lib/assistant-response";
-
-type ChatMessage = {
-  id: string;
-  eventId?: string;
-  role: "user" | "assistant";
-  text: string;
-  learnerVisibleLabel?: string;
-  structured?: StructuredAssistantContent | null;
-  verificationPrompt?: string | null;
-};
 
 type ChatShellProps = {
   activeTab: ChatTab;
+  initialMessages: ChatMessage[];
+  mistakeGroups: MistakeGroup[];
+  revisionCards: RevisionCardData[];
   shouldPromptForName: boolean;
 };
 
-function PlaceholderCard({ body, title }: { body: string; title: string }) {
-  return (
-    <div className="flex h-full min-h-[460px] items-center justify-center px-8 text-center">
-      <div className="max-w-sm rounded-2xl border border-rule bg-paper2/60 p-8 dark:border-[#2E2E2B] dark:bg-night2">
-        <div className="serif text-[28px] leading-[1.2] tracking-[-0.015em] text-ink dark:text-mist">{title}</div>
-        <p className="mt-4 whitespace-pre-line text-[15px] leading-[1.7] text-ink3 dark:text-ink4">{body}</p>
-      </div>
-    </div>
-  );
-}
-
-export function ChatShell({ activeTab, shouldPromptForName }: ChatShellProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+export function ChatShell({
+  activeTab,
+  initialMessages = [],
+  mistakeGroups = [],
+  revisionCards = [],
+  shouldPromptForName,
+}: ChatShellProps) {
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [isSending, setIsSending] = useState(false);
   const [showNamePrompt, setShowNamePrompt] = useState(shouldPromptForName);
+  const streamEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
+
+  useEffect(() => {
+    streamEndRef.current?.scrollIntoView({ block: "end" });
+  }, [messages, isSending]);
 
   async function handleSend(value: string) {
+    if (isSending) {
+      return;
+    }
+
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
@@ -81,12 +86,26 @@ export function ChatShell({ activeTab, shouldPromptForName }: ChatShellProps) {
       };
 
       setMessages((current) => [...current, assistantMessage]);
+    } catch {
+      const assistantMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        text: "Abhi jawab nahi aa paaya.",
+        structured: null,
+        verificationPrompt: null,
+      };
+
+      setMessages((current) => [...current, assistantMessage]);
     } finally {
       setIsSending(false);
     }
   }
 
   async function handleAttempt(parentEventId: string, value: string, kind: AssistantAttemptKind) {
+    if (isSending) {
+      return;
+    }
+
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
@@ -94,44 +113,56 @@ export function ChatShell({ activeTab, shouldPromptForName }: ChatShellProps) {
     };
 
     setMessages((current) => [...current, userMessage]);
+    setIsSending(true);
 
-    const response = await fetch("/api/chat/attempt", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        attemptText: value,
-        kind,
-        parentEventId,
-      }),
-    });
-    const payload = (await response.json()) as {
-      eventId?: string;
-      error?: string;
-      response?: string;
-      learnerVisibleLabel?: string;
-    };
-    const assistantMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      eventId: payload.eventId,
-      role: "assistant",
-      text: payload.response || payload.error || "Abhi jawab nahi aa paaya.",
-      learnerVisibleLabel: payload.learnerVisibleLabel,
-      structured: null,
-      verificationPrompt: null,
-    };
+    try {
+      const response = await fetch("/api/chat/attempt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          attemptText: value,
+          kind,
+          parentEventId,
+        }),
+      });
+      const payload = (await response.json()) as {
+        eventId?: string;
+        error?: string;
+        response?: string;
+        learnerVisibleLabel?: string;
+      };
+      const assistantMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        eventId: payload.eventId,
+        role: "assistant",
+        text: payload.response || payload.error || "Abhi jawab nahi aa paaya.",
+        learnerVisibleLabel: payload.learnerVisibleLabel,
+        structured: null,
+        verificationPrompt: null,
+      };
 
-    setMessages((current) => [...current, assistantMessage]);
+      setMessages((current) => [...current, assistantMessage]);
+    } catch {
+      const assistantMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        text: "Abhi jawab nahi aa paaya.",
+        structured: null,
+        verificationPrompt: null,
+      };
+
+      setMessages((current) => [...current, assistantMessage]);
+    } finally {
+      setIsSending(false);
+    }
   }
 
   if (activeTab === "revision") {
     return (
       <AppShell activeTab={activeTab}>
-        <PlaceholderCard
-          body={"Jo cheezein aapko mushkil lagi thi, woh yahan dohra-ne ke liye milengi."}
-          title="Yeh feature jaldi aa raha hai."
-        />
+        <RevisionQueue initialCards={revisionCards} />
       </AppShell>
     );
   }
@@ -139,10 +170,7 @@ export function ChatShell({ activeTab, shouldPromptForName }: ChatShellProps) {
   if (activeTab === "mistakes") {
     return (
       <AppShell activeTab={activeTab}>
-        <PlaceholderCard
-          body={"Aapki purani galtiyaan yahan dikhengi, taaki aap unhein dheere-dheere theek kar sakein."}
-          title="Yeh feature jaldi aa raha hai."
-        />
+        <MistakesPanel groups={mistakeGroups} />
       </AppShell>
     );
   }
@@ -152,9 +180,10 @@ export function ChatShell({ activeTab, shouldPromptForName }: ChatShellProps) {
       activeTab={activeTab}
       footer={<Composer disabled={showNamePrompt} isSending={isSending} onSend={handleSend} />}
     >
-      <div className="relative h-full min-h-[calc(100vh-9.5rem)] overflow-hidden">
+      <div className="relative h-full overflow-hidden">
         <div className="h-full overflow-y-auto px-4 py-5">
-          <MessageList messages={messages} onAttempt={handleAttempt} />
+          <MessageList isPending={isSending} messages={messages} onAttempt={handleAttempt} />
+          <div ref={streamEndRef} />
         </div>
         {showNamePrompt ? <NamePromptModal onClose={() => setShowNamePrompt(false)} /> : null}
       </div>

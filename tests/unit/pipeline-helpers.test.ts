@@ -8,6 +8,7 @@ import {
   isCoreGrammarTopic,
 } from "../../lib/pipeline/grammar_topics.ts";
 import { assignMistakePriority } from "../../lib/pipeline/mistake_priority.ts";
+import { buildRevisionItemFromMistake, calculateNextRevisionState } from "../../lib/revision.ts";
 
 assert.equal(selectResponseDepth("word_query", { depthHint: "quick_answer" }), "quick_answer");
 assert.equal(
@@ -32,6 +33,49 @@ assert.equal(assignMistakePriority("case_confusion", 0), "high");
 assert.equal(assignMistakePriority("phrase_meaning", 2), "high");
 assert.equal(assignMistakePriority("formality_register_confusion", 0), "low");
 assert.equal(assignMistakePriority("phrase_meaning", 0), "medium");
+
+assert.deepEqual(
+  calculateNextRevisionState({ ease: 2.5, intervalDays: 1, rating: "again", reviewCount: 1 }),
+  {
+    ease: 2.3,
+    intervalDays: 1,
+    reviewCount: 1,
+    shouldSettle: false,
+  },
+);
+assert.deepEqual(
+  calculateNextRevisionState({ ease: 2.5, intervalDays: 3, rating: "good", reviewCount: 2 }),
+  {
+    ease: 2.6,
+    intervalDays: 8,
+    reviewCount: 3,
+    shouldSettle: true,
+  },
+);
+assert.deepEqual(
+  buildRevisionItemFromMistake(
+    {
+      correctForm: "Ich gehe in die Küche.",
+      exampleInput: "Ich gehe in der Küche.",
+      explanationGiven: "Movement uses Akkusativ.",
+      hiddenExamImpact: ["grammar_accuracy.cases"],
+      mistakeType: "case_confusion",
+      subtype: "movement_vs_location",
+    },
+    new Date("2026-05-09T00:00:00.000Z"),
+  ),
+  {
+    revisionType: "mistake_transfer",
+    front: "Ich gehe in die Küche.",
+    back: "Ich gehe in die Küche.",
+    explanation: "Movement uses Akkusativ.",
+    hiddenExamRelevance: ["grammar_accuracy.cases"],
+    learnerVisibleLabel: "Wiederholen, was schwer war",
+    nextReview: new Date("2026-05-09T00:00:00.000Z"),
+    intervalDays: 1,
+    ease: 2.5,
+  },
+);
 
 const updated = updateExamReadinessSkills(
   {

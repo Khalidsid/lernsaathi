@@ -125,3 +125,22 @@ npm run check:policy
 npm run eval
 npm run build
 ```
+
+## Implementation status
+Completed locally on 2026-05-09.
+
+- Safe overflow menu implemented in `components/AppShell.tsx`; the three-dot button only opens the menu, and `Sign out` is a separate menu item.
+- Theme control implemented with `System`, `Light`, and `Dark`; choice persists in `localStorage` under `lernsaathi-theme` and applies resolved theme on `<html data-theme>`.
+- Tailwind dark mode now follows `[data-theme="dark"]`; the old system-only CSS media override was removed.
+- Chat shell now uses fixed viewport height, constrained desktop width, stable header/footer regions, and an internal message scroll container.
+- Composer and attempt inputs use token-based `focus-within` border/ring states in light and dark modes.
+- Pending `/api/chat` and `/api/chat/attempt` requests render a temporary `Soch raha hoon...` assistant card; errors replace the placeholder with the existing fallback message.
+- No schema, Prisma migration, prompt, pipeline, auth-provider, DB-backed history, revision queue, or mistake-list data wiring was added.
+
+## Validation evidence
+- `npm run typecheck`: pass.
+- `npm run lint`: pass.
+- `npm run check:policy`: pass.
+- `npm run test:unit`: pass.
+- `npm run eval`: pass.
+- `npm run build`: pass after rerunning outside the sandbox because the first sandboxed build hit `spawn EPERM` during Next.js worker startup.

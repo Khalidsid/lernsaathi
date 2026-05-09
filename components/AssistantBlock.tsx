@@ -12,6 +12,7 @@ export type AssistantAttemptKind = "reflection" | "chhota_check";
 
 type AssistantBlockProps = React.HTMLAttributes<HTMLDivElement> & {
   eventId?: string;
+  isAttemptDisabled?: boolean;
   label?: string;
   onAttempt?: (parentEventId: string, value: string, kind: AssistantAttemptKind) => Promise<void>;
   response: string;
@@ -24,7 +25,7 @@ function labelText(label?: string) {
 }
 
 export const AssistantBlock = forwardRef<HTMLDivElement, AssistantBlockProps>(function AssistantBlock(
-  { className, eventId, label, onAttempt, response, structured, verificationPrompt, ...props },
+  { className, eventId, isAttemptDisabled = false, label, onAttempt, response, structured, verificationPrompt, ...props },
   ref,
 ) {
   const hasStructured = Boolean(structured?.lemma || structured?.examples?.length || structured?.use || structured?.pattern);
@@ -46,6 +47,7 @@ export const AssistantBlock = forwardRef<HTMLDivElement, AssistantBlockProps>(fu
             ) : null}
             <ReflectionCard
               corrected={reflection.corrected}
+              disabled={isAttemptDisabled}
               explanation={reflection.explanation}
               friction={reflection.friction}
               onAttempt={
@@ -58,6 +60,7 @@ export const AssistantBlock = forwardRef<HTMLDivElement, AssistantBlockProps>(fu
             />
             {verificationPrompt ? (
               <ChhotaCheck
+                disabled={isAttemptDisabled}
                 onReply={
                   eventId && onAttempt
                     ? (value) => onAttempt(eventId, value, "chhota_check")
@@ -125,6 +128,7 @@ export const AssistantBlock = forwardRef<HTMLDivElement, AssistantBlockProps>(fu
 
             {verificationPrompt ? (
               <ChhotaCheck
+                disabled={isAttemptDisabled}
                 onReply={
                   eventId && onAttempt
                     ? (value) => onAttempt(eventId, value, "chhota_check")
@@ -139,6 +143,7 @@ export const AssistantBlock = forwardRef<HTMLDivElement, AssistantBlockProps>(fu
             <div className="whitespace-pre-wrap text-[15px] leading-[1.65] text-ink2 dark:text-[#CFCDC4]">{response}</div>
             {verificationPrompt ? (
               <ChhotaCheck
+                disabled={isAttemptDisabled}
                 onReply={
                   eventId && onAttempt
                     ? (value) => onAttempt(eventId, value, "chhota_check")

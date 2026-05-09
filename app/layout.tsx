@@ -3,6 +3,33 @@ import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
 
+const themeScript = `
+(() => {
+  const key = "lernsaathi-theme";
+  const allowed = ["system", "light", "dark"];
+  const root = document.documentElement;
+
+  function getPreference() {
+    try {
+      const stored = window.localStorage.getItem(key);
+      return allowed.includes(stored || "") ? stored : "system";
+    } catch {
+      return "system";
+    }
+  }
+
+  function getSystemTheme() {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  const preference = getPreference();
+  const resolved = preference === "system" ? getSystemTheme() : preference;
+  root.dataset.theme = resolved;
+  root.dataset.themePreference = preference;
+  root.style.colorScheme = resolved;
+})();
+`;
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -33,8 +60,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${fraunces.variable} ${jetBrainsMono.variable} min-h-screen antialiased`}>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {children}
       </body>
     </html>
