@@ -5,7 +5,7 @@
 | 0 | Foundation | Scaffold, full schema, auth, OpenAI wrapper, prompt pipeline shape, logging |
 | 1 | Word & phrase queries | Single text input, classifier-lite, Hinglish response, event logging |
 | 1.5 | Visual Integration | Apply design system from Lernsaathi.html to existing slice 1 surfaces; build component dictionary; add tab placeholders |
-| 2 | Grammar Q & sentence correction | Full classifier, adaptive depth router, verifier, mistake creation; local complete 2026-05-08, Railway route smoke verified |
+| 2 | Grammar Q & sentence correction | Full classifier, adaptive depth router, verifier, mistake creation; implemented locally 2026-05-08, Railway route smoke verified |
 | 2.5 | Chat UI Stabilization Patch | Safe overflow menu, Light/Dark/System theme control, fixed chat viewport, internal message scrolling, composer focus correction, pending assistant placeholder, desktop visual tightening |
 | 3 | Mistake memory & revision queue | DB-backed chat hydration, revision scheduling, daily review UI, real mistake list |
 | 3.5 | Auth & Session Hardening | Google OAuth allowlist, preserve existing user data, future password-account provisions, idempotency and concurrency guards |
@@ -13,6 +13,11 @@
 | 3.7 | Decision Engine V1 | Deterministic decision-planning stage, module-specific response contracts, one targeted next action |
 | 3.8 | Learning Momentum UI | Today state, due/active counts, better empty states, quick-start actions, visible saved/scheduled feedback |
 | 3.9 | Revision & Mistake Practice Upgrade | Revision progress, due reasons, richer review feedback, mistake detail and targeted practice |
+| 3.9.1 | Retroactive 3.9 Realignment | Review-count correctness, keyboard shortcut guard, learning-state a11y, evidence scaffold |
+| 3.10 | Production Gates & Framework Boundaries | Route loading/error boundaries, verification script, lint gates, first e2e/a11y smoke path |
+| 3.11 | UX Architecture & Accessibility Baseline | Low-reasoning UI contracts, focus/keyboard rules, mobile/a11y baseline fixes |
+| 3.12 | Reliability, Safety & Privacy Baseline | API validation, error envelope, rate-limit decision, observability, data governance, OpenAI safety/model policy |
+| 3.13 | Evidence Pass & Debt Triage | Manual evidence matrix, review-count correctness fix, debt register update, release evidence |
 | 4 | Image input | File upload, vision, multi-exercise handling |
 | 5 | Writing prompts | Scaffolded writing support |
 | 6 | Picture description | Observation-first guidance |
@@ -23,20 +28,31 @@
 | 11 | Polish & PWA | Installability, offline queue, export, theming |
 
 ## Current Status
-- Slice 0 + Slice 1: live in production; login, migrations, real prompt-pipeline calls, OpenAI responses, and structured rendering are working.
-- Slice 1.5 Visual Integration: live in production; design tokens, dark mode, assistant blocks, lemma underline, bilingual pairs, and tab shell are rendering correctly.
-- Slice 2: complete locally; diagnostic classifier, adaptive depth, chhota-check verifier, Pattern A, Mistake writes, prior-mistake awareness, and attempt feedback pass local checks.
+- Development control protocol: active. Future sessions should read `docs/LOW_REASONING_DEV_PROTOCOL.md` and the relevant `docs/slices/SLICE_*_BRIEF.md` instead of loading every retrospective note. UI tasks should also read `docs/UX_ARCHITECTURE.md`, `docs/COMPONENT_CONTRACTS.md`, and `docs/NAMING.md`.
+- Slice status words from now on: `planned`, `implemented locally`, `verified locally`, `manual evidence pending`, `production smoke passed`, `complete`, `waived`. Do not mark a slice `complete` while manual evidence is still pending.
+- Slice 0 + Slice 1: production smoke passed; login, migrations, real prompt-pipeline calls, OpenAI responses, and structured rendering are working.
+- Slice 1.5 Visual Integration: production smoke passed; design tokens, dark mode, assistant blocks, lemma underline, bilingual pairs, and tab shell are rendering correctly.
+- Slice 2: implemented locally; diagnostic classifier, adaptive depth, chhota-check verifier, Pattern A, Mistake writes, prior-mistake awareness, and attempt feedback pass local checks.
 - Production smoke: Railway public `POST /api/chat` returns the expected unauthenticated `401`; new Slice 2 `POST /api/chat/attempt` also returns `401`, confirming the new route is live.
 - Local dev auth: username `admin`, password `testpass123`; the prior failure was a local bcrypt hash mismatch, not production credentials being requested.
 - Remaining evidence follow-up: authenticated production behavior walk, production `LearningEvent.structured` DB spot-check, first production `Mistake` row, and production `/admin/stats` spot-check.
 - Pairing protocol: developer owns visual/browser validation and production DB evidence; Codex records unavailable evidence as pending instead of changing code to manufacture a minor validation pass.
 - Frontend persistence note: visible chat history now hydrates from persisted `LearningEvent` rows.
 - UI chrome decision: English tabs/actions from the design HTML default voice bank are intended (`Chat`, `Revise`, `Mistakes`, `Sign in`, `Continue`, `Skip`, `Show`). Slice 3 updates the tab labels to `Chat`, `Revise`, and `Mistakes`.
-- Slice 2.5: complete locally on 2026-05-09. It fixes chat shell behavior, safe menu/theme controls, composer focus, pending state, and visual width. It does not implement DB-backed conversation history.
-- Slice 3: complete locally on 2026-05-09. It wires DB-backed chat hydration, revision cards, review scheduling, and the real mistake list. A full collapsible conversation/history panel remains out of scope.
-- Slice 3.5: complete locally on 2026-05-09. It implements Google OAuth with email allowlist, preserves existing user data via email mapping, adds request idempotency for chat/attempt/revision routes, guards mistake and revision item creation against duplicates, and implements per-user rate limiting. Known limitation: rate limiting uses in-memory Map, not suitable for multi-instance deployments.
-- Slice 3.6: complete locally on 2026-05-09. It defines the `TurnDecision` contract with 10 learning modules, response depth levels, memory actions, and next actions. Routing rules map input types to modules. Depth logic considers prior mistakes. Unit tests verify all decision logic. This slice creates types and tests only; Slice 3.7 will wire the decision engine into the pipeline.
+- Slice 2.5: implemented locally on 2026-05-09. It fixes chat shell behavior, safe menu/theme controls, composer focus, pending state, and visual width. It does not implement DB-backed conversation history.
+- Slice 3: implemented locally on 2026-05-09. It wires DB-backed chat hydration, revision cards, review scheduling, and the real mistake list. A full collapsible conversation/history panel remains out of scope.
+- Slice 3.5: implemented locally on 2026-05-09. It implements Google OAuth with email allowlist, preserves existing user data via email mapping, adds request idempotency for chat/attempt/revision routes, guards mistake and revision item creation against duplicates, and implements per-user rate limiting. Known limitation: rate limiting uses in-memory Map, not suitable for multi-instance deployments.
+- Slice 3.6: implemented locally on 2026-05-09. It defines the `TurnDecision` contract with 10 learning modules, response depth levels, memory actions, and next actions. Routing rules map input types to modules. Depth logic considers prior mistakes. Unit tests verify all decision logic. This slice creates types and tests only; Slice 3.7 wires the decision engine into the pipeline.
+- Slice 3.7: implemented locally on 2026-05-09. It implements the decision-planning stage between classification and response generation. The decision planner loads learner context (recent events, active mistakes, due revision cards, profile, exam readiness), finds related mistakes, produces a `TurnDecision` object, and passes it to the responder. Prior mistakes now upgrade word/phrase queries to guided explanation depth. Decision metadata is logged and included in pipeline output. Typecheck, lint, and unit tests pass.
+- Slice 3.8: implemented locally on 2026-05-09. Motion design system (8 CSS tokens, 8 animations), learning state API endpoint, LearningStatePanel with animated counts and skeleton loading, Toast component with slide-up/fade-out animations, enhanced empty states for all three tabs (quick-start chips, icons, links), AppShell integration (chat tab). Post-implementation: comprehensive language audit implemented smart bilingual strategy (English system UI, Hinglish learning content) across 10 files for user-friendly experience. Typecheck, lint, and build pass. Manual browser testing remains for final polish verification.
+- Slice 3.9: implemented locally on 2026-05-09. Enhanced revision experience with progress tracking (counter + animated progress bar), 4-button review system (Again/Hard/Good/Easy) with color coding, improved spaced repetition algorithm handling all four ratings, after-review feedback showing next review timing, smooth card transitions (slide-out/slide-in animations), keyboard navigation (Space to reveal, 1-4 to rate), and visual keyboard hints. Typecheck passes. Manual browser testing recommended.
+- Slice 3.9.1: verified locally on 2026-05-09. It fixes learning-state review counting (based on persisted `Mistake.lastReviewedAt`), adds a revision keyboard shortcut text-entry guard, adds low-risk learning-state ARIA metadata, and adds a release evidence scaffold at `docs/RELEASE_EVIDENCE_SLICE_3_9_1.md`. Manual browser testing remains pending. Blocks Slice 3.10 and Slice 4 until evidence is recorded.
+- Slice 3.10: planned. Brief lives at `docs/slices/SLICE_3_10_BRIEF.md`. Blocks Slice 4.
+- Slice 3.11: planned. Brief lives at `docs/slices/SLICE_3_11_BRIEF.md`. Blocks Slice 4.
+- Slice 3.12: planned. Brief lives at `docs/slices/SLICE_3_12_BRIEF.md`. Blocks Slice 4.
+- Slice 3.13: planned. Brief lives at `docs/slices/SLICE_3_13_BRIEF.md`. Blocks Slice 4.
 - Slice 3.7-3.9: inserted after retrospective review. These slices prevent a sloppy jump into image or writing features by first implementing the decision engine, visible learning momentum, and deeper revision/mistake practice.
+- Slice 3.10-3.13: inserted after realignment review. These slices make future development feasible for lower-reasoning sessions by reducing context requirements, adding explicit UI/API contracts, and installing executable gates before broader feature work.
 - Roadmap restructure note: `docs/SLICE_3_RETROSPECTIVE_ROADMAP_RESTRUCTURE_NOTES.md` records why the application behavior and UI direction shifted after Slice 3.
-- Future implementation prompts: `docs/build_prompts/future_slice_prompts.md` is the prompt-level guide for Slice 3.5 through Slice 11.
+- Future implementation prompts: `docs/build_prompts/future_slice_prompts.md` is now a legacy product-intent library. Active implementation starts from `docs/LOW_REASONING_DEV_PROTOCOL.md` plus the relevant `docs/slices/SLICE_*_BRIEF.md`.
 - Exact latest commit is tracked by git history; this status page avoids commit hashes that go stale after doc-only updates.
