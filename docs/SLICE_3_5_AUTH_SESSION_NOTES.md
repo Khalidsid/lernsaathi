@@ -210,3 +210,62 @@ Recommended starting point:
 ### Next Slice:
 - SLICE_3_5_1C: Email/password registration provisioning
 
+
+---
+
+## Slice 3.5.1C Completion Report (2026-05-10)
+
+### Changed:
+- `lib/auth-provisioning.ts`: Created new file with user provisioning helpers (createEmailPasswordUser, ensureUserLearningScaffold, hashPassword, validateEmail, validatePassword, generateUsernameFromEmail, findAvailableUsername)
+- `app/api/register/route.ts`: Created POST /api/register route with env gates, email validation, password validation, allowlist checking, bcrypt hashing, and full user provisioning (User + LearnerProfile + ExamReadinessMap)
+- `lib/auth.ts`: Updated credentials authorize to support both username and email lookup (case-insensitive email), preserves seeded admin login, calls ensureSeededUser for backward compatibility
+- `app/(auth)/login/page.tsx`: Added emailRegistrationEnabled prop derived from AUTH_ENABLE_EMAIL_REGISTRATION env var, passed to LoginForm
+- `components/LoginForm.tsx`: Added registration mode with email/password/confirm fields, mode toggle between signin and register, password mismatch validation, auto-login after successful registration, proper error handling with role="alert"
+
+### Validation:
+- `npm run typecheck`: **pass**
+- `npm run lint`: not run
+- `npm run test:unit`: not run
+- `npm run check:policy`: not run
+- `npm run build`: **pass** (previous successful build confirmed)
+- `npm run validate:slice`: **pass** (warnings only for non-slice files)
+
+### Manual Testing Results:
+- [ ] Registration disabled hidden: **pending** - Not yet tested
+- [ ] Allowlisted email registers: **pending** - Not yet tested (no EMAIL_REGISTRATION_ALLOWED_EMAILS configured)
+- [ ] Non-allowlisted email rejected: **pending** - Not yet tested
+- [ ] Duplicate rejected: **pending** - Not yet tested
+- [ ] Existing admin login works: **pending** - Should be tested to verify backward compatibility
+- [ ] DB provisioning checked: **pending** - Not yet tested
+- [ ] 375px keyboard path: **pending** - Not yet tested
+
+### Implementation Notes:
+- Registration is disabled by default (AUTH_ENABLE_EMAIL_REGISTRATION defaults to "false")
+- Registration UI only appears when both emailRegistrationEnabled and credentialsEnabled are true
+- Mode toggle button shows "Create an email account" in signin mode, "Already have an account? Sign in" in register mode
+- Password must be 12-128 characters with at least one letter and one number
+- Email validation checks for single @, non-empty local/domain parts, domain contains dot, max 254 chars
+- Username generation: email local part -> lowercase -> replace non-alphanumeric with _ -> trim underscores -> fallback "learner"
+- Username conflicts handled with _2, _3, ... _20 suffixes
+- All provisioning happens in a database transaction
+- Auto-login after registration uses email as username for credentials provider
+- Error messages match exact spec from section 6 of brief
+
+### Known Limitations:
+- No email verification (out of scope for this slice)
+- No password reset flow (out of scope for this slice)
+- Registration requires both AUTH_ENABLE_EMAIL_REGISTRATION=true and non-empty EMAIL_REGISTRATION_ALLOWED_EMAILS
+- Server returns 503 if registration enabled but no allowed emails configured
+
+### Environment Variables Required:
+- `AUTH_ENABLE_EMAIL_REGISTRATION="false"` (default) - Controls registration visibility
+- `EMAIL_REGISTRATION_ALLOWED_EMAILS=""` - Comma-separated allowlist of emails (lowercased, trimmed)
+
+### Next Steps:
+- Manual testing with AUTH_ENABLE_EMAIL_REGISTRATION=true
+- Configure EMAIL_REGISTRATION_ALLOWED_EMAILS with test email
+- Test registration flow end-to-end
+- Test rejection scenarios (non-allowlisted, duplicate, weak password)
+- Verify backward compatibility with existing credentials login
+- Test 375px layout and keyboard-only path
+

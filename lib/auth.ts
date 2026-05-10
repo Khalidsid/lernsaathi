@@ -60,26 +60,62 @@ if (shouldEnableCredentialsFallback()) {
       },
       authorize: async (credentials) => {
         const seededUser = await ensureSeededUser();
-        const username = credentials.username?.toString().trim();
+        const identifier = credentials.username?.toString().trim();
         const password = credentials.password?.toString() ?? "";
-        const passwordHash = seededUser.passwordHash?.trim() || process.env.ADMIN_PASSWORD_HASH?.trim();
 
-        if (!username || username !== seededUser.username) {
-          logPipelineEvent("auth_authorize_rejected_username", {
-            providedUsername: username ?? null,
-            expectedUsername: seededUser.username,
+        if (!identifier || !password) {
+          logPipelineEvent("auth_authorize_missing_credentials", {});
+          return null;
+        }
+
+        // Try to match by username first (for seeded admin and username-based accounts)
+        let user = await db.user.findUnique({
+          where: { username: identifier },
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            passwordHash: true,
+          },
+        });
+
+        // If not found by username, try by email (case-insensitive)
+        if (!user && identifier.includes("@")) {
+          const normalizedEmail = identifier.toLowerCase();
+          user = await db.user.findUnique({
+            where: { email: normalizedEmail },
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              passwordHash: true,
+            },
+          });
+        }
+
+        // No matching user found
+        if (!user) {
+          logPipelineEvent("auth_authorize_user_not_found", {
+            identifier: identifier,
           });
           return null;
         }
 
+        // Check if user has a password hash
+        const passwordHash = user.passwordHash?.trim() || (user.id === seededUser.id ? process.env.ADMIN_PASSWORD_HASH?.trim() : null);
+
         if (!passwordHash) {
-          logPipelineEvent("auth_authorize_missing_hash", {});
+          logPipelineEvent("auth_authorize_missing_hash", {
+            userId: user.id,
+          });
           return null;
         }
 
+        // Verify password
         const isValid = await bcrypt.compare(password, passwordHash);
         logPipelineEvent("auth_authorize_password_check", {
-          username,
+          userId: user.id,
+          identifier: identifier,
           hashLength: passwordHash.length,
           passwordProvided: password.length > 0,
           isValid,
@@ -90,9 +126,9 @@ if (shouldEnableCredentialsFallback()) {
         }
 
         return {
-          id: seededUser.id,
-          name: seededUser.username,
-          email: seededUser.email,
+          id: user.id,
+          name: user.username,
+          email: user.email,
         };
       },
     }),

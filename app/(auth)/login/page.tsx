@@ -15,6 +15,7 @@ export default async function LoginPage() {
 
   const googleEnabled = Boolean(process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim());
   const credentialsEnabled = (process.env.AUTH_ENABLE_CREDENTIALS_FALLBACK ?? "true").toLowerCase() !== "false";
+  const emailRegistrationEnabled = (process.env.AUTH_ENABLE_EMAIL_REGISTRATION ?? "false").toLowerCase() === "true";
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
@@ -25,7 +26,7 @@ export default async function LoginPage() {
             <div className="serif mt-3 text-[15px] italic text-ink3">Your private German companion.</div>
           </div>
           <div className="mt-16">
-            <LoginForm credentialsEnabled={credentialsEnabled} googleEnabled={googleEnabled} registrationConfigured={false} />
+            <LoginForm credentialsEnabled={credentialsEnabled} emailRegistrationEnabled={emailRegistrationEnabled} googleEnabled={googleEnabled} />
           </div>
         </div>
         <div className="absolute inset-x-0 bottom-8 text-center">
