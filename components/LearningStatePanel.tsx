@@ -26,22 +26,22 @@ type LearningState = {
 
 export function LearningStatePanel() {
   const [state, setState] = useState<LearningState | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function fetchState() {
     try {
-      setLoading(true);
-      setError(false);
+      setIsLoading(true);
+      setErrorMessage(null);
       const response = await fetch("/api/learning-state");
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setState(data);
     } catch (err) {
       console.error("Error fetching learning state:", err);
-      setError(true);
+      setErrorMessage("Couldn't load learning state right now. Please retry.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }
 
@@ -49,21 +49,22 @@ export function LearningStatePanel() {
     fetchState();
   }, []);
 
-  if (loading) {
+  if (isLoading) {
     return <LearningStateSkeleton />;
   }
 
-  if (error || !state) {
+  if (errorMessage || !state) {
     return (
       <div className="rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4">
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
-          Failed to load learning state.
+        <p className="text-sm text-neutral-600 dark:text-neutral-400" role="alert">
+          {errorMessage ?? "Couldn't load learning state right now. Please retry."}
         </p>
         <button
-          onClick={fetchState}
+          aria-label="Retry learning state"
           className="mt-2 text-sm text-accent hover:underline flex items-center gap-1"
+          onClick={fetchState}
         >
-          <RefreshCw className="w-3 h-3" />
+          <RefreshCw aria-hidden="true" className="w-3 h-3" />
           Retry
         </button>
       </div>
@@ -75,6 +76,7 @@ export function LearningStatePanel() {
   return (
     <div
       aria-live="polite"
+      aria-relevant="text"
       className="rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4 space-y-3 animate-fade-in"
     >
       <div className="flex items-center justify-between">
@@ -82,9 +84,9 @@ export function LearningStatePanel() {
           Today's Progress
         </h2>
         <button
-          onClick={fetchState}
+          aria-label="Refresh learning state"
           className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded transition-colors active-press"
-          aria-label="Refresh"
+          onClick={fetchState}
         >
           <RefreshCw aria-hidden="true" className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-400" />
         </button>
@@ -200,6 +202,7 @@ function LearningStateSkeleton() {
   return (
     <div
       aria-busy="true"
+      aria-live="polite"
       className="rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4 space-y-3"
     >
       <div className="flex items-center justify-between">

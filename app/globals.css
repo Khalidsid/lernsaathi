@@ -79,6 +79,32 @@ textarea:focus-visible {
   outline-offset: 3px;
 }
 
+.skip-link {
+  left: 0.75rem;
+  position: absolute;
+  top: 0.75rem;
+  transform: translateY(-160%);
+  z-index: 70;
+  border: 1px solid #d7d5cc;
+  border-radius: 10px;
+  background: #fafaf7;
+  color: #1f1f1f;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.6rem 0.8rem;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+html[data-theme="dark"] .skip-link {
+  border-color: #2e2e2b;
+  background: #171715;
+  color: #e9e7df;
+}
+
 .serif {
   font-family: var(--font-fraunces), ui-serif, Georgia, serif;
   font-optical-sizing: auto;

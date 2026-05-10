@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type NamePromptModalProps = {
   onClose: () => void;
@@ -10,6 +10,26 @@ export function NamePromptModal({ onClose }: NamePromptModalProps) {
   const [displayName, setDisplayName] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    lastFocusedRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    inputRef.current?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !isPending) {
+        event.preventDefault();
+        onClose();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      lastFocusedRef.current?.focus();
+    };
+  }, [isPending, onClose]);
 
   async function submit(body: { displayName?: string | null; skip?: boolean }) {
     setIsPending(true);
@@ -36,7 +56,11 @@ export function NamePromptModal({ onClose }: NamePromptModalProps) {
   return (
     <div className="absolute inset-0 z-30 bg-[rgba(20,20,18,0.28)] backdrop-blur-[8px]">
       <div className="absolute inset-x-0 bottom-0 px-4 pb-6">
-        <div className="fade-in rounded-2xl bg-paper p-6 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.25)] dark:bg-night2">
+        <div
+          aria-modal="true"
+          className="fade-in rounded-2xl bg-paper p-6 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.25)] dark:bg-night2"
+          role="dialog"
+        >
         <p className="serif text-[22px] tracking-[-0.005em] text-ink dark:text-mist">What's your name?</p>
         <p className="mt-2 text-[14px] leading-relaxed text-ink3 dark:text-ink4">
           This is just for personalization. You can skip if you prefer.
@@ -48,6 +72,7 @@ export function NamePromptModal({ onClose }: NamePromptModalProps) {
             disabled={isPending}
             onChange={(event) => setDisplayName(event.target.value)}
             placeholder="Your name"
+            ref={inputRef}
             value={displayName}
           />
         </label>

@@ -26,6 +26,7 @@ Must:
 - Keep menu actions explicit.
 - Show which account is signed in, at least inside the menu.
 - Keep sign-out visually and semantically tied to the signed-in account.
+- Return focus to the menu trigger when the menu closes.
 
 Must not:
 
@@ -141,6 +142,7 @@ Must:
 - Show save error inline.
 - Trap focus after focus-management baseline is implemented.
 - Return focus after close.
+- Support Escape close for keyboard users.
 - Use English chrome.
 
 Must not:
@@ -165,6 +167,7 @@ Must:
 - Show retryable error state.
 - Use accurate data source.
 - Announce count updates after accessibility baseline is implemented.
+- Keep control labels explicit for refresh and retry actions.
 
 Must not:
 

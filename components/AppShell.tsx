@@ -116,8 +116,17 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
 ) {
   const menuId = useId();
   const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const wasMenuOpenRef = useRef(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { preference, setPreference } = useThemePreference();
+
+  useEffect(() => {
+    if (wasMenuOpenRef.current && !isMenuOpen) {
+      menuButtonRef.current?.focus();
+    }
+    wasMenuOpenRef.current = isMenuOpen;
+  }, [isMenuOpen]);
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -165,6 +174,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
               aria-label="Open menu"
               className="flex h-9 w-9 items-center justify-center rounded-full text-ink3 transition hover:bg-paper2 hover:text-ink dark:text-ink4 dark:hover:bg-night3 dark:hover:text-mist"
               onClick={() => setIsMenuOpen((current) => !current)}
+              ref={menuButtonRef}
               type="button"
             >
               <MoreHorizontal aria-hidden="true" size={18} strokeWidth={2} />

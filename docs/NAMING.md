@@ -42,6 +42,7 @@ Use:
 - `errorMessage` for displayable string.
 - `errorCode` for machine-readable code.
 - `hasError` for boolean.
+- `isLoading` for loading booleans.
 
 Avoid:
 
@@ -141,4 +142,3 @@ Docs:
 - Use uppercase for project governance docs: `UX_ARCHITECTURE.md`.
 - Use slice notes as `SLICE_N_NAME_NOTES.md`.
 - Use slice briefs as `docs/slices/SLICE_N_BRIEF.md`.
-

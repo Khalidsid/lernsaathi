@@ -63,7 +63,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${fraunces.variable} ${jetBrainsMono.variable} min-h-screen antialiased`}>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        {children}
+        <a className="skip-link" href="#main-content">
+          Skip to main content
+        </a>
+        <main id="main-content">{children}</main>
       </body>
     </html>
   );

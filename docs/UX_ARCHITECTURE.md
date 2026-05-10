@@ -232,6 +232,8 @@ Required:
 - Icons used only for decoration have `aria-hidden="true"`.
 - Icon-only buttons have `aria-label`.
 - Reduced motion is respected.
+- Root layout includes a keyboard-reachable `Skip to main content` link targeting `#main-content`.
+- Closing overflow menu or modal should return focus to the control that opened it.
 
 Keyboard shortcut rule:
 
