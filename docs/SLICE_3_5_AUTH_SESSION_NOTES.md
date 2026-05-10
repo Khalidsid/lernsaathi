@@ -251,6 +251,11 @@ Recommended starting point:
 - Auto-login after registration uses email as username for credentials provider
 - Error messages match exact spec from section 6 of brief
 
+### Deployment Follow-up (2026-05-10):
+- Railway build failed on commit `2560c1c4` because `app/api/register/route.ts` imported `NextRequest` as a runtime value even though it is only used as a type.
+- Fixed by changing `NextRequest` to `import type` while keeping `NextResponse` as a runtime import. This preserves the existing `@typescript-eslint/consistent-type-imports` gate instead of bypassing it.
+- `npm run build`: **pass** after the source fix.
+
 ### Known Limitations:
 - No email verification (out of scope for this slice)
 - No password reset flow (out of scope for this slice)
@@ -268,4 +273,3 @@ Recommended starting point:
 - Test rejection scenarios (non-allowlisted, duplicate, weak password)
 - Verify backward compatibility with existing credentials login
 - Test 375px layout and keyboard-only path
-
