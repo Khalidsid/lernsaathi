@@ -35,6 +35,7 @@ Do not load every retrospective, slice note, design note, and source file in one
 | `docs/UX_ARCHITECTURE.md` | UI state, layout, mobile, accessibility rules. | Any UI or user-facing behavior change. |
 | `docs/COMPONENT_CONTRACTS.md` | Component ownership and non-goals. | Any component edit or new component. |
 | `docs/NAMING.md` | Naming rules for states, callbacks, errors, tests. | New APIs, components, helpers, or refactors. |
+| `docs/PROBLEM_FIRST_LEARNING_JOURNEYS.md` | Active product direction for problem-first landing, six tiles, compact coach, and journey flow. | Slice 3.14-3.16 or any dashboard/mode/journey work. |
 | `docs/PROMPT_PIPELINE.md` | LLM pipeline structure and prompt behavior. | Prompt, model, decision engine, or response-shape changes. |
 | `docs/DATA_GOVERNANCE.md` | Learner data retention/export/delete policy. | After it exists: any learner data, auth, privacy, upload, or logging work. |
 | Legacy slice notes | Historical evidence and decisions. | Only when the active brief cites the exact note. |
@@ -48,6 +49,7 @@ Use the smallest matching pack. If a task crosses categories, combine only the r
 | Task Type | Required Docs | Why |
 |---|---|---|
 | UI component | `ACCOUNTABILITY_AND_QUALITY_GATES.md`, `UX_ARCHITECTURE.md`, `COMPONENT_CONTRACTS.md`, `NAMING.md` | Defines states, ownership, accessibility, mobile, naming, fake-control and evidence gates. |
+| Problem launcher / journey UI | `PROBLEM_FIRST_LEARNING_JOURNEYS.md`, `UX_ARCHITECTURE.md`, `COMPONENT_CONTRACTS.md`, `NAMING.md`, active slice brief | Prevents agents from reverting to generic chat-first or feature-first dashboard behavior. |
 | Auth/session | `ACCOUNTABILITY_AND_QUALITY_GATES.md`, `ARCHITECTURE.md`, active auth brief, `UX_ARCHITECTURE.md`, `COMPONENT_CONTRACTS.md`, `prisma/schema.prisma`, `lib/auth.ts` | Auth changes affect identity, data ownership, UI visibility, privacy, and security. |
 | API route | `ACCOUNTABILITY_AND_QUALITY_GATES.md`, Retrospective sections 8, 11, 12 if cited, exact route file, `lib/auth.ts`, `lib/idempotency.ts` if mutation | Defines validation, error envelope, auth, ownership, retry behavior, drift and debt rules. |
 | Database | `ACCOUNTABILITY_AND_QUALITY_GATES.md`, `ARCHITECTURE.md`, `prisma/schema.prisma`, existing migrations, affected routes/libs | Prevents schema drift and requires retention/deletion/debt decisions. |

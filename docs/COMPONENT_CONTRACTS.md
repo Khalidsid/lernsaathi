@@ -263,7 +263,186 @@ Decision:
 
 ---
 
-## 11. New Component Checklist
+## 11. ProblemLauncher
+
+Owns:
+
+- Problem-first landing page content after login.
+- Greeting and task-choice heading.
+- Compact learning coach placement.
+- Six problem tiles.
+
+Must:
+
+- Use exact heading from `docs/PROBLEM_FIRST_LEARNING_JOURNEYS.md`.
+- Render exactly six primary tiles: `WOERTER`, `LESEN`, `SCHREIBEN`, `GRAMMATIK`, `HOEREN`, `WIEDERHOLEN`.
+- Keep the compact learning coach collapsed by default.
+- Keep free chat out of the six primary tiles.
+- Keep all tiles keyboard reachable.
+
+Must not:
+
+- Fetch or render old chat history.
+- Own authentication logic.
+- Invent journey behavior not specified in the active slice.
+- Show fake disabled primary tiles.
+
+---
+
+## 12. ProblemTile
+
+Owns:
+
+- One clickable problem choice on the landing screen.
+
+Must:
+
+- Use the German label as the strongest visual signal.
+- Include English meaning and Hinglish task line.
+- Make the entire tile clickable with a real link.
+- Provide visible hover and focus states.
+- Use an accessible label combining German label, English meaning, and Hinglish line.
+- Respect the visual values in `docs/PROBLEM_FIRST_LEARNING_JOURNEYS.md`.
+
+Must not:
+
+- Depend on hover-only meaning.
+- Use fake disabled behavior.
+- Navigate to non-existent routes unless the route is implemented in the same slice.
+
+---
+
+## 13. CompactLearningCoach
+
+Owns:
+
+- Due revision count.
+- Active mistake count.
+- Today's review count.
+- Collapsed/expanded progress explanation.
+- Refresh/retry action.
+
+Must:
+
+- Use `/api/learning-state`.
+- Be collapsed by default.
+- Keep collapsed height near `44px`.
+- Explain purpose only when expanded.
+- Use `aria-expanded` and `aria-live="polite"`.
+- Show retryable error state.
+
+Must not:
+
+- Become a large dashboard tile.
+- Hide the beginning of chat or journey responses.
+- Count data that is not actually persisted.
+
+---
+
+## 14. JourneyStepCard
+
+Owns:
+
+- One bounded step inside a learning journey.
+
+Must:
+
+- Provide clear title and optional eyebrow.
+- Use `rounded-lg`, existing color tokens, and no nested card shell unless rendering repeated options.
+- Keep content readable at 375px.
+
+Must not:
+
+- Own API calls.
+- Own global journey state.
+
+---
+
+## 15. QuickCheck
+
+Owns:
+
+- A small recognition check with 2-4 options.
+- Local selected/correct/incorrect state.
+- Immediate feedback.
+
+Must:
+
+- Render options as real buttons.
+- Lock after selection.
+- Provide feedback text, not color alone.
+- Use `role="status"` or `aria-live="polite"` for feedback.
+- Support keyboard selection.
+
+Must not:
+
+- Claim persisted score/progress unless parent actually persists it.
+- Generate questions itself.
+
+---
+
+## 16. ProductionPrompt
+
+Owns:
+
+- A learner text entry step for recall or production.
+
+Must:
+
+- Label the textarea.
+- Disable submit until meaningful input exists.
+- Show pending and error states.
+- Use `role="alert"` for errors.
+
+Must not:
+
+- Persist input directly.
+- Log raw learner text.
+
+---
+
+## 17. LearningReward
+
+Owns:
+
+- Small non-blocking completion feedback.
+
+Must:
+
+- Stay visually quiet.
+- Use calm copy.
+- Avoid large celebration animations.
+
+Must not:
+
+- Replace inline errors.
+- Claim saved/reviewed state unless that state is real.
+
+---
+
+## 18. JourneyShell
+
+Owns:
+
+- Shared route shell for one problem-specific journey.
+- Back-to-dashboard link.
+- German/English/Hinglish journey header.
+
+Must:
+
+- Use one `h1`.
+- Put back link before journey content in tab order.
+- Keep one obvious primary next action above the fold.
+- Avoid loading old chat history by default.
+
+Must not:
+
+- Own prompt/model behavior.
+- Fake unavailable audio/image controls.
+
+---
+
+## 19. New Component Checklist
 
 Before adding a component:
 

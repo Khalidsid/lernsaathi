@@ -30,7 +30,7 @@ The app shell is a chat-style application shell, not a long scrolling webpage.
 Required:
 
 - Header remains visible.
-- Tab bar remains visible.
+- Tab bar remains visible where the current chat shell is used.
 - Composer remains visible on chat tab.
 - Message stream scrolls internally.
 - Body/page scrolling is not needed for normal chat.
@@ -47,7 +47,7 @@ Chat tab regions:
 
 1. Header and menu.
 2. Tab bar.
-3. Learning state panel.
+3. Compact learning coach or learning state panel when used.
 4. Message stream.
 5. Composer.
 6. Name prompt modal when needed.
@@ -59,6 +59,7 @@ Rules:
 - Failure appears as a recoverable assistant/system message with clear retry guidance.
 - Composer disables only when sending or blocked by modal.
 - Image attach button stays disabled until real image upload exists.
+- Old chat history must not load into a fresh problem journey by default.
 
 ---
 
@@ -86,73 +87,98 @@ Auth error examples:
 
 ---
 
-## 3.2 Dashboard And Learning Modes
+## 3.2 Problem-First Landing And Learning Journeys
 
-**Rationale:** User feedback identified confusion with chat-first auto-redirect. Dashboard provides deterministic navigation and clear learning mode selection.
+**Rationale:** User feedback identified that chat-first auto-redirect creates confusion and cognitive load. The app should start from the learner's real task, not from app features.
 
 ### Navigation Flow
 
-**Before (chat-first):**
-```
-Login → /chat → Tab navigation (Chat, Revise, Mistakes)
-```
+Before:
 
-**After (menu-driven):**
-```
-Login → /dashboard → Select mode → Mode-specific UI or existing tab
+```text
+Login -> /chat -> tab navigation
 ```
 
-### Dashboard Rules
+After:
 
-- Login always redirects to `/dashboard`, never directly to chat
-- Dashboard shows 7 learning mode tiles arranged in responsive grid:
-  - Desktop (≥640px): 3-column grid
-  - Mobile (<640px): 1-column stack
-- Each tile shows: icon (emoji), label, brief description
-- Active tiles (Chat, Revise, Mistakes) navigate to existing tabs
-- Future tiles (Words, Grammar, Reading, Writing, Scenarios) show "Coming soon" state
-- Disabled tiles use `opacity: 0.6`, `cursor: not-allowed`, no hover effect
-- Active tiles show hover state: border color change, background lighten
-- Dashboard includes "Today's Progress" widget showing reviewed count and due count
-- Keyboard navigation: Tab through active tiles, Enter to navigate
+```text
+Login -> /dashboard -> choose problem tile -> focused journey screen or existing revision flow
+```
 
-### Mode Tile Specifications
+### Landing Screen Rules
 
-**Active Mode Tile:**
-- Clickable link to existing route
-- Clear hover/focus states
-- Accessible (keyboard + screen reader)
-- Icon + label + description
+- Login always redirects to `/dashboard`, never directly to chat.
+- `/dashboard` asks: `Which problem do you need assistance with?`
+- The Hinglish support line is: `Aapko kis task mein madad chahiye?`
+- The landing screen shows exactly six primary problem tiles:
+  - `WOERTER`
+  - `LESEN`
+  - `SCHREIBEN`
+  - `GRAMMATIK`
+  - `HOEREN`
+  - `WIEDERHOLEN`
+- German label is the main tile identity; Hinglish explains the task.
+- Free chat must not be one of the six primary tiles. It can appear as a quiet secondary link after the user has task context.
+- The progress surface is a compact learning coach, collapsed by default, not a large tile.
+- Detailed product, tile, copy, visual, and journey rules live in `docs/PROBLEM_FIRST_LEARNING_JOURNEYS.md`.
 
-**Disabled Mode Tile:**
-- Visual disabled state (reduced opacity)
-- "Coming soon" text
-- No click handler
-- cursor: not-allowed
+### Problem Tile Specifications
 
-**Color Tokens:**
-- Use existing design tokens (teal, paper, ink, rule)
-- Dark mode: respect theme tokens
-- Focus ring: use CSS focus-visible
+Required:
 
-### Mode-Specific UI (Future)
+- Entire tile is clickable.
+- Tile is a real link when it navigates.
+- Focus ring visible.
+- Hover state indicates clickability, but hover is not required to understand the tile.
+- Tile content order: German label, English meaning, Hinglish task line, small action label.
+- Tile grid: 3 columns desktop, 2 columns tablet, 1 column at 375px.
+- Use `rounded-lg`.
+- Do not use fake disabled primary tiles.
 
-When mode UIs are implemented (Slice 3.16+):
+### Compact Learning Coach
 
-- Each mode gets dedicated route: `/modes/{mode-name}`
-- Use `ModeShell` wrapper component for consistent chrome
-- Mode header shows: mode icon + title + back to dashboard link
-- Mode content area scrolls independently
-- Keep composer pattern for interactive modes
-- Card/list pattern for drill/exercise modes
+Default collapsed text:
 
-### Integration with Existing Tabs
+```text
+Practice status: [due] due - [active] active - [done] done today
+```
 
-Chat, Revise, and Mistakes tabs remain accessible:
-- Via dashboard tiles
-- Via direct URL (`/chat`, `/chat?tab=revise`, `/chat?tab=mistakes`)
-- Existing tab navigation preserved
-- No breaking changes to current functionality
+Expanded purpose line:
+
+```text
+This tracks due reviews, active mistakes, and today's completed practice.
+```
+
+Rules:
+
+- Collapsed by default.
+- Target collapsed height: about `44px`.
+- Expanded height target: no more than `132px`.
+- Uses `aria-expanded` on the toggle.
+- Uses `aria-live="polite"` for count updates.
+- Does not hide the start of a chat or journey response.
+
+### Journey-Specific UI
+
+When journey UIs are implemented in Slice 3.16+:
+
+- Each problem can get a dedicated route under `/modes/*`.
+- Use `JourneyShell` wrapper component for consistent chrome.
+- Journey header shows German label, English meaning, Hinglish task line, and back-to-dashboard link.
+- Journey content area scrolls independently.
+- Each journey has one obvious next action above the fold.
+- Old chat history must not appear by default inside a fresh journey.
+- Do not fake audio/image controls before real support exists.
+
+### Integration With Existing Routes
+
+Existing routes remain accessible:
+
+- `/chat`
+- `/chat?tab=revision`
+- `/chat?tab=mistakes`
+
+Do not break existing direct URLs while introducing the problem-first landing flow.
 
 ---
 

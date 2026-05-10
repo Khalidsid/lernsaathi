@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useCallback, useEffect, useState } from "react";
 
 import { LemmaAnchor } from "@/components/LemmaAnchor";
 import { cn } from "@/lib/cn";
@@ -40,6 +40,22 @@ export const RevisionCard = forwardRef<HTMLDivElement, RevisionCardProps>(functi
 ) {
   const [isRevealed, setIsRevealed] = useState(false);
 
+  const revealCard = useCallback(() => {
+    if (!isPending) {
+      setIsRevealed(true);
+    }
+  }, [isPending]);
+
+  function handleCardKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== " " && event.key !== "Enter") {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    revealCard();
+  }
+
   useEffect(() => {
     function handleKeyPress(event: KeyboardEvent) {
       if (isPending) {
@@ -53,7 +69,7 @@ export const RevisionCard = forwardRef<HTMLDivElement, RevisionCardProps>(functi
       // Space or Enter to reveal
       if (!isRevealed && (event.key === " " || event.key === "Enter")) {
         event.preventDefault();
-        setIsRevealed(true);
+        revealCard();
         return;
       }
 
@@ -77,16 +93,27 @@ export const RevisionCard = forwardRef<HTMLDivElement, RevisionCardProps>(functi
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isRevealed, isPending, onReview]);
+  }, [isRevealed, isPending, onReview, revealCard]);
+
+  const isRevealCard = !isRevealed;
 
   return (
     <div
+      {...props}
+      aria-disabled={isRevealCard && isPending ? true : undefined}
+      aria-label={isRevealCard ? `Show answer for ${front}` : undefined}
       className={cn(
         "flex min-h-[360px] flex-col rounded-2xl border border-rule bg-paper2 p-6 dark:border-[#2E2E2B] dark:bg-night2",
+        isRevealCard
+          ? "group cursor-pointer outline-none transition hover:border-teal hover:bg-paper active-press focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal dark:hover:border-tealLt2 dark:hover:bg-night"
+          : null,
         className,
       )}
+      onClick={isRevealCard ? revealCard : undefined}
+      onKeyDown={isRevealCard ? handleCardKeyDown : undefined}
       ref={ref}
-      {...props}
+      role={isRevealCard ? "button" : undefined}
+      tabIndex={isRevealCard ? 0 : undefined}
     >
       <div className="serif text-[12px] lowercase italic text-ink3 dark:text-ink4">{learnerVisibleLabel}</div>
       <div className="mt-5">
@@ -109,14 +136,12 @@ export const RevisionCard = forwardRef<HTMLDivElement, RevisionCardProps>(functi
       <div className="flex-1" />
       <div className="mt-8">
         {!isRevealed ? (
-          <button
-            className="w-full rounded-xl border border-rule bg-paper px-4 py-3 text-[14px] font-medium text-ink transition hover:bg-paper2 active-press disabled:opacity-70 dark:border-[#2E2E2B] dark:bg-night dark:text-mist"
-            disabled={isPending}
-            onClick={() => setIsRevealed(true)}
-            type="button"
+          <div
+            aria-hidden="true"
+            className="w-full rounded-xl border border-rule bg-paper px-4 py-3 text-center text-[14px] font-medium text-ink transition group-hover:bg-paper2 dark:border-[#2E2E2B] dark:bg-night dark:text-mist"
           >
             Show <span className="ml-1 text-[11px] opacity-60">Space</span>
-          </button>
+          </div>
         ) : (
           <div className="grid grid-cols-2 gap-2">
             <button
