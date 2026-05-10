@@ -6,9 +6,86 @@
 
 ---
 
+## 0. Context Navigation
+
+Read in this order:
+
+1. `docs/DOC_NAVIGATION.md` - prevents broad context loading.
+2. `docs/LOW_REASONING_DEV_PROTOCOL.md` - execution rules and stop conditions.
+3. `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md` - fake-control, accessibility, drift, and evidence gates.
+4. `docs/SLICE_MAP.md` - confirms Slice 3.11 status and blockers.
+5. `docs/UX_ARCHITECTURE.md` - primary source for layout, states, mobile, accessibility, and auth visibility rules.
+6. `docs/COMPONENT_CONTRACTS.md` - component ownership and non-goals.
+7. `docs/NAMING.md` - state, callback, API, and test naming rules.
+8. `docs/VISUAL_INTEGRATION_NOTES.md` and `docs/UI_PATCH_NOTES.md` - read only to preserve established shell visual behavior.
+9. `components/RevisionCard.tsx`, `components/AppShell.tsx`, `components/NamePromptModal.tsx`, `components/LearningStatePanel.tsx` - current high-risk interactive surfaces.
+
+Do not read:
+
+- `docs/RETROSPECTIVE_ARCHITECTURAL_ANALYSIS.md` in full unless a P0 rule is unclear.
+- Prompt docs unless UI work unexpectedly changes prompt/model behavior.
+
+---
+
 ## 1. Goal
 
 Refine the UI governance docs and fix the highest-risk accessibility issues in current interactive surfaces.
+
+---
+
+## 1.5. ⚠️ CONSTRAINT CARD (Check Before EVERY Edit)
+
+**Allowed files (section 2)**:
+- `docs/UX_ARCHITECTURE.md`
+- `docs/COMPONENT_CONTRACTS.md`
+- `docs/NAMING.md`
+- `components/RevisionCard.tsx`
+- `components/AppShell.tsx`
+- `components/NamePromptModal.tsx`
+- `components/LearningStatePanel.tsx`
+- `app/layout.tsx`
+- `app/globals.css`
+- focused tests if test tooling exists
+- `docs/SLICE_MAP.md`
+
+**Forbidden areas (section 3)**:
+- Product visual identity redesign
+- Image upload implementation
+- New learning features (STOP if feature scope expands)
+- Broad component renaming
+- Refactor all components for perfect accessibility in one pass
+
+**Expected git diff**:
+```
+M docs/UX_ARCHITECTURE.md
+M docs/COMPONENT_CONTRACTS.md
+M docs/NAMING.md
+M components/RevisionCard.tsx
+M components/AppShell.tsx (if menu a11y improved)
+M components/NamePromptModal.tsx (if modal a11y improved)
+M components/LearningStatePanel.tsx
+M app/layout.tsx (if skip-to-content added)
+M app/globals.css (if skip-to-content styles added)
+M docs/SLICE_MAP.md
+```
+
+**Mandatory checks before committing**:
+- [ ] Only allowed files modified?
+- [ ] Text-entry guard added to `RevisionCard` keyboard shortcuts?
+- [ ] Skip-to-content link added if feasible?
+- [ ] `LearningStatePanel` accessibility labels/live regions improved where safe?
+- [ ] Keyboard checks pass: open/close menu?
+- [ ] Keyboard checks pass: name prompt save/skip?
+- [ ] Keyboard checks pass: revision reveal/rate?
+- [ ] 375px mobile layout checked for touched components?
+- [ ] Existing visual behavior preserved (no regression)?
+- [ ] Intentionally deferred accessibility work documented in updated docs?
+
+**Stop conditions (section 10)**:
+- Focus trap requires dependency not already available
+- Skip link requires broad layout restructuring
+- Keyboard fixes cause behavior conflicts outside touched components
+- Manual keyboard behavior cannot be checked
 
 ---
 
@@ -140,4 +217,3 @@ Stop if:
 - Mobile checks:
 - Known limitations:
 - `docs/SLICE_MAP.md` status update:
-

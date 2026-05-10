@@ -7,6 +7,25 @@
 
 ---
 
+## 0. Context Navigation
+
+Read in this order:
+
+1. `docs/DOC_NAVIGATION.md` - prevents broad context loading.
+2. `docs/LOW_REASONING_DEV_PROTOCOL.md` - execution rules and stop conditions.
+3. `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md` - changed-files audit and evidence/debt rules.
+4. `docs/SLICE_MAP.md` - confirms current status and blockers.
+5. `docs/SLICE_3_9_1_RETROACTIVE_REALIGNMENT_NOTES.md` - explains the narrow correction scope.
+6. `docs/UX_ARCHITECTURE.md`, `docs/COMPONENT_CONTRACTS.md`, `docs/NAMING.md` - only for UI and naming rules touched by this brief.
+7. `app/api/learning-state/route.ts`, `components/RevisionCard.tsx`, `components/LearningStatePanel.tsx` - the exact implementation files.
+
+Do not read:
+
+- Full retrospective unless a P0 rule is unclear.
+- Prompt docs unless response behavior unexpectedly changes.
+
+---
+
 ## 1. Goal
 
 Fix the narrow correctness and validation gaps in the current revision/learning-state surfaces without adding new product scope.

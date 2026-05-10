@@ -6,9 +6,100 @@
 
 ---
 
+## 0. Context Navigation
+
+Read in this order:
+
+1. `docs/DOC_NAVIGATION.md` - prevents broad context loading.
+2. `docs/LOW_REASONING_DEV_PROTOCOL.md` - execution rules and evidence language.
+3. `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md` - release evidence, debt closure, waiver, and drift rules.
+4. `docs/SLICE_MAP.md` - confirms which slices are implemented, verified, or evidence-pending.
+5. `docs/gates/EVIDENCE_MATRIX.md` - defines validation matrix and release blockers.
+6. `docs/gates/DEFINITION_OF_DONE.md` - quality gates for all slices.
+7. `docs/gates/TECH_DEBT_REGISTER.md` - P0 items addressed in this slice.
+8. `docs/gates/SLICE_4_ENTRY_CRITERIA.md` - gates that must pass before Slice 4.
+9. `docs/UX_ARCHITECTURE.md` - manual UI evidence must use the UI contract.
+10. `app/api/learning-state/route.ts`, `app/api/revision/review/route.ts`, `lib/revision-data.ts` - review-count correctness path.
+11. `components/LearningStatePanel.tsx`, `components/RevisionQueue.tsx`, `components/Toast.tsx` - affected feedback and evidence surfaces.
+
+Do not read:
+
+- Prompt docs unless a validation failure points to response behavior.
+- Legacy slice notes unless evidence contradicts current `SLICE_MAP.md`.
+
+---
+
 ## 1. Goal
 
 Fix known correctness debt, run the validation matrix, and update status docs so future slices start from accurate evidence.
+
+---
+
+## 1.5. ⚠️ CONSTRAINT CARD (Check Before EVERY Edit)
+
+**Allowed files (section 2)**:
+- `app/api/learning-state/route.ts`
+- `app/api/revision/review/route.ts`
+- `lib/revision-data.ts`
+- `prisma/schema.prisma` (ONLY if adding review table - requires decision in section 6)
+- `prisma/migrations/*` (ONLY if schema change)
+- `components/Toast.tsx`
+- components that integrate or remove Toast
+- `docs/RELEASE_EVIDENCE_SLICE_3_13.md`
+- `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md`
+- `docs/SLICE_MAP.md`
+- `docs/RETROSPECTIVE_ARCHITECTURAL_ANALYSIS.md` (debt register only)
+
+**Forbidden areas (section 3)**:
+- Image upload implementation
+- New learning modules
+- App redesign
+- Broad analytics implementation
+- Prompt behavior changes (STOP unless validation issue requires it)
+
+**Expected git diff (section 6 decision)**:
+Fast path (LearningEvent):
+```
+M app/api/revision/review/route.ts
+M lib/revision-data.ts
+M components/Toast.tsx (if integrated/removed)
+A docs/RELEASE_EVIDENCE_SLICE_3_13.md
+M docs/ACCOUNTABILITY_AND_QUALITY_GATES.md
+M docs/SLICE_MAP.md
+```
+
+Durable path (RevisionReview table):
+```
+M prisma/schema.prisma
+A prisma/migrations/*
+M app/api/revision/review/route.ts
+M lib/revision-data.ts
+M components/Toast.tsx (if integrated/removed)
+A docs/RELEASE_EVIDENCE_SLICE_3_13.md
+M docs/ACCOUNTABILITY_AND_QUALITY_GATES.md
+M docs/SLICE_MAP.md
+```
+
+**Mandatory checks before committing**:
+- [ ] Only allowed files modified?
+- [ ] Today's review count data source chosen (section 6)?
+- [ ] Review count reflects actually persisted state (not client-only)?
+- [ ] Revision queue reflects persisted state?
+- [ ] Failed review/save visible and retryable?
+- [ ] Review buttons disable while pending?
+- [ ] Review completion updates due count correctly?
+- [ ] Review completion updates today's review count correctly?
+- [ ] Toast decision made (integrated or removed)?
+- [ ] Manual validation matrix run (section 7)?
+- [ ] `docs/RELEASE_EVIDENCE_SLICE_3_13.md` created?
+- [ ] `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md` debt statuses updated?
+- [ ] `docs/SLICE_MAP.md` updated with exact status words?
+
+**Stop conditions (section 10)**:
+- Today's review count requires schema decision not made
+- Manual validation cannot be performed
+- Fixing Toast integration expands into broad notification architecture
+- Existing data makes count behavior ambiguous
 
 ---
 
@@ -21,6 +112,7 @@ Fix known correctness debt, run the validation matrix, and update status docs so
 - `components/Toast.tsx`
 - components that integrate or remove Toast
 - `docs/RELEASE_EVIDENCE_SLICE_3_13.md`
+- `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md`
 - `docs/SLICE_MAP.md`
 - `docs/RETROSPECTIVE_ARCHITECTURAL_ANALYSIS.md` debt register if needed
 
@@ -39,7 +131,10 @@ Fix known correctness debt, run the validation matrix, and update status docs so
 ## 4. Required Reads
 
 - `docs/LOW_REASONING_DEV_PROTOCOL.md`
-- `docs/RETROSPECTIVE_ARCHITECTURAL_ANALYSIS.md` sections 9, 11, 12, 15
+- `docs/gates/EVIDENCE_MATRIX.md`
+- `docs/gates/DEFINITION_OF_DONE.md`
+- `docs/gates/TECH_DEBT_REGISTER.md`
+- `docs/gates/SLICE_4_ENTRY_CRITERIA.md`
 - `docs/UX_ARCHITECTURE.md`
 - `app/api/learning-state/route.ts`
 - `app/api/revision/review/route.ts`
@@ -103,7 +198,8 @@ Manual evidence required:
 5. Run automated validation.
 6. Run manual validation matrix.
 7. Create `docs/RELEASE_EVIDENCE_SLICE_3_13.md`.
-8. Update `docs/SLICE_MAP.md` using exact status words.
+8. Update `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md` debt statuses, waivers, and closure evidence.
+9. Update `docs/SLICE_MAP.md` using exact status words.
 
 ---
 
@@ -142,4 +238,3 @@ Stop if:
 - Screenshots/clips location if captured:
 - Known limitations:
 - `docs/SLICE_MAP.md` status update:
-

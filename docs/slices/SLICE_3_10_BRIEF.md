@@ -6,9 +6,86 @@
 
 ---
 
+## 0. Context Navigation
+
+Read in this order:
+
+1. `docs/DOC_NAVIGATION.md` - prevents broad context loading.
+2. `docs/LOW_REASONING_DEV_PROTOCOL.md` - execution rules and stop conditions.
+3. `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md` - changed-files audit, debt, waiver, and reliability gate rules.
+4. `docs/SLICE_MAP.md` - confirms Slice 3.10 status and current blockers.
+5. `docs/gates/ROUTE_BOUNDARIES_WHY.md` - explains why loading/error boundaries and gates are P0.
+6. `docs/gates/DEFINITION_OF_DONE.md` - quality gates for all slices.
+7. `docs/gates/TECH_DEBT_REGISTER.md` - P0 items addressed in this slice.
+8. `docs/UX_ARCHITECTURE.md` - loading/error UI behavior must match UI rules.
+9. `docs/COMPONENT_CONTRACTS.md` - shell boundaries must not be broken.
+10. `app/layout.tsx`, `components/AppShell.tsx`, `components/ChatShell.tsx` - route boundaries must fit current shell structure.
+11. `eslint.config.mjs`, `package.json` - quality gates and scripts live here.
+
+Do not read:
+
+- Legacy slice notes unless a regression points to an old decision.
+- Prompt docs unless implementation unexpectedly changes model behavior.
+
+---
+
 ## 1. Goal
 
 Make the app safer for future development by adding route loading/error boundaries, a single verification script, and first automated smoke/accessibility gates.
+
+---
+
+## 1.5. ⚠️ CONSTRAINT CARD (Check Before EVERY Edit)
+
+**Allowed files (section 2)**:
+- `app/loading.tsx`
+- `app/error.tsx`
+- `app/not-found.tsx`
+- `app/chat/loading.tsx` (if route-specific loading needed)
+- `app/chat/error.tsx` (if route-specific error recovery needed)
+- `eslint.config.mjs`
+- `package.json`
+- test setup files (if adding Playwright or axe)
+- `docs/ARCHITECTURE.md`
+- `docs/SLICE_MAP.md`
+
+**Forbidden areas (section 3)**:
+- Image upload implementation
+- Chat UI redesign (STOP if boundaries require broad UI changes)
+- Prompt behavior/files
+- Database schema changes
+- Broad client/server component refactoring
+- Visual regression tooling (unless Playwright/a11y basics done first)
+
+**Expected git diff**:
+```
+A app/loading.tsx
+A app/error.tsx
+A app/not-found.tsx
+M eslint.config.mjs
+M package.json
+M docs/ARCHITECTURE.md
+M docs/SLICE_MAP.md
+```
+
+**Mandatory checks before committing**:
+- [ ] Only allowed files modified?
+- [ ] Root `loading.tsx` exists?
+- [ ] Root `error.tsx` exists as client component with retry/home link?
+- [ ] `not-found.tsx` exists if implemented?
+- [ ] `verify` script added to `package.json`?
+- [ ] ESLint plugins configured where safe?
+- [ ] Playwright/axe documented if deferred due to install/approval?
+- [ ] Error UI retry button keyboard reachable?
+- [ ] Error UI works at 375px?
+- [ ] Loading UI does not create layout shift?
+- [ ] `npm run verify` passes?
+
+**Stop conditions (section 10)**:
+- Playwright/axe requires network install and approval unavailable
+- ESLint plugin creates many unrelated existing failures
+- Error boundary requires broad UI redesign
+- Unexpected worktree changes affect app shell or route files
 
 ---
 
@@ -41,7 +118,9 @@ Make the app safer for future development by adding route loading/error boundari
 ## 4. Required Reads
 
 - `docs/LOW_REASONING_DEV_PROTOCOL.md`
-- `docs/RETROSPECTIVE_ARCHITECTURAL_ANALYSIS.md` sections 2, 5, 6, 11, 12
+- `docs/gates/ROUTE_BOUNDARIES_WHY.md`
+- `docs/gates/DEFINITION_OF_DONE.md`
+- `docs/gates/TECH_DEBT_REGISTER.md`
 - `docs/UX_ARCHITECTURE.md`
 - `docs/COMPONENT_CONTRACTS.md`
 - `app/layout.tsx`
@@ -134,4 +213,3 @@ Stop if:
 - Tooling deferred:
 - Known limitations:
 - `docs/SLICE_MAP.md` status update:
-
