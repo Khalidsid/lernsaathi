@@ -10,6 +10,7 @@
 Primary execution docs:
 
 - `docs/LOW_REASONING_DEV_PROTOCOL.md`
+- `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md`
 - `docs/UX_ARCHITECTURE.md`
 - `docs/COMPONENT_CONTRACTS.md`
 - `docs/NAMING.md`
@@ -912,6 +913,8 @@ A slice is not complete until:
 
 ## 12. Technical Debt Register
 
+This retrospective register explains the source debt discovered during the architectural analysis. Operational debt tracking, ownership, waivers, drift reports, and closure evidence now live in `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md`.
+
 This register supersedes vague "deferred" notes. Every item needs a priority and action.
 
 Priority definitions:
@@ -929,6 +932,7 @@ Priority definitions:
 | No privacy/retention policy | P0 | Learner raw input and responses stored indefinitely. | Create data governance doc and deletion/export procedure. |
 | No automated a11y/e2e gates | P0 | Tooling not configured. | Add Playwright and axe checks. |
 | Inaccurate `todayReviews` metric | P0 | Learning state counts events not written by revision route. | Write review event or add review table. |
+| Auth UX and account provisioning gap | P0 | Google OAuth is wired, but account identity is not visible after login and non-Google registration is only schema-provisioned. | Complete Slice 3.5.1 before treating auth as product-grade. |
 | No OpenAI safety identifier | P1 | `responses.create` does not pass `safety_identifier`. | Add hashed user identifier. |
 | No model upgrade policy | P1 | `OPENAI_MODEL = "gpt-5"` alias. | Define alias/snapshot strategy. |
 | Missing observability hook | P1 | No `instrumentation.ts`. | Add Next instrumentation and request ids. |
@@ -950,6 +954,7 @@ The previous process relied too much on the LLM choosing patterns implicitly. Fu
 Every implementation prompt must include:
 
 - Slice brief path.
+- Accountability gates from `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md`.
 - Relevant architecture docs.
 - Files likely to change.
 - Explicit non-goals.
@@ -1078,6 +1083,11 @@ Do not make offline chat appear possible unless LLM access is actually available
 
 Execute in this order.
 
+0. Slice 3.5.1:
+   - Execute child brief 3.5.1A for signed-in account visibility.
+   - Execute child brief 3.5.1B for login method visibility.
+   - Execute child brief 3.5.1C for safe non-Google email/password registration policy and provisioning.
+
 1. Slice 3.10:
    - Add route loading/error boundaries.
    - Add `verify` script.
@@ -1091,6 +1101,7 @@ Execute in this order.
    - Add focus and keyboard shortcut fixes.
 
 3. Slice 3.12:
+   - Use `docs/ACCOUNTABILITY_AND_QUALITY_GATES.md` as the operational debt and waiver ledger.
    - Add zod validation and safe JSON handling.
    - Add error envelope.
    - Decide and implement rate limit strategy.

@@ -1,7 +1,7 @@
 # Slice 2 Notes
 
 ## Status
-complete locally; Railway route smoke verified; authenticated production verification pending
+implemented locally; Railway route smoke verified; authenticated production verification pending
 
 ## What was built
 - Classifier extended for `grammar_question` and `sentence_correction`.

@@ -12,6 +12,7 @@ Owns:
 - Fixed app viewport.
 - Header.
 - Overflow menu.
+- Signed-in account visibility when session identity is available.
 - Tab bar.
 - Optional learning state panel.
 - Footer/composer region.
@@ -23,12 +24,42 @@ Must:
 - Respect mobile safe area.
 - Provide visible keyboard focus.
 - Keep menu actions explicit.
+- Show which account is signed in, at least inside the menu.
+- Keep sign-out visually and semantically tied to the signed-in account.
 
 Must not:
 
 - Put chat-specific state inside shell.
 - Directly submit messages.
 - Put image upload controls in the menu.
+- Hide account identity once multi-account or registration paths exist.
+
+---
+
+## 1.1 LoginForm
+
+Owns:
+
+- Visible sign-in method choices.
+- Credentials sign-in fields when enabled.
+- Google sign-in action when configured.
+- Registration entry point only when registration is implemented and enabled.
+
+Must:
+
+- Show only real available auth methods.
+- Explain when no auth method is configured.
+- Show inline errors for failed sign-in or registration.
+- Disable actions while pending.
+- Keep all controls keyboard reachable.
+- Use English chrome.
+
+Must not:
+
+- Show a fake registration button.
+- Silently hide Google configuration problems when no fallback exists.
+- Persist or log raw passwords.
+- Decide account provisioning rules client-side.
 
 ---
 
@@ -246,4 +277,3 @@ Before adding a component:
 - What ARIA labels are needed?
 - What mobile behavior exists?
 - What docs must be updated?
-

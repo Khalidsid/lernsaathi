@@ -95,7 +95,9 @@
 ## Auth Direction
 - Current implementation supports NextAuth Credentials as a fallback and Google OAuth when `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` are configured.
 - Google access is allowlisted through `GOOGLE_ALLOWED_EMAILS`; open registration is not supported.
-- Slice 3.5 is implemented locally and added idempotency guards plus per-user rate limiting for current chat/attempt/revision routes.
+- Slice 3.5 is implemented locally for provider plumbing and request hardening. It added idempotency guards plus per-user rate limiting for current chat/attempt/revision routes.
+- Slice 3.5.1 is planned because provider wiring is not enough. It must define and implement visible sign-in method states, signed-in account display, and safe non-Google email/password provisioning before auth is considered product-grade.
+- Non-Google email/password registration must be allowlisted, invite-based, or otherwise explicitly controlled. Do not add public open signup without a new product/security decision.
 - Known limitation: rate limiting still uses in-memory state and is not suitable for multi-instance deployments until Slice 3.12 replaces or waives it.
 - Do not treat the app as ready for open registration, broad multi-user public access, or durable distributed abuse controls until the Slice 3.12 reliability baseline lands.
 

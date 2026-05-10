@@ -1,7 +1,7 @@
 # Slice 3.6 Decision Contract Notes
 
 ## Status
-Complete locally on 2026-05-09. Decision contract types, module definitions, routing rules, and unit tests are implemented. Slice 3.7 will implement the actual decision engine that uses this contract.
+Implemented locally on 2026-05-09. Decision contract types, module definitions, routing rules, and unit tests are implemented. Slice 3.7 will implement the actual decision engine that uses this contract.
 
 ## Why this slice exists
 The app currently uses a simple classifier → responder flow. Before adding image upload, writing modules, and other learning modes, we need a formal contract that:

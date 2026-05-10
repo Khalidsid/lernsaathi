@@ -1,7 +1,7 @@
 # Slice 3 Notes
 
 ## Status
-complete locally; production verification pending
+implemented locally; production verification pending
 
 ## What was built
 - `/chat` now hydrates recent visible chat from persisted `LearningEvent` rows.

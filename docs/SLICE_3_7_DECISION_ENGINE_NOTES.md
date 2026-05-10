@@ -1,6 +1,6 @@
 # Slice 3.7: Decision Engine V1
 
-**Status**: Complete locally on 2026-05-09
+**Status**: implemented locally on 2026-05-09
 
 ## What This Slice Adds
 
