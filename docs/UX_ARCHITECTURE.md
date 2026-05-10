@@ -62,6 +62,100 @@ Rules:
 
 ---
 
+## 3.1 Auth And Account Visibility
+
+Authentication is part of the product UX, not only provider plumbing.
+
+Rules:
+
+- The login screen must clearly show which sign-in methods are available.
+- Do not show fake or disabled registration controls unless the disabled reason is explicit.
+- If Google OAuth is not configured, the UI must still explain the available fallback or configuration state.
+- After login, the authenticated shell must show which account owns the current learning data.
+- Prefer signed-in email as the account label when available. Fallback order: display name, username, `Account`.
+- The account label may be compact in the header, but the menu must show the full account identity or a clearly truncated value with accessible full text.
+- Sign-out must stay near the account identity so the user understands which account is being signed out.
+- Registration UI must not appear unless the backend route/action and provisioning policy are real.
+
+Auth error examples:
+
+- `This email is not allowed for this private app.`
+- `Registration is not enabled for this app.`
+- `That email already has an account. Sign in instead.`
+- `Google sign-in is not configured yet. Use credentials or contact the app owner.`
+
+---
+
+## 3.2 Dashboard And Learning Modes
+
+**Rationale:** User feedback identified confusion with chat-first auto-redirect. Dashboard provides deterministic navigation and clear learning mode selection.
+
+### Navigation Flow
+
+**Before (chat-first):**
+```
+Login → /chat → Tab navigation (Chat, Revise, Mistakes)
+```
+
+**After (menu-driven):**
+```
+Login → /dashboard → Select mode → Mode-specific UI or existing tab
+```
+
+### Dashboard Rules
+
+- Login always redirects to `/dashboard`, never directly to chat
+- Dashboard shows 7 learning mode tiles arranged in responsive grid:
+  - Desktop (≥640px): 3-column grid
+  - Mobile (<640px): 1-column stack
+- Each tile shows: icon (emoji), label, brief description
+- Active tiles (Chat, Revise, Mistakes) navigate to existing tabs
+- Future tiles (Words, Grammar, Reading, Writing, Scenarios) show "Coming soon" state
+- Disabled tiles use `opacity: 0.6`, `cursor: not-allowed`, no hover effect
+- Active tiles show hover state: border color change, background lighten
+- Dashboard includes "Today's Progress" widget showing reviewed count and due count
+- Keyboard navigation: Tab through active tiles, Enter to navigate
+
+### Mode Tile Specifications
+
+**Active Mode Tile:**
+- Clickable link to existing route
+- Clear hover/focus states
+- Accessible (keyboard + screen reader)
+- Icon + label + description
+
+**Disabled Mode Tile:**
+- Visual disabled state (reduced opacity)
+- "Coming soon" text
+- No click handler
+- cursor: not-allowed
+
+**Color Tokens:**
+- Use existing design tokens (teal, paper, ink, rule)
+- Dark mode: respect theme tokens
+- Focus ring: use CSS focus-visible
+
+### Mode-Specific UI (Future)
+
+When mode UIs are implemented (Slice 3.16+):
+
+- Each mode gets dedicated route: `/modes/{mode-name}`
+- Use `ModeShell` wrapper component for consistent chrome
+- Mode header shows: mode icon + title + back to dashboard link
+- Mode content area scrolls independently
+- Keep composer pattern for interactive modes
+- Card/list pattern for drill/exercise modes
+
+### Integration with Existing Tabs
+
+Chat, Revise, and Mistakes tabs remain accessible:
+- Via dashboard tiles
+- Via direct URL (`/chat`, `/chat?tab=revise`, `/chat?tab=mistakes`)
+- Existing tab navigation preserved
+- No breaking changes to current functionality
+
+---
+
 ## 4. Required UI States
 
 Every async UI surface must define these states.
@@ -216,4 +310,3 @@ Before completion:
 - Keyboard-only path checked.
 - No fake controls.
 - Docs updated.
-
