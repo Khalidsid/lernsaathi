@@ -5,11 +5,25 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type LoginFormProps = {
-  credentialsEnabled?: boolean;
-  googleEnabled?: boolean;
+  credentialsEnabled: boolean;
+  googleEnabled: boolean;
+  registrationConfigured?: false;
 };
 
-export function LoginForm({ credentialsEnabled = true, googleEnabled = false }: LoginFormProps) {
+function getHelperText(googleEnabled: boolean, credentialsEnabled: boolean): string {
+  if (googleEnabled && credentialsEnabled) {
+    return "Use Google if your email is allowlisted, or use temporary credentials.";
+  }
+  if (googleEnabled && !credentialsEnabled) {
+    return "Use your allowlisted Google account to continue.";
+  }
+  if (!googleEnabled && credentialsEnabled) {
+    return "Google sign-in is not configured here. Use temporary credentials.";
+  }
+  return "No sign-in method is configured. Set Google OAuth credentials or enable the credentials fallback.";
+}
+
+export function LoginForm({ credentialsEnabled, googleEnabled }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
@@ -60,8 +74,22 @@ export function LoginForm({ credentialsEnabled = true, googleEnabled = false }: 
     setIsPending(false);
   }
 
+  const helperText = getHelperText(googleEnabled, credentialsEnabled);
+  const noMethodsAvailable = !googleEnabled && !credentialsEnabled;
+
+  if (noMethodsAvailable) {
+    return (
+      <div role="alert" className="rounded-xl border border-rule bg-paper2 px-4 py-3 text-[14px] text-ink2">
+        {helperText}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
+      <p className="text-[13px] text-ink3">
+        {helperText}
+      </p>
       {googleEnabled ? (
         <button
           className="w-full rounded-xl border border-rule bg-paper2 py-3 text-[15px] text-ink transition hover:bg-paper disabled:cursor-not-allowed disabled:opacity-70"
@@ -69,7 +97,7 @@ export function LoginForm({ credentialsEnabled = true, googleEnabled = false }: 
           onClick={() => void handleGoogleSignIn()}
           type="button"
         >
-          Continue with Google
+          {isPending ? "Redirecting..." : "Continue with Google"}
         </button>
       ) : null}
       {googleEnabled && credentialsEnabled ? (

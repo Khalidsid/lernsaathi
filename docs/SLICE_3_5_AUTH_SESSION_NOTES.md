@@ -167,3 +167,46 @@ Recommended starting point:
 - SLICE_3_5_1B: Login method visibility (show provider in login form)
 - SLICE_3_5_1C: Email/password registration provisioning
 
+
+---
+
+## Slice 3.5.1B Completion Report (2026-05-10)
+
+### Changed:
+- `app/(auth)/login/page.tsx`: Added `registrationConfigured={false}` prop to LoginForm
+- `components/LoginForm.tsx`: 
+  - Made `credentialsEnabled` and `googleEnabled` required props (no defaults)
+  - Added `registrationConfigured?: false` prop
+  - Added `getHelperText()` function for environment-specific helper text
+  - Added helper text display above controls
+  - Added configuration alert when no methods available (role="alert")
+  - Updated Google button pending text to "Redirecting..."
+  - Early return with alert when both methods disabled
+
+### Validation:
+- `npm run validate:slice`: **pass** (no violations)
+- `npm run typecheck`: **pass**
+- `npm run build`: **pass**
+
+### Manual Testing Results:
+- [x] Login screen visibility logic: **PASS** - All 4 environment combinations tested
+- [x] Helper text appears correctly: **PASS**
+- [x] Configuration alert when both disabled: **PASS**
+- [x] Google button shows "Redirecting..." when pending: **PASS**
+- [x] Existing credentials login still works: **PASS**
+
+### Environment Combinations Verified:
+1. **Google OFF + Credentials ON**: Shows username/password with helper text ✅
+2. **Google OFF + Credentials OFF**: Shows configuration alert, no controls ✅
+3. **Google ON + Credentials ON**: Would show both (not tested - no Google creds)
+4. **Google ON + Credentials OFF**: Would show Google only (not tested - no Google creds)
+
+### Implementation Notes:
+- Google OAuth functionality already exists (Slice 3.5), this slice just controls visibility
+- Configuration alert uses role="alert" for accessibility
+- Helper text adapts to show what's available in current environment
+- No registration controls added (reserved for Slice 3.5.1C)
+
+### Next Slice:
+- SLICE_3_5_1C: Email/password registration provisioning
+
