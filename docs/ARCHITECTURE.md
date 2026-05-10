@@ -130,6 +130,16 @@
 - Mobile layouts must respect safe-area bottom padding so the composer and latest message are not hidden.
 - Pending chat requests render a temporary assistant placeholder (`Soch raha hoon...`) in the MessageStream and replace it with the response or existing error surface.
 
+## Route Boundaries And Verification Gates
+- Slice 3.10 adds root App Router boundaries: `app/loading.tsx`, `app/error.tsx`, and `app/not-found.tsx`.
+- Root loading uses existing paper/night tokens and a fixed-height skeleton so route transitions do not show a blank screen or create large layout shifts.
+- Root error is a client boundary with a keyboard-reachable `Retry` button and `Back to chat` recovery link.
+- Not-found provides a controlled 404 screen with a `Back to chat` recovery link.
+- `npm run verify` is the local all-gates command: typecheck, lint, unit tests, policy check, and production build.
+- ESLint is configured for TypeScript type-import rules, unused variables, React Hooks rules, and duplicate import detection. `react-hooks/set-state-in-effect` is intentionally disabled for now because enabling it created unrelated findings in existing client components; this should be handled in a focused accessibility/React cleanup slice, not inside the route-boundary slice.
+- Next build can still print the flat-config detector warning about the Next ESLint plugin. Direct `npm run lint` does load the plugin and enforces the enabled `@next/next` rules, so the warning is tracked as tooling cleanup rather than a production gate failure.
+- Playwright and axe automation remain deferred. The current checkout lists `eslint-plugin-jsx-a11y`, but the local package contents lack the compiled `lib/index.js`; browser/a11y automation should be added in a dedicated tooling pass with dependency installation approval.
+
 ## Slice 2 Label Routing
 - Templated out-of-scope responses use `getLearnerVisibleLabelForEvent("out_of_scope")`, which always returns `Aufgabe verstehen`.
 - Templated daily-limit responses use `getLearnerVisibleLabelForEvent("daily_limit_reached")`, which returns `Wörter verstehen` because the learner's original task is still a word or phrase lookup even though the cap blocked the answer.
@@ -175,7 +185,7 @@
 - Slice 3.7 (implemented locally): implements the first decision engine, inserting decision planning between classifier and responder, loading learner context, and routing to module-specific responders.
 - Slice 3.8 (implemented locally): exposes learning momentum in the UI through next actions, due counts, active mistake counts, stronger empty states, and visible saved/scheduled feedback.
 - Slice 3.9 (implemented locally): deepens the revision and mistake-practice loop before image, writing, picture-description, reading/listening, speaking, and personal-story modules expand the product surface.
-- Slice 3.10 (planned): adds framework loading/error boundaries and executable gates.
+- Slice 3.10 (verified locally): adds framework loading/error/not-found boundaries, a `verify` script, safe ESLint gate expansion, and documents deferred Playwright/axe automation.
 - Slice 3.11 (planned): establishes low-reasoning UI contracts and accessibility baseline.
 - Slice 3.12 (planned): establishes API validation, error envelope, privacy, reliability, and AI safety/model policy.
 - Slice 3.13 (planned): fixes evidence and debt gaps before Slice 4.
