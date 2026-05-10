@@ -12,7 +12,13 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "eval": "node eval/run.mjs",
-    "check:policy": "node scripts/check-policy.mjs"
+    "check:policy": "node scripts/check-policy.mjs",
+    "validate:constraints": "node scripts/validate-constraints.mjs",
+    "validate:slice": "node scripts/validate-constraints.mjs",
+    "evidence:init": "node scripts/collect-evidence.mjs init",
+    "evidence:mark": "node scripts/collect-evidence.mjs mark",
+    "evidence:status": "node scripts/collect-evidence.mjs status",
+    "evidence:report": "node scripts/collect-evidence.mjs report"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

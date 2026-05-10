@@ -44,3 +44,8 @@ next-env.d.ts
 # temporary local inspection clone
 lernsaathi_repo/
 nul
+.claude
+
+# Development helpers (local state only)
+.evidence-matrix.json
+.mcp-memory/
